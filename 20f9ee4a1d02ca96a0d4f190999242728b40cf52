@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "68f63a57_eb217ccd",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Makes sense, but I realised that I actually do not need this interface, since I ended up with just printing out the JSON string.",
+      "parentUuid": "5713845d_d62d3dc8",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 37
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2ebef189_c67586ba",
@@ -65,6 +89,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "54f1fea1_4c178f48",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Indeed not needed, dropped these lines.",
+      "parentUuid": "2ebef189_c67586ba",
+      "range": {
+        "startLine": 80,
+        "startChar": 6,
+        "endLine": 81,
+        "endChar": 48
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "08a33947_310ee6df",
@@ -78,6 +126,30 @@
       "writtenOn": "2024-08-05T12:01:20Z",
       "side": 1,
       "message": "unused class",
+      "range": {
+        "startLine": 101,
+        "startChar": 20,
+        "endLine": 101,
+        "endChar": 29
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f519788f_fd7ee1d3",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08a33947_310ee6df",
       "range": {
         "startLine": 101,
         "startChar": 20,
@@ -111,6 +183,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5e3cd75d_a6952f55",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4ee0dbb4_b78c94f8",
+      "range": {
+        "startLine": 113,
+        "startChar": 10,
+        "endLine": 113,
+        "endChar": 20
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8112578b_dca64deb",
@@ -124,6 +220,30 @@
       "writtenOn": "2024-08-05T12:01:20Z",
       "side": 1,
       "message": "Do these need to be a \"fieldset\"? fieldset\u0027s purpose is grouping inputs. (Arguably it\u0027s also not needed for the inputs, since we don\u0027t have multiple forms on the page, but that\u0027s ok)",
+      "range": {
+        "startLine": 104,
+        "startChar": 8,
+        "endLine": 115,
+        "endChar": 19
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e1e5a08f_85951efb",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8112578b_dca64deb",
       "range": {
         "startLine": 104,
         "startChar": 8,
@@ -215,6 +335,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1f098af3_cc5db479",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76629cf9_2131a563",
+      "range": {
+        "startLine": 124,
+        "startChar": 23,
+        "endLine": 124,
+        "endChar": 24
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5fbc0a6b_65473210",
@@ -228,6 +372,30 @@
       "writtenOn": "2024-08-05T12:01:20Z",
       "side": 1,
       "message": "Don\u0027t need quote marks when assigning value in lit",
+      "range": {
+        "startLine": 133,
+        "startChar": 22,
+        "endLine": 133,
+        "endChar": 23
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "26297723_c195d6d3",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fbc0a6b_65473210",
       "range": {
         "startLine": 133,
         "startChar": 22,
@@ -261,6 +429,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e4cebbb1_cc1410eb",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fb951d3_69f1274f",
+      "range": {
+        "startLine": 140,
+        "startChar": 32,
+        "endLine": 140,
+        "endChar": 37
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2b7c96da_170244a9",
@@ -274,6 +466,30 @@
       "writtenOn": "2024-08-05T12:01:20Z",
       "side": 1,
       "message": "This can benefit from a placeholder, that shows the format. Ex. leading \"/\"",
+      "range": {
+        "startLine": 153,
+        "startChar": 15,
+        "endLine": 153,
+        "endChar": 20
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dafcebb1_9d76d1ac",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done (FWIW the leading \"/\" should be optional).",
+      "parentUuid": "2b7c96da_170244a9",
       "range": {
         "startLine": 153,
         "startChar": 15,
@@ -307,6 +523,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5ba8b1b4_d9d648ab",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "63bea326_8984df25",
+      "range": {
+        "startLine": 162,
+        "startChar": 32,
+        "endLine": 162,
+        "endChar": 55
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "05c09142_5ceedf55",
@@ -320,6 +560,30 @@
       "writtenOn": "2024-08-05T12:01:20Z",
       "side": 1,
       "message": "id is unused",
+      "range": {
+        "startLine": 174,
+        "startChar": 10,
+        "endLine": 174,
+        "endChar": 35
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "280a9c18_b9ada89c",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05c09142_5ceedf55",
       "range": {
         "startLine": 174,
         "startChar": 10,
@@ -353,6 +617,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ef09f012_46bca8e5",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Good catch! Done.",
+      "parentUuid": "7c604e28_cab8b622",
+      "range": {
+        "startLine": 211,
+        "startChar": 2,
+        "endLine": 218,
+        "endChar": 3
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "40c11a3b_b225dffd",
@@ -366,6 +654,30 @@
       "writtenOn": "2024-08-05T12:01:20Z",
       "side": 1,
       "message": "Why is absence of email is valid value? You say earlier that only \"Calling user\" is optional",
+      "range": {
+        "startLine": 230,
+        "startChar": 8,
+        "endLine": 230,
+        "endChar": 14
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b1e8312_c6c8038d",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Thanks for noticing, this was a copy\u0026paste mistake.\n\nDone.",
+      "parentUuid": "40c11a3b_b225dffd",
       "range": {
         "startLine": 230,
         "startChar": 8,
@@ -427,6 +739,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "83231b7f_67a20e5d",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f507db39_0347e5ac",
+      "range": {
+        "startLine": 252,
+        "startChar": 2,
+        "endLine": 252,
+        "endChar": 34
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "deec2ef9_d52e8dd5",
@@ -450,6 +786,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7a95c6a0_53ac9494",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "deec2ef9_d52e8dd5",
+      "range": {
+        "startLine": 266,
+        "startChar": 13,
+        "endLine": 266,
+        "endChar": 21
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "27a916d1_5d45b0f5",
@@ -463,6 +823,30 @@
       "writtenOn": "2024-08-05T12:01:20Z",
       "side": 1,
       "message": "This should be part of \"finally\" block",
+      "range": {
+        "startLine": 274,
+        "startChar": 8,
+        "endLine": 274,
+        "endChar": 32
+      },
+      "revId": "20f9ee4a1d02ca96a0d4f190999242728b40cf52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9a8c4851_7cddd2d4",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-05T15:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "27a916d1_5d45b0f5",
       "range": {
         "startLine": 274,
         "startChar": 8,
