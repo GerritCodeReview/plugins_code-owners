@@ -28,6 +28,7 @@ import {
   OWNER_STATUS_COLUMN_CONTENT,
 } from './owner-status-column';
 import {CodeOwnersModelMixinInterface} from './code-owners-model-mixin';
+import './gr-check-code-owner';
 
 window.Gerrit.install(plugin => {
   const restApi = plugin.restApi();
@@ -105,4 +106,5 @@ window.Gerrit.install(plugin => {
       (view as unknown as CodeOwnersModelMixinInterface).restApi = restApi;
       (view as unknown as CodeOwnersModelMixinInterface).reporting = reporting;
     });
+  plugin.screen('check-code-owner', 'gr-check-code-owner');
 });
