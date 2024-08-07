@@ -46,6 +46,12 @@ public class CodeOwnerCheckInfo {
   public boolean isResolvable;
 
   /**
+   * The code owner config files that are relevant for computing the code ownership, i.e. all code
+   * owner config files which have been inspected to compute the code ownership.
+   */
+  public List<CodeOwnerConfigFileInfo> codeOwnerConfigs;
+
+  /**
    * Whether the user to which the given email was resolved has read permissions on the branch.
    *
    * <p>Not set if:
