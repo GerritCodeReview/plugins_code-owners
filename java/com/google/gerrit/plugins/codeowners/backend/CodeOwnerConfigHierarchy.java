@@ -224,7 +224,7 @@ public class CodeOwnerConfigHierarchy {
           logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
           boolean visitFurtherCodeOwnerConfigs = pathCodeOwnersVisitor.visit(pathCodeOwners.get());
           boolean ignoreParentCodeOwners =
-              pathCodeOwners.get().resolveCodeOwnerConfig().get().ignoreParentCodeOwners();
+              pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners();
           if (ignoreParentCodeOwners) {
             parentCodeOwnersIgnoredCallback.accept(codeOwnerConfigKey);
           }
