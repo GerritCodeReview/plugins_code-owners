@@ -30,6 +30,7 @@ import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.extensions.restapi.TopLevelResource;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
@@ -85,6 +86,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   private final AccountsCollection accountsCollection;
   private final UnresolvedImportFormatter unresolvedImportFormatter;
   private final ChangeFinder changeFinder;
+  private final CodeOwnerConfigFileJson codeOwnerConfigFileJson;
 
   private String email;
   private String path;
@@ -104,7 +106,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       CodeOwners codeOwners,
       AccountsCollection accountsCollection,
       UnresolvedImportFormatter unresolvedImportFormatter,
-      ChangeFinder changeFinder) {
+      ChangeFinder changeFinder,
+      CodeOwnerConfigFileJson codeOwnerConfigFileJson) {
     this.checkCodeOwnerCapability = checkCodeOwnerCapability;
     this.permissionBackend = permissionBackend;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -115,6 +118,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     this.accountsCollection = accountsCollection;
     this.unresolvedImportFormatter = unresolvedImportFormatter;
     this.changeFinder = changeFinder;
+    this.codeOwnerConfigFileJson = codeOwnerConfigFileJson;
   }
 
   @Option(name = "--email", usage = "email for which the code ownership should be checked")
@@ -154,6 +158,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     validateInput(branchResource);
 
     Path absolutePath = JgitPath.of(path).getAsAbsolutePath();
+    ImmutableList.Builder<CodeOwnerConfigFileInfo> codeOwnerConfigFileInfosBuilder =
+        ImmutableList.builder();
     List<String> messages = new ArrayList<>();
     List<Path> codeOwnerConfigFilePaths = new ArrayList<>();
     AtomicBoolean isCodeOwnershipAssignedToEmail = new AtomicBoolean(false);
@@ -174,6 +180,13 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               pathCodeOwnersFactory
                   .createWithoutCache(codeOwnerConfig, absolutePath)
                   .resolveCodeOwnerConfig();
+
+          codeOwnerConfigFileInfosBuilder.add(
+              codeOwnerConfigFileJson.format(
+                  codeOwnerConfig,
+                  pathCodeOwnersResult.get().resolvedImports(),
+                  pathCodeOwnersResult.get().unresolvedImports()));
+
           messages.addAll(pathCodeOwnersResult.messages());
           pathCodeOwnersResult
               .get()
@@ -181,6 +194,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               .forEach(
                   unresolvedImport ->
                       messages.add(unresolvedImportFormatter.format(unresolvedImport)));
+
           Optional<CodeOwnerReference> codeOwnerReference =
               pathCodeOwnersResult.get().getPathCodeOwners().stream()
                   .filter(cor -> cor.email().equals(email))
@@ -332,6 +346,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                 || isFallbackCodeOwner)
             && isResolvable;
     codeOwnerCheckInfo.isResolvable = isResolvable;
+    codeOwnerCheckInfo.codeOwnerConfigs = codeOwnerConfigFileInfosBuilder.build();
     codeOwnerCheckInfo.canReadRef = canReadRef;
     codeOwnerCheckInfo.canSeeChange = canSeeChange;
     codeOwnerCheckInfo.canApproveChange = canApproveChange;

@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.truth.ListSubject.elements;
 
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -67,6 +68,16 @@ public class CodeOwnerConfigFileInfoSubject extends Subject {
   /** Returns a subject for the path of the code owner config file info. */
   public StringSubject hasPathThat() {
     return check("path()").that(codeOwnerConfigFileInfo().path);
+  }
+
+  public IterableSubject hasWebLinksThat() {
+    return check("webLinks()").that(codeOwnerConfigFileInfo().webLinks);
+  }
+
+  @CanIgnoreReturnValue
+  public CodeOwnerConfigFileInfoSubject assertNoWebLinks() {
+    hasWebLinksThat().isNull();
+    return this;
   }
 
   /**

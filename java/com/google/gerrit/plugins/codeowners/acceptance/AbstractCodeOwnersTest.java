@@ -19,6 +19,7 @@ import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
@@ -287,8 +288,9 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
    *
    * @param testAccounts the accounts of the users that should be code owners
    */
-  protected void setAsDefaultCodeOwners(TestAccount... testAccounts) {
-    setAsCodeOwners(RefNames.REFS_CONFIG, "/", testAccounts);
+  @CanIgnoreReturnValue
+  protected CodeOwnerConfig.Key setAsDefaultCodeOwners(TestAccount... testAccounts) {
+    return setAsCodeOwners(RefNames.REFS_CONFIG, "/", testAccounts);
   }
 
   /**
@@ -296,8 +298,9 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
    *
    * @param testAccounts the accounts of the users that should be code owners
    */
-  protected void setAsRootCodeOwners(TestAccount... testAccounts) {
-    setAsCodeOwners("/", testAccounts);
+  @CanIgnoreReturnValue
+  protected CodeOwnerConfig.Key setAsRootCodeOwners(TestAccount... testAccounts) {
+    return setAsCodeOwners("/", testAccounts);
   }
 
   /**
@@ -306,8 +309,9 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
    * @param path the path of the code owner config file
    * @param testAccounts the accounts of the users that should be code owners
    */
-  protected void setAsCodeOwners(String path, TestAccount... testAccounts) {
-    setAsCodeOwners("master", path, testAccounts);
+  @CanIgnoreReturnValue
+  protected CodeOwnerConfig.Key setAsCodeOwners(String path, TestAccount... testAccounts) {
+    return setAsCodeOwners("master", path, testAccounts);
   }
 
   /**
@@ -317,7 +321,9 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
    * @param path the path of the code owner config file
    * @param testAccounts the accounts of the users that should be code owners
    */
-  private void setAsCodeOwners(String branchName, String path, TestAccount... testAccounts) {
+  @CanIgnoreReturnValue
+  private CodeOwnerConfig.Key setAsCodeOwners(
+      String branchName, String path, TestAccount... testAccounts) {
     Builder newCodeOwnerConfigBuilder =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
@@ -327,7 +333,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     for (TestAccount testAccount : testAccounts) {
       newCodeOwnerConfigBuilder.addCodeOwnerEmail(testAccount.email());
     }
-    newCodeOwnerConfigBuilder.create();
+    return newCodeOwnerConfigBuilder.create();
   }
 
   /**
