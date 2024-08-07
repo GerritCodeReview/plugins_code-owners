@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 /** The result of resolving path code owners via {@link PathCodeOwners}. */
 @AutoValue
@@ -33,8 +34,14 @@ public abstract class PathCodeOwnersResult {
   /** Gets the path for which the code owner config was resolved. */
   abstract Path path();
 
-  /** Gets the resolved code owner config. */
-  abstract CodeOwnerConfig codeOwnerConfig();
+  /** Gets the key of the resolved code owner config. */
+  abstract CodeOwnerConfig.Key codeOwnerConfigKey();
+
+  /** Gets whether parent code owners should be ignored for the path. */
+  public abstract boolean ignoreParentCodeOwners();
+
+  /** Gets the relevant code owner sets for the path. */
+  abstract ImmutableSet<CodeOwnerSet> codeOwnerSets();
 
   /** Gets a list of resolved imports. */
   public abstract ImmutableList<CodeOwnerConfigImport> resolvedImports();
@@ -55,10 +62,9 @@ public abstract class PathCodeOwnersResult {
    * @return the code owners of the path
    */
   public ImmutableSet<CodeOwnerReference> getPathCodeOwners() {
-    logger.atFine().log(
-        "retrieving path code owners for %s from %s", path(), codeOwnerConfig().key());
+    logger.atFine().log("retrieving path code owners for %s from %s", path(), codeOwnerConfigKey());
     ImmutableSet<CodeOwnerReference> pathCodeOwners =
-        codeOwnerConfig().codeOwnerSets().stream()
+        codeOwnerSets().stream()
             .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
             .collect(toImmutableSet());
     logger.atFine().log("pathCodeOwners = %s", pathCodeOwners);
@@ -73,12 +79,10 @@ public abstract class PathCodeOwnersResult {
    */
   public ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> getAnnotations() {
     logger.atFine().log(
-        "retrieving path code owner annotations for %s from %s", path(), codeOwnerConfig().key());
+        "retrieving path code owner annotations for %s from %s", path(), codeOwnerConfigKey());
     ImmutableMultimap.Builder<CodeOwnerReference, CodeOwnerAnnotation> annotationsBuilder =
         ImmutableMultimap.builder();
-    codeOwnerConfig()
-        .codeOwnerSets()
-        .forEach(codeOwnerSet -> annotationsBuilder.putAll(codeOwnerSet.annotations()));
+    codeOwnerSets().forEach(codeOwnerSet -> annotationsBuilder.putAll(codeOwnerSet.annotations()));
 
     ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> annotations =
         annotationsBuilder.build();
@@ -93,20 +97,13 @@ public abstract class PathCodeOwnersResult {
         .collect(toImmutableSet());
   }
 
-  /**
-   * Whether parent code owners should be ignored for the path.
-   *
-   * @return whether parent code owners should be ignored for the path
-   */
-  public boolean ignoreParentCodeOwners() {
-    return codeOwnerConfig().ignoreParentCodeOwners();
-  }
-
   @Override
   public final String toString() {
     return MoreObjects.toStringHelper(this)
         .add("path", path())
-        .add("codeOwnerConfig", codeOwnerConfig())
+        .add("codeOwnerConfigKey", codeOwnerConfigKey())
+        .add("ignoreParentCodeOwners", ignoreParentCodeOwners())
+        .add("codeOwnerSets", codeOwnerSets())
         .add("resolvedImports", resolvedImports())
         .add("unresolvedImports", unresolvedImports())
         .toString();
@@ -115,12 +112,16 @@ public abstract class PathCodeOwnersResult {
   /** Creates a {@link PathCodeOwnersResult} instance. */
   public static PathCodeOwnersResult create(
       Path path,
-      CodeOwnerConfig codeOwnerConfig,
+      CodeOwnerConfig.Key codeOwnerConfigKey,
+      boolean ignoreParentCodeOwners,
+      Set<CodeOwnerSet> codeOwnerSets,
       List<CodeOwnerConfigImport> resolvedImports,
       List<CodeOwnerConfigImport> unresolvedImports) {
     return new AutoValue_PathCodeOwnersResult(
         path,
-        codeOwnerConfig,
+        codeOwnerConfigKey,
+        ignoreParentCodeOwners,
+        ImmutableSet.copyOf(codeOwnerSets),
         ImmutableList.copyOf(resolvedImports),
         ImmutableList.copyOf(unresolvedImports));
   }
