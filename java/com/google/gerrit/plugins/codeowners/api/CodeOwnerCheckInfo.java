@@ -45,6 +45,9 @@ public class CodeOwnerCheckInfo {
    */
   public boolean isResolvable;
 
+  /** The code owner config files that are relevant for computing the code ownership. */
+  public List<CodeOwnerConfigFileInfo> codeOwnerConfigs;
+
   /**
    * Whether the user to which the given email was resolved has read permissions on the branch.
    *

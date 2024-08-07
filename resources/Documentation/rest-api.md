@@ -301,6 +301,13 @@ As response a [CodeOwnerCheckInfo](#code-owner-check-info) entity is returned.
   {
     "is_code_owner": false,
     "is_resolvable": false,
+    "code_owner_configs": [
+      {
+        "project": "foo/bar",
+        "branch": "master",
+        "path": "/OWNERS"
+      }
+    ]
     "can_read_ref": true,
     "code_owner_config_file_paths": [
       "/OWNERS",
@@ -941,6 +948,7 @@ ownership of a user for a path in a branch.
 | --------------- | ----------- |
 | `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) any code owner config file assigns codeownership to the email for the path (see field `code_owner_config_file_paths`) or the email is configured as default code owner (see field `is_default_code_owner` or the email is configured as global code owner (see field `is_global_code_owner`) or the user is a fallback code owner (see field `is_fallback_code_owner`).
 | `is_resolvable` | Whether the given email is resolvable for the specified user or the calling user if no user was specified.
+| `code_owner_configs` | The code owner config files that have been inspected to check the code owner as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
 | `can_read_ref` | Whether the user to which the given email was resolved has read permissions on the branch. Not set if the given email is not resolvable or if the given email is the all users wildcard (aka '*').
 | `can_see_change`| Whether the user to which the given email was resolved can see the specified change. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
 | `can_approve_change`| Whether the user to which the given email was resolved can code-owner approve the specified change. Being able to code-owner approve the change means that the user has permissions to vote on the label that is [required as code owner approval](config.html#pluginCodeOwnersRequiredApproval). Other permissions are not considered for computing this flag. In particular missing read permissions on the change don't have any effect on this flag. Whether the user misses read permissions on the change (and hence cannot apply the code owner approval) can be seen from the `can_see_change` flag. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
