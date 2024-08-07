@@ -176,7 +176,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
           messages.add(
               String.format(
                   "checking code owner config file %s", codeOwnerConfig.key().format(codeOwners)));
-          OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult =
+          PathCodeOwnersResult pathCodeOwnersResult =
               pathCodeOwnersFactory
                   .createWithoutCache(codeOwnerConfig, absolutePath)
                   .resolveCodeOwnerConfig();
@@ -184,19 +184,18 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
           codeOwnerConfigFileInfosBuilder.add(
               codeOwnerConfigFileJson.format(
                   codeOwnerConfig,
-                  pathCodeOwnersResult.get().resolvedImports(),
-                  pathCodeOwnersResult.get().unresolvedImports()));
+                  pathCodeOwnersResult.resolvedImports(),
+                  pathCodeOwnersResult.unresolvedImports()));
 
           messages.addAll(pathCodeOwnersResult.messages());
           pathCodeOwnersResult
-              .get()
               .unresolvedImports()
               .forEach(
                   unresolvedImport ->
                       messages.add(unresolvedImportFormatter.format(unresolvedImport)));
 
           Optional<CodeOwnerReference> codeOwnerReference =
-              pathCodeOwnersResult.get().getPathCodeOwners().stream()
+              pathCodeOwnersResult.getPathCodeOwners().stream()
                   .filter(cor -> cor.email().equals(email))
                   .findAny();
           if (codeOwnerReference.isPresent()
@@ -216,8 +215,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
             }
 
-            ImmutableSet<String> localAnnotations =
-                pathCodeOwnersResult.get().getAnnotationsFor(email);
+            ImmutableSet<String> localAnnotations = pathCodeOwnersResult.getAnnotationsFor(email);
             if (!localAnnotations.isEmpty()) {
               messages.add(
                   String.format("email %s is annotated with %s", email, sort(localAnnotations)));
@@ -225,7 +223,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
             }
           }
 
-          if (pathCodeOwnersResult.get().getPathCodeOwners().stream()
+          if (pathCodeOwnersResult.getPathCodeOwners().stream()
               .anyMatch(cor -> cor.email().equals(CodeOwnerResolver.ALL_USERS_WILDCARD))) {
             isCodeOwnershipAssignedToAllUsers.set(true);
 
@@ -249,7 +247,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
             }
 
             ImmutableSet<String> localAnnotations =
-                pathCodeOwnersResult.get().getAnnotationsFor(CodeOwnerResolver.ALL_USERS_WILDCARD);
+                pathCodeOwnersResult.getAnnotationsFor(CodeOwnerResolver.ALL_USERS_WILDCARD);
             if (!localAnnotations.isEmpty()) {
               messages.add(
                   String.format(
@@ -266,12 +264,12 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
             hasRevelantCodeOwnerDefinitions.set(true);
           }
 
-          if (pathCodeOwnersResult.get().ignoreParentCodeOwners()) {
+          if (pathCodeOwnersResult.ignoreParentCodeOwners()) {
             messages.add("parent code owners are ignored");
             parentCodeOwnersAreIgnored.set(true);
           }
 
-          return !pathCodeOwnersResult.get().ignoreParentCodeOwners();
+          return !pathCodeOwnersResult.ignoreParentCodeOwners();
         });
 
     boolean isGlobalCodeOwner = false;

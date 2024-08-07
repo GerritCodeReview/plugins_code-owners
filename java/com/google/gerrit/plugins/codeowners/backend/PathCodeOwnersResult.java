@@ -54,6 +54,8 @@ public abstract class PathCodeOwnersResult {
     return !unresolvedImports().isEmpty();
   }
 
+  public abstract ImmutableList<String> messages();
+
   /**
    * Gets the code owners from the code owner config that apply to the path.
    *
@@ -106,6 +108,7 @@ public abstract class PathCodeOwnersResult {
         .add("codeOwnerSets", codeOwnerSets())
         .add("resolvedImports", resolvedImports())
         .add("unresolvedImports", unresolvedImports())
+        .add("messages", messages())
         .toString();
   }
 
@@ -116,13 +119,15 @@ public abstract class PathCodeOwnersResult {
       boolean ignoreParentCodeOwners,
       Set<CodeOwnerSet> codeOwnerSets,
       List<CodeOwnerConfigImport> resolvedImports,
-      List<CodeOwnerConfigImport> unresolvedImports) {
+      List<CodeOwnerConfigImport> unresolvedImports,
+      List<String> messages) {
     return new AutoValue_PathCodeOwnersResult(
         path,
         codeOwnerConfigKey,
         ignoreParentCodeOwners,
         ImmutableSet.copyOf(codeOwnerSets),
         ImmutableList.copyOf(resolvedImports),
-        ImmutableList.copyOf(unresolvedImports));
+        ImmutableList.copyOf(unresolvedImports),
+        ImmutableList.copyOf(messages));
   }
 }
