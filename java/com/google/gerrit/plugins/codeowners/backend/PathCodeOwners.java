@@ -210,7 +210,7 @@ public class PathCodeOwners {
    * <p>Imports from other projects are always loaded from the same branch from which the importing
    * code owner config was loaded.
    *
-   * @return the resolved code owner config
+   * @return the resolved code owner config as a {@link PathCodeOwnersResult}
    */
   public OptionalResultWithMessages<PathCodeOwnersResult> resolveCodeOwnerConfig() {
     if (this.pathCodeOwnersResult != null) {
@@ -235,18 +235,16 @@ public class PathCodeOwners {
               codeOwnerConfig.key().shortBranchName(),
               codeOwnerConfigFilePath));
 
-      // Create a code owner config builder to create the resolved code owner config (= code owner
-      // config that is scoped to the path and which has imports resolved)
-      CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder =
-          CodeOwnerConfig.builder(codeOwnerConfig.key(), codeOwnerConfig.revision());
+      // Create vars to collect result data.
+      boolean ignoreParentCodeOwners = codeOwnerConfig.ignoreParentCodeOwners();
+      ImmutableSet.Builder<CodeOwnerSet> codeOwnerSets = ImmutableSet.builder();
+      ImmutableList.Builder<CodeOwnerConfigImport> resolvedImports = ImmutableList.builder();
+      ImmutableList.Builder<CodeOwnerConfigImport> unresolvedImports = ImmutableList.builder();
 
       // Add all data from the original code owner config that is relevant for the path
       // (ignoreParentCodeOwners flag, global code owner sets and matching per-file code owner
       // sets). Effectively this means we are dropping all non-matching per-file rules.
-      resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners(
-          codeOwnerConfig.ignoreParentCodeOwners());
-      getGlobalCodeOwnerSets(codeOwnerConfig)
-          .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+      getGlobalCodeOwnerSets(codeOwnerConfig).forEach(codeOwnerSets::add);
       boolean globalCodeOwnersIgnored = false;
       ImmutableSet<CodeOwnerSet> matchingPerFileCodeOwnerSets =
           getMatchingPerFileCodeOwnerSets(codeOwnerConfig).collect(toImmutableSet());
@@ -255,20 +253,17 @@ public class PathCodeOwners {
             String.format(
                 "per-file code owner set with path expressions %s matches",
                 codeOwnerSet.pathExpressions()));
-        resolvedCodeOwnerConfigBuilder.addCodeOwnerSet(codeOwnerSet);
+        codeOwnerSets.add(codeOwnerSet);
         if (codeOwnerSet.ignoreGlobalAndParentCodeOwners()) {
           globalCodeOwnersIgnored = true;
         }
       }
 
       // Resolve global imports.
-      ImmutableList.Builder<CodeOwnerConfigImport> resolvedImports = ImmutableList.builder();
-      ImmutableList.Builder<CodeOwnerConfigImport> unresolvedImports = ImmutableList.builder();
       ImmutableSet<CodeOwnerImport> globalImports = getGlobalImports(0, codeOwnerConfig);
       OptionalResultWithMessages<CodeOwnerConfigImports> globalImportedCodeOwnerConfigs;
       if (!globalCodeOwnersIgnored) {
-        globalImportedCodeOwnerConfigs =
-            resolveImports(codeOwnerConfig.key(), globalImports, resolvedCodeOwnerConfigBuilder);
+        globalImportedCodeOwnerConfigs = resolveImports(codeOwnerConfig.key(), globalImports);
       } else {
         // skip global import with mode GLOBAL_CODE_OWNER_SETS_ONLY,
         // since we already know that global code owners will be ignored, we do not need to resolve
@@ -281,10 +276,13 @@ public class PathCodeOwners {
                         codeOwnerConfigImport ->
                             codeOwnerConfigImport.referenceToImportedCodeOwnerConfig().importMode()
                                 != CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY)
-                    .collect(toImmutableSet()),
-                resolvedCodeOwnerConfigBuilder);
+                    .collect(toImmutableSet()));
       }
       messages.addAll(globalImportedCodeOwnerConfigs.messages());
+      if (globalImportedCodeOwnerConfigs.get().ignoreParentCodeOwners()) {
+        ignoreParentCodeOwners = true;
+      }
+      codeOwnerSets.addAll(globalImportedCodeOwnerConfigs.get().codeOwnerSets());
       resolvedImports.addAll(globalImportedCodeOwnerConfigs.get().resolved());
       unresolvedImports.addAll(globalImportedCodeOwnerConfigs.get().unresolved());
 
@@ -295,7 +293,7 @@ public class PathCodeOwners {
       // ignoreGlobalAndParentCodeOwners flags on per-file code owner sets again, but can just rely
       // on the global ignoreParentCodeOwners flag.
       Optional<CodeOwnerSet> matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners =
-          getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfigBuilder.build())
+          getMatchingPerFileCodeOwnerSets(codeOwnerSets.build())
               .filter(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)
               .findAny();
       if (matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners.isPresent()) {
@@ -307,23 +305,13 @@ public class PathCodeOwners {
                 matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners
                     .get()
                     .pathExpressions()));
-        // We use resolvedCodeOwnerConfigBuilder to build up a code owner config that is scoped to
-        // the path and which has imports resolved. When resolving imports the relevant code owner
-        // sets from the imported code owner configs are added to the builder.
         // If a per-file rule ignores global and parent code owners we have to drop all global code
-        // owner sets. The problem is that AutoValue doesn't allow us to remove/override code owner
-        // sets that have previously been added to the builder (we cannot call setCodeOwnerSets(...)
-        // after addCodeOwnerSet(...) or codeOwnerSetsBuilder() has been invoked). To override the
-        // code owner sets we build the code owner config and then create a fresh builder from it.
-        // Since the builder is fresh addCodeOwnerSet(...) and codeOwnerSetsBuilder() haven't been
-        // invoked on it yet we can now call setCodeOwnerSets(...).
-        resolvedCodeOwnerConfigBuilder =
-            resolvedCodeOwnerConfigBuilder
-                .build()
-                .toBuilder()
-                .setIgnoreParentCodeOwners()
-                .setCodeOwnerSets(
-                    resolvedCodeOwnerConfigBuilder.codeOwnerSets().stream()
+        // owner sets.
+        ignoreParentCodeOwners = true;
+        codeOwnerSets =
+            ImmutableSet.<CodeOwnerSet>builder()
+                .addAll(
+                    codeOwnerSets.build().stream()
                         .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
                         .collect(toImmutableSet()));
       }
@@ -332,8 +320,12 @@ public class PathCodeOwners {
       ImmutableSet<CodeOwnerImport> perFileImports =
           getPerFileImports(0, codeOwnerConfig, matchingPerFileCodeOwnerSets);
       OptionalResultWithMessages<CodeOwnerConfigImports> perFileImportedCodeOwnerConfigs =
-          resolveImports(codeOwnerConfig.key(), perFileImports, resolvedCodeOwnerConfigBuilder);
+          resolveImports(codeOwnerConfig.key(), perFileImports);
       messages.addAll(perFileImportedCodeOwnerConfigs.messages());
+      if (perFileImportedCodeOwnerConfigs.get().ignoreParentCodeOwners()) {
+        ignoreParentCodeOwners = true;
+      }
+      codeOwnerSets.addAll(perFileImportedCodeOwnerConfigs.get().codeOwnerSets());
       resolvedImports.addAll(perFileImportedCodeOwnerConfigs.get().resolved());
       unresolvedImports.addAll(perFileImportedCodeOwnerConfigs.get().unresolved());
 
@@ -341,7 +333,9 @@ public class PathCodeOwners {
           OptionalResultWithMessages.create(
               PathCodeOwnersResult.create(
                   path,
-                  resolvedCodeOwnerConfigBuilder.build(),
+                  codeOwnerConfig.key(),
+                  ignoreParentCodeOwners,
+                  codeOwnerSets.build(),
                   resolvedImports.build(),
                   unresolvedImports.build()),
               messages);
@@ -355,16 +349,18 @@ public class PathCodeOwners {
    *
    * @param keyOfImportingCodeOwnerConfig the key of the importing code owner config
    * @param codeOwnerConfigImports the code owner configs that should be imported
-   * @param resolvedCodeOwnerConfigBuilder the builder for the resolved code owner config
    * @return list of unresolved imports, empty list if all imports were successfully resolved
    */
   private OptionalResultWithMessages<CodeOwnerConfigImports> resolveImports(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
-      Set<CodeOwnerImport> codeOwnerConfigImports,
-      CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder) {
+      Set<CodeOwnerImport> codeOwnerConfigImports) {
+    // Create vars to collect result data.
+    boolean ignoreParentCodeOwners = false;
+    ImmutableSet.Builder<CodeOwnerSet> codeOwnerSets = ImmutableSet.builder();
     ImmutableList.Builder<CodeOwnerConfigImport> resolvedImports = ImmutableList.builder();
     ImmutableList.Builder<CodeOwnerConfigImport> unresolvedImports = ImmutableList.builder();
     StringBuilder messageBuilder = new StringBuilder();
+
     try (Timer0.Context ctx = codeOwnerMetrics.resolveCodeOwnerConfigImports.start()) {
       logger.atFine().log("resolve imports of codeOwnerConfig %s", keyOfImportingCodeOwnerConfig);
 
@@ -471,13 +467,12 @@ public class PathCodeOwners {
           if (importMode.importIgnoreParentCodeOwners()
               && importedCodeOwnerConfig.ignoreParentCodeOwners()) {
             logger.atFine().log("import ignoreParentCodeOwners flag");
-            resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners();
+            ignoreParentCodeOwners = true;
           }
 
           if (importMode.importGlobalCodeOwnerSets()) {
             logger.atFine().log("import global code owners");
-            getGlobalCodeOwnerSets(importedCodeOwnerConfig)
-                .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+            getGlobalCodeOwnerSets(importedCodeOwnerConfig).forEach(codeOwnerSets::add);
           }
 
           ImmutableSet<CodeOwnerSet> matchingPerFileCodeOwnerSets =
@@ -491,7 +486,7 @@ public class PathCodeOwners {
                           String.format(
                               "per-file code owner set with path expressions %s matches\n",
                               codeOwnerSet.pathExpressions())));
-                  resolvedCodeOwnerConfigBuilder.addCodeOwnerSet(codeOwnerSet);
+                  codeOwnerSets.add(codeOwnerSet);
                 });
           }
 
@@ -539,7 +534,11 @@ public class PathCodeOwners {
       message = message.substring(0, message.length() - 1);
     }
     return OptionalResultWithMessages.create(
-        CodeOwnerConfigImports.create(resolvedImports.build(), unresolvedImports.build()),
+        CodeOwnerConfigImports.create(
+            ignoreParentCodeOwners,
+            codeOwnerSets.build(),
+            resolvedImports.build(),
+            unresolvedImports.build()),
         !message.isEmpty() ? ImmutableList.of(message) : ImmutableList.of());
   }
 
@@ -602,7 +601,12 @@ public class PathCodeOwners {
   }
 
   private Stream<CodeOwnerSet> getMatchingPerFileCodeOwnerSets(CodeOwnerConfig codeOwnerConfig) {
-    return codeOwnerConfig.codeOwnerSets().stream()
+    return getMatchingPerFileCodeOwnerSets(codeOwnerConfig.codeOwnerSets());
+  }
+
+  private Stream<CodeOwnerSet> getMatchingPerFileCodeOwnerSets(
+      ImmutableSet<CodeOwnerSet> codeOwnerSets) {
+    return codeOwnerSets.stream()
         .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
         .filter(codeOwnerSet -> matches(codeOwnerSet, getRelativePath(), pathExpressionMatcher));
   }
@@ -735,6 +739,10 @@ public class PathCodeOwners {
 
   @AutoValue
   abstract static class CodeOwnerConfigImports {
+    abstract boolean ignoreParentCodeOwners();
+
+    abstract ImmutableSet<CodeOwnerSet> codeOwnerSets();
+
     /** Imported code owner configs the could be resolved. */
     abstract ImmutableList<CodeOwnerConfigImport> resolved();
 
@@ -742,9 +750,12 @@ public class PathCodeOwners {
     abstract ImmutableList<CodeOwnerConfigImport> unresolved();
 
     static CodeOwnerConfigImports create(
+        boolean ignoreParentCodeOwners,
+        ImmutableSet<CodeOwnerSet> codeOwnerSets,
         ImmutableList<CodeOwnerConfigImport> resolved,
         ImmutableList<CodeOwnerConfigImport> unresolved) {
-      return new AutoValue_PathCodeOwners_CodeOwnerConfigImports(resolved, unresolved);
+      return new AutoValue_PathCodeOwners_CodeOwnerConfigImports(
+          ignoreParentCodeOwners, codeOwnerSets, resolved, unresolved);
     }
   }
 }

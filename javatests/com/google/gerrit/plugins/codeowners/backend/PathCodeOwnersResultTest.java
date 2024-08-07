@@ -36,10 +36,9 @@ public class PathCodeOwnersResultTest extends AbstractAutoValueTest {
     PathCodeOwnersResult pathCodeOwnersResult =
         PathCodeOwnersResult.create(
             Path.of("/foo/bar/baz.md"),
-            CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
-                .addImport(resolvableCodeOwnerConfigReference)
-                .addImport(unresolvableCodeOwnerConfigReference)
-                .build(),
+            codeOwnerConfig.key(),
+            codeOwnerConfig.ignoreParentCodeOwners(),
+            codeOwnerConfig.codeOwnerSets(),
             ImmutableList.of(
                 CodeOwnerConfigImport.createResolvedImport(
                     codeOwnerConfig,
