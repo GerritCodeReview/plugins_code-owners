@@ -25,6 +25,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -47,20 +48,25 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
+import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigFileInfoSubject;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
 import com.google.gerrit.server.account.externalids.ExternalIdFactory;
 import com.google.gerrit.server.account.externalids.storage.notedb.ExternalIdNotes;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
+import com.google.gerrit.truth.ListSubject;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.Arrays;
@@ -84,10 +90,12 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   @Inject private ExternalIdFactory externalIdFactory;
 
   private TestPathExpressions testPathExpressions;
+  private CodeOwnerBackend backend;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     testPathExpressions = plugin.getSysInjector().getInstance(TestPathExpressions.class);
+    backend = plugin.getSysInjector().getInstance(BackendConfig.class).getDefaultBackend();
   }
 
   @Test
@@ -155,12 +163,20 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
-    setAsCodeOwners("/foo/", codeOwner);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsCodeOwners("/foo/", codeOwner);
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo).canReadRef();
     assertThat(checkCodeOwnerInfo).canSeeChangeNotSet();
     assertThat(checkCodeOwnerInfo).canApproveChangeNotSet();
@@ -187,14 +203,41 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
-    setAsRootCodeOwners(codeOwner);
-    setAsCodeOwners("/foo/", codeOwner);
-    setAsCodeOwners("/foo/bar/", codeOwner);
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey = setAsRootCodeOwners(codeOwner);
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey = setAsCodeOwners("/foo/", codeOwner);
+    CodeOwnerConfig.Key fooBarCodeOwnerConfigKey = setAsCodeOwners("/foo/bar/", codeOwner);
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().hasSize(3);
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .element(0)
+        .assertKey(backend, fooBarCodeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .element(1)
+        .assertKey(backend, fooCodeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .element(2)
+        .assertKey(backend, rootCodeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(
@@ -226,21 +269,41 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .ignoreParentCodeOwners()
-        .addCodeOwnerEmail(codeOwner.email())
-        .create();
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .ignoreParentCodeOwners()
+            .addCodeOwnerEmail(codeOwner.email())
+            .create();
 
-    setAsCodeOwners("/foo/bar/", codeOwner);
+    CodeOwnerConfig.Key fooBarCodeOwnerConfigKey = setAsCodeOwners("/foo/bar/", codeOwner);
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().hasSize(2);
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .element(0)
+        .assertKey(backend, fooBarCodeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .element(1)
+        .assertKey(backend, fooCodeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(
@@ -273,11 +336,19 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .addSecondaryEmail(secondaryEmail)
         .update();
 
-    setAsRootCodeOwners(secondaryEmail);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(secondaryEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, secondaryEmail);
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -298,11 +369,20 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
 
-    setAsRootCodeOwners(CodeOwnerResolver.ALL_USERS_WILDCARD);
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        setAsRootCodeOwners(CodeOwnerResolver.ALL_USERS_WILDCARD);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, codeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -325,11 +405,20 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
 
-    setAsRootCodeOwners(codeOwner.email(), CodeOwnerResolver.ALL_USERS_WILDCARD);
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        setAsRootCodeOwners(codeOwner.email(), CodeOwnerResolver.ALL_USERS_WILDCARD);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, codeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -354,6 +443,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, user.email());
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
@@ -367,11 +457,19 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   public void checkNonExistingEmail() throws Exception {
     String nonExistingEmail = "non-exiting@example.com";
 
-    setAsRootCodeOwners(nonExistingEmail);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(nonExistingEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, nonExistingEmail);
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -392,7 +490,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   public void checkAmbiguousExistingEmail() throws Exception {
     String ambiguousEmail = "ambiguous@example.com";
 
-    setAsRootCodeOwners(ambiguousEmail);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(ambiguousEmail);
 
     // Add the email to 2 accounts to make it ambiguous.
     addEmail(user.id(), ambiguousEmail);
@@ -401,6 +499,14 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, ambiguousEmail);
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -428,11 +534,19 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
       extIdNotes.commit(md);
     }
 
-    setAsRootCodeOwners(orphanedEmail);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(orphanedEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, orphanedEmail);
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -459,11 +573,19 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             "inactiveUser", "inactiveUser@example.com", "Inactive User", /* displayName= */ null);
     accountOperations.account(inactiveUser.id()).forUpdate().inactive().update();
 
-    setAsRootCodeOwners(inactiveUser);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(inactiveUser);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, inactiveUser.email());
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -491,11 +613,19 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             "User with allowed emil",
             /* displayName= */ null);
 
-    setAsRootCodeOwners(userWithAllowedEmail);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(userWithAllowedEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, emailWithAllowedEmailDomain);
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -517,19 +647,27 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.net")
   public void checkEmailWithNonAllowedDomain() throws Exception {
     String emailWithNonAllowedEmailDomain = "foo@example.com";
-    TestAccount userWithAllowedEmail =
+    TestAccount userWithNonAllowedEmail =
         accountCreator.create(
             "userWithNonAllowedEmail",
             emailWithNonAllowedEmailDomain,
             "User with non-allowed emil",
             /* displayName= */ null);
 
-    setAsRootCodeOwners(userWithAllowedEmail);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(userWithNonAllowedEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo =
         checkCodeOwner(ROOT_PATH, emailWithNonAllowedEmailDomain);
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -554,6 +692,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         checkCodeOwner(ROOT_PATH, CodeOwnerResolver.ALL_USERS_WILDCARD);
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).canReadRefNotSet();
     assertThat(checkCodeOwnerInfo).canSeeChangeNotSet();
     assertThat(checkCodeOwnerInfo).canApproveChangeNotSet();
@@ -565,12 +704,21 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
 
   @Test
   public void checkAllUsersWildcard_ownedByAllUsers() throws Exception {
-    setAsRootCodeOwners(CodeOwnerResolver.ALL_USERS_WILDCARD);
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        setAsRootCodeOwners(CodeOwnerResolver.ALL_USERS_WILDCARD);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo =
         checkCodeOwner(ROOT_PATH, CodeOwnerResolver.ALL_USERS_WILDCARD);
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -595,12 +743,20 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             "defaultCodeOwner@example.com",
             "Default Code Owner",
             /* displayName= */ null);
-    setAsDefaultCodeOwners(defaultCodeOwner);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsDefaultCodeOwners(defaultCodeOwner);
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, defaultCodeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
@@ -623,12 +779,21 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             "defaultCodeOwner@example.com",
             "Default Code Owner",
             /* displayName= */ null);
-    setAsDefaultCodeOwner(CodeOwnerResolver.ALL_USERS_WILDCARD);
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        setAsDefaultCodeOwner(CodeOwnerResolver.ALL_USERS_WILDCARD);
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, defaultCodeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
@@ -658,6 +823,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, globalCodeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isGlobalCodeOwner();
@@ -685,6 +851,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, globalCodeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isGlobalCodeOwner();
@@ -702,12 +869,20 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
-    setAsCodeOwners("/foo/", codeOwner);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsCodeOwners("/foo/", codeOwner);
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email(), user.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
@@ -741,12 +916,20 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
 
-    setAsRootCodeOwners(codeOwner);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(codeOwner);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo =
         checkCodeOwner(ROOT_PATH, codeOwner.email(), user.email());
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -775,11 +958,19 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .addSecondaryEmail(secondaryEmail)
         .update();
 
-    setAsRootCodeOwners(secondaryEmail);
+    CodeOwnerConfig.Key codeOwnerConfigKey = setAsRootCodeOwners(secondaryEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, secondaryEmail, user.email());
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
@@ -798,16 +989,16 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void debugLogsContainUnresolvedImports() throws Exception {
+  public void checkWithUnresolvedImports() throws Exception {
     skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfigReference unresolvableCodeOwnerConfigReferenceCodeOwnerConfigNotFound =
         CodeOwnerConfigReference.create(
-            CodeOwnerConfigImportMode.ALL, "non-existing/" + getCodeOwnerConfigFileName());
+            CodeOwnerConfigImportMode.ALL, "/non-existing/" + getCodeOwnerConfigFileName());
 
     CodeOwnerConfigReference unresolvableCodeOwnerConfigReferenceProjectNotFound =
         CodeOwnerConfigReference.builder(
-                CodeOwnerConfigImportMode.ALL, getCodeOwnerConfigFileName())
+                CodeOwnerConfigImportMode.ALL, "/" + getCodeOwnerConfigFileName())
             .setProject(Project.nameKey("non-existing"))
             .build();
 
@@ -818,7 +1009,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     gApi.projects().name(nonReadableProject.get()).config(configInput);
     CodeOwnerConfigReference unresolvableCodeOwnerConfigReferenceProjectNotReadable =
         CodeOwnerConfigReference.builder(
-                CodeOwnerConfigImportMode.ALL, getCodeOwnerConfigFileName())
+                CodeOwnerConfigImportMode.ALL, "/" + getCodeOwnerConfigFileName())
             .setProject(nonReadableProject)
             .build();
 
@@ -834,6 +1025,75 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             .create();
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, user.email());
+
+    CodeOwnerConfigFileInfoSubject codeOwnerConfigFileInfoSubject =
+        assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
+    codeOwnerConfigFileInfoSubject.assertKey(backend, codeOwnerConfigKey);
+    codeOwnerConfigFileInfoSubject
+        .assertNoWebLinks()
+        .assertNoResolvedImports()
+        .assertNoImportMode();
+
+    ListSubject<CodeOwnerConfigFileInfoSubject, CodeOwnerConfigFileInfo>
+        unresolvedImportsListSubject = codeOwnerConfigFileInfoSubject.hasUnresolvedImportsThat();
+    unresolvedImportsListSubject.hasSize(3);
+
+    CodeOwnerConfigFileInfoSubject unresolvedImportSubject1 =
+        unresolvedImportsListSubject.element(0);
+    unresolvedImportSubject1.hasProjectThat().isEqualTo(project.get());
+    unresolvedImportSubject1.hasBranchThat().isEqualTo("refs/heads/master");
+    unresolvedImportSubject1
+        .hasPathThat()
+        .isEqualTo(
+            unresolvableCodeOwnerConfigReferenceCodeOwnerConfigNotFound.filePath().toString());
+    unresolvedImportSubject1.assertImportMode(
+        unresolvableCodeOwnerConfigReferenceCodeOwnerConfigNotFound.importMode());
+    unresolvedImportSubject1
+        .hasUnresolvedErrorMessageThat()
+        .isEqualTo(
+            String.format(
+                "code owner config does not exist (revision = %s)",
+                projectOperations.project(project).getHead("master").name()));
+    unresolvedImportSubject1.assertNoWebLinks().assertNoImports();
+
+    CodeOwnerConfigFileInfoSubject unresolvedImportSubject2 =
+        unresolvedImportsListSubject.element(1);
+    unresolvedImportSubject2
+        .hasProjectThat()
+        .isEqualTo(unresolvableCodeOwnerConfigReferenceProjectNotFound.project().get().get());
+    unresolvedImportSubject2.hasBranchThat().isEqualTo("refs/heads/master");
+    unresolvedImportSubject2
+        .hasPathThat()
+        .isEqualTo(unresolvableCodeOwnerConfigReferenceProjectNotFound.filePath().toString());
+    unresolvedImportSubject2.assertImportMode(
+        unresolvableCodeOwnerConfigReferenceProjectNotFound.importMode());
+    unresolvedImportSubject2
+        .hasUnresolvedErrorMessageThat()
+        .isEqualTo(
+            String.format(
+                "project %s not found",
+                unresolvableCodeOwnerConfigReferenceProjectNotFound.project().get()));
+    unresolvedImportSubject2.assertNoWebLinks().assertNoImports();
+
+    CodeOwnerConfigFileInfoSubject unresolvedImportSubject3 =
+        unresolvedImportsListSubject.element(2);
+    unresolvedImportSubject3
+        .hasProjectThat()
+        .isEqualTo(unresolvableCodeOwnerConfigReferenceProjectNotReadable.project().get().get());
+    unresolvedImportSubject3.hasBranchThat().isEqualTo("refs/heads/master");
+    unresolvedImportSubject3
+        .hasPathThat()
+        .isEqualTo(unresolvableCodeOwnerConfigReferenceProjectNotReadable.filePath().toString());
+    unresolvedImportSubject3.assertImportMode(
+        unresolvableCodeOwnerConfigReferenceProjectNotReadable.importMode());
+    unresolvedImportSubject3
+        .hasUnresolvedErrorMessageThat()
+        .isEqualTo(
+            String.format(
+                "state of project %s doesn't permit read",
+                unresolvableCodeOwnerConfigReferenceProjectNotReadable.project().get()));
+    unresolvedImportSubject3.assertNoWebLinks().assertNoImports();
+
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -887,18 +1147,20 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void debugLogsContainUnresolvedTransitiveImports() throws Exception {
+  public void checkWithUnresolvedTransitiveImports() throws Exception {
     skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath(ROOT_PATH)
-        .addImport(
-            CodeOwnerConfigReference.create(
-                CodeOwnerConfigImportMode.ALL, "/foo/" + getCodeOwnerConfigFileName()))
-        .create();
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.ALL, "/foo/" + getCodeOwnerConfigFileName());
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath(ROOT_PATH)
+            .addImport(codeOwnerConfigReference)
+            .create();
 
     CodeOwnerConfigReference unresolvableCodeOwnerConfigReference =
         CodeOwnerConfigReference.create(
@@ -912,6 +1174,40 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .create();
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, user.email());
+
+    CodeOwnerConfigFileInfoSubject codeOwnerConfigFileInfoSubject =
+        assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
+    codeOwnerConfigFileInfoSubject.assertKey(backend, codeOwnerConfigKey);
+    codeOwnerConfigFileInfoSubject
+        .assertNoWebLinks()
+        .assertNoUnresolvedImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+
+    CodeOwnerConfigFileInfoSubject importSubject =
+        codeOwnerConfigFileInfoSubject.hasImportsThat().onlyElement();
+    importSubject.hasProjectThat().isEqualTo(project.get());
+    importSubject.hasBranchThat().isEqualTo("refs/heads/master");
+    importSubject.hasPathThat().isEqualTo(codeOwnerConfigReference.filePath().toString());
+    importSubject.assertImportMode(codeOwnerConfigReference.importMode());
+    importSubject.assertNoWebLinks().assertNoResolvedImports();
+
+    CodeOwnerConfigFileInfoSubject transitiveImportSubject =
+        importSubject.hasUnresolvedImportsThat().onlyElement();
+    transitiveImportSubject.hasProjectThat().isEqualTo(project.get());
+    transitiveImportSubject.hasBranchThat().isEqualTo("refs/heads/master");
+    transitiveImportSubject
+        .hasPathThat()
+        .isEqualTo(unresolvableCodeOwnerConfigReference.filePath().toString());
+    transitiveImportSubject.assertImportMode(unresolvableCodeOwnerConfigReference.importMode());
+    transitiveImportSubject
+        .hasUnresolvedErrorMessageThat()
+        .isEqualTo(
+            String.format(
+                "code owner config does not exist (revision = %s)",
+                projectOperations.project(project).getHead("master").name()));
+    transitiveImportSubject.assertNoWebLinks().assertNoImports();
+
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -945,27 +1241,36 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         accountCreator.create(
             "mdCodeOwner", "mdCodeOwner@example.com", "Md Code Owner", /* displayName= */ null);
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerSet(
-            CodeOwnerSet.builder()
-                .addPathExpression(testPathExpressions.matchFileType("txt"))
-                .addCodeOwnerEmail(txtOwner.email())
-                .build())
-        .addCodeOwnerSet(
-            CodeOwnerSet.builder()
-                .addPathExpression(testPathExpressions.matchFileType("md"))
-                .addCodeOwnerEmail(mdOwner.email())
-                .build())
-        .create();
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("txt"))
+                    .addCodeOwnerEmail(txtOwner.email())
+                    .build())
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("md"))
+                    .addCodeOwnerEmail(mdOwner.email())
+                    .build())
+            .create();
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, mdOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
@@ -1001,24 +1306,33 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             "Folder Code Owner",
             /* displayName= */ null);
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(folderCodeOwner.email())
-        .addCodeOwnerSet(
-            CodeOwnerSet.builder()
-                .addPathExpression(testPathExpressions.matchFileType("md"))
-                .setIgnoreGlobalAndParentCodeOwners()
-                .addCodeOwnerEmail(fileCodeOwner.email())
-                .build())
-        .create();
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(folderCodeOwner.email())
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("md"))
+                    .setIgnoreGlobalAndParentCodeOwners()
+                    .addCodeOwnerEmail(fileCodeOwner.email())
+                    .build())
+            .create();
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, folderCodeOwner.email());
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
@@ -1060,32 +1374,58 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addImport(
-            CodeOwnerConfigReference.create(
-                CodeOwnerConfigImportMode.ALL, "/bar/" + getCodeOwnerConfigFileName()))
-        .create();
+    CodeOwnerConfigReference barCodeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.ALL, "/bar/" + getCodeOwnerConfigFileName());
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addImport(barCodeOwnerConfigReference)
+            .create();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/bar/")
-        .addImport(
-            CodeOwnerConfigReference.create(
-                CodeOwnerConfigImportMode.ALL, "/baz/" + getCodeOwnerConfigFileName()))
-        .create();
+    CodeOwnerConfigReference bazCodeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.ALL, "/baz/" + getCodeOwnerConfigFileName());
+    CodeOwnerConfig.Key barCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/bar/")
+            .addImport(bazCodeOwnerConfigReference)
+            .create();
 
-    setAsCodeOwners("/baz/", codeOwner);
+    CodeOwnerConfig.Key bazCodeOwnerConfigKey = setAsCodeOwners("/baz/", codeOwner);
 
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+
+    CodeOwnerConfigFileInfoSubject codeOwnerConfigFileInfoSubject =
+        assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
+    codeOwnerConfigFileInfoSubject.assertKey(backend, fooCodeOwnerConfigKey);
+    codeOwnerConfigFileInfoSubject
+        .assertNoWebLinks()
+        .assertNoUnresolvedImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+
+    CodeOwnerConfigFileInfoSubject importSubject =
+        codeOwnerConfigFileInfoSubject.hasImportsThat().onlyElement();
+    importSubject.assertKey(backend, barCodeOwnerConfigKey);
+    importSubject.assertImportMode(barCodeOwnerConfigReference.importMode());
+    importSubject.assertNoWebLinks().assertNoUnresolvedImports().assertNoUnresolvedErrorMessage();
+
+    CodeOwnerConfigFileInfoSubject transitiveImportSubject =
+        importSubject.hasImportsThat().onlyElement();
+    transitiveImportSubject.assertKey(backend, bazCodeOwnerConfigKey);
+    transitiveImportSubject.assertImportMode(bazCodeOwnerConfigReference.importMode());
+    transitiveImportSubject.assertNoWebLinks().assertNoImports().assertNoUnresolvedErrorMessage();
+
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
@@ -1114,38 +1454,64 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         accountCreator.create(
             "mdCodeOwner", "mdCodeOwner@example.com", "Md Code Owner", /* displayName= */ null);
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addImport(
-            CodeOwnerConfigReference.create(
-                CodeOwnerConfigImportMode.ALL, "/bar/" + getCodeOwnerConfigFileName()))
-        .create();
+    CodeOwnerConfigReference barCodeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.ALL, "/bar/" + getCodeOwnerConfigFileName());
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addImport(barCodeOwnerConfigReference)
+            .create();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/bar/")
-        .addCodeOwnerSet(
-            CodeOwnerSet.builder()
-                .addPathExpression(testPathExpressions.matchFileType("md"))
-                .addImport(
-                    CodeOwnerConfigReference.create(
-                        CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                        "/baz/" + getCodeOwnerConfigFileName()))
-                .build())
-        .create();
+    CodeOwnerConfigReference bazCodeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+            "/baz/" + getCodeOwnerConfigFileName());
+    CodeOwnerConfig.Key barCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/bar/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("md"))
+                    .addImport(bazCodeOwnerConfigReference)
+                    .build())
+            .create();
 
-    setAsCodeOwners("/baz/", mdCodeOwner);
+    CodeOwnerConfig.Key bazCodeOwnerConfigKey = setAsCodeOwners("/baz/", mdCodeOwner);
 
     // 1. check for mdCodeOwner and path of an md file
     String path = "/foo/bar/baz.md";
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, mdCodeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+
+    CodeOwnerConfigFileInfoSubject codeOwnerConfigFileInfoSubject =
+        assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
+    codeOwnerConfigFileInfoSubject.assertKey(backend, fooCodeOwnerConfigKey);
+    codeOwnerConfigFileInfoSubject
+        .assertNoWebLinks()
+        .assertNoUnresolvedImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+
+    CodeOwnerConfigFileInfoSubject importSubject =
+        codeOwnerConfigFileInfoSubject.hasImportsThat().onlyElement();
+    importSubject.assertKey(backend, barCodeOwnerConfigKey);
+    importSubject.assertImportMode(barCodeOwnerConfigReference.importMode());
+    importSubject.assertNoWebLinks().assertNoUnresolvedImports().assertNoUnresolvedErrorMessage();
+
+    CodeOwnerConfigFileInfoSubject transitiveImportSubject =
+        importSubject.hasImportsThat().onlyElement();
+    transitiveImportSubject.assertKey(backend, bazCodeOwnerConfigKey);
+    transitiveImportSubject.assertImportMode(bazCodeOwnerConfigReference.importMode());
+    transitiveImportSubject.assertNoWebLinks().assertNoImports().assertNoUnresolvedErrorMessage();
+
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
@@ -1174,6 +1540,26 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     checkCodeOwnerInfo = checkCodeOwner(path, user.email());
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+
+    codeOwnerConfigFileInfoSubject =
+        assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
+    codeOwnerConfigFileInfoSubject.assertKey(backend, fooCodeOwnerConfigKey);
+    codeOwnerConfigFileInfoSubject
+        .assertNoWebLinks()
+        .assertNoUnresolvedImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+
+    importSubject = codeOwnerConfigFileInfoSubject.hasImportsThat().onlyElement();
+    importSubject.assertKey(backend, barCodeOwnerConfigKey);
+    importSubject.assertImportMode(barCodeOwnerConfigReference.importMode());
+    importSubject.assertNoWebLinks().assertNoUnresolvedImports().assertNoUnresolvedErrorMessage();
+
+    transitiveImportSubject = importSubject.hasImportsThat().onlyElement();
+    transitiveImportSubject.assertKey(backend, bazCodeOwnerConfigKey);
+    transitiveImportSubject.assertImportMode(bazCodeOwnerConfigReference.importMode());
+    transitiveImportSubject.assertNoWebLinks().assertNoImports().assertNoUnresolvedErrorMessage();
+
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
@@ -1199,6 +1585,21 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     checkCodeOwnerInfo = checkCodeOwner(path, mdCodeOwner.email());
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+
+    codeOwnerConfigFileInfoSubject =
+        assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
+    codeOwnerConfigFileInfoSubject.assertKey(backend, fooCodeOwnerConfigKey);
+    codeOwnerConfigFileInfoSubject
+        .assertNoWebLinks()
+        .assertNoUnresolvedImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+
+    importSubject = codeOwnerConfigFileInfoSubject.hasImportsThat().onlyElement();
+    importSubject.assertKey(backend, barCodeOwnerConfigKey);
+    importSubject.assertImportMode(barCodeOwnerConfigReference.importMode());
+    importSubject.assertNoWebLinks().assertNoImports().assertNoUnresolvedErrorMessage();
+
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
@@ -1571,12 +1972,17 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   }
 
   private String getCodeOwnerConfigFilePath(String folderPath) {
-    assertThat(folderPath).startsWith("/");
-    assertThat(folderPath).endsWith("/");
+    if (!folderPath.startsWith("/")) {
+      folderPath = "/" + folderPath;
+    }
+    if (!folderPath.endsWith("/")) {
+      folderPath = folderPath + "/";
+    }
     return folderPath + getCodeOwnerConfigFileName();
   }
 
-  private void setAsRootCodeOwners(String... emails) {
+  @CanIgnoreReturnValue
+  private CodeOwnerConfig.Key setAsRootCodeOwners(String... emails) {
     TestCodeOwnerConfigCreation.Builder builder =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
@@ -1584,11 +1990,12 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             .branch("master")
             .folderPath(ROOT_PATH);
     Arrays.stream(emails).forEach(builder::addCodeOwnerEmail);
-    builder.create();
+    return builder.create();
   }
 
-  private void setAsDefaultCodeOwner(String email) {
-    codeOwnerConfigOperations
+  @CanIgnoreReturnValue
+  private CodeOwnerConfig.Key setAsDefaultCodeOwner(String email) {
+    return codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
         .branch(RefNames.REFS_CONFIG)
