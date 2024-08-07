@@ -144,7 +144,7 @@ public class PathCodeOwners {
   private final Path path;
   private final PathExpressionMatcher pathExpressionMatcher;
 
-  private OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult;
+  private PathCodeOwnersResult pathCodeOwnersResult;
 
   private PathCodeOwners(
       CodeOwnerMetrics codeOwnerMetrics,
@@ -212,7 +212,7 @@ public class PathCodeOwners {
    *
    * @return the resolved code owner config as a {@link PathCodeOwnersResult}
    */
-  public OptionalResultWithMessages<PathCodeOwnersResult> resolveCodeOwnerConfig() {
+  public PathCodeOwnersResult resolveCodeOwnerConfig() {
     if (this.pathCodeOwnersResult != null) {
       return this.pathCodeOwnersResult;
     }
@@ -330,14 +330,13 @@ public class PathCodeOwners {
       unresolvedImports.addAll(perFileImportedCodeOwnerConfigs.get().unresolved());
 
       this.pathCodeOwnersResult =
-          OptionalResultWithMessages.create(
-              PathCodeOwnersResult.create(
-                  path,
-                  codeOwnerConfig.key(),
-                  ignoreParentCodeOwners,
-                  codeOwnerSets.build(),
-                  resolvedImports.build(),
-                  unresolvedImports.build()),
+          PathCodeOwnersResult.create(
+              path,
+              codeOwnerConfig.key(),
+              ignoreParentCodeOwners,
+              codeOwnerSets.build(),
+              resolvedImports.build(),
+              unresolvedImports.build(),
               messages);
       logger.atFine().log("path code owners result = %s", pathCodeOwnersResult);
       return this.pathCodeOwnersResult;
