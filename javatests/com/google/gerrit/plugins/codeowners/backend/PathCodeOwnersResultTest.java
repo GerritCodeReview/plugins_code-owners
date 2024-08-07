@@ -51,7 +51,8 @@ public class PathCodeOwnersResultTest extends AbstractAutoValueTest {
                     codeOwnerConfig,
                     CodeOwnerConfig.Key.create(project, "master", "/baz/"),
                     unresolvableCodeOwnerConfigReference,
-                    "test message")));
+                    "test message")),
+            ImmutableList.of());
     assertThatToStringIncludesAllData(pathCodeOwnersResult, PathCodeOwnersResult.class);
   }
 }

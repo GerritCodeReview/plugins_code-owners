@@ -228,13 +228,12 @@ public class CodeOwnerResolver {
       logger.atFine().log(
           "resolve path code owners (code owner config = %s, path = %s)",
           pathCodeOwners.getCodeOwnerConfig().key(), pathCodeOwners.getPath());
-      OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult =
-          pathCodeOwners.resolveCodeOwnerConfig();
+      PathCodeOwnersResult pathCodeOwnersResult = pathCodeOwners.resolveCodeOwnerConfig();
       return resolve(
-          pathCodeOwnersResult.get().getPathCodeOwners(),
-          pathCodeOwnersResult.get().getAnnotations(),
-          pathCodeOwnersResult.get().resolvedImports(),
-          pathCodeOwnersResult.get().unresolvedImports(),
+          pathCodeOwnersResult.getPathCodeOwners(),
+          pathCodeOwnersResult.getAnnotations(),
+          pathCodeOwnersResult.resolvedImports(),
+          pathCodeOwnersResult.unresolvedImports(),
           pathCodeOwnersResult.messages());
     }
   }
