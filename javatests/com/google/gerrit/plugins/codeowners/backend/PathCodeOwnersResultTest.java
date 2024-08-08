@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import com.google.common.collect.ImmutableList;
 import java.nio.file.Path;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
@@ -34,25 +33,25 @@ public class PathCodeOwnersResultTest extends AbstractAutoValueTest {
     CodeOwnerConfigReference unresolvableCodeOwnerConfigReference =
         CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/baz/OWNERS");
     PathCodeOwnersResult pathCodeOwnersResult =
-        PathCodeOwnersResult.create(
-            Path.of("/foo/bar/baz.md"),
-            codeOwnerConfig.key(),
-            codeOwnerConfig.ignoreParentCodeOwners(),
-            codeOwnerConfig.codeOwnerSets(),
-            ImmutableList.of(
+        PathCodeOwnersResult.builder(
+                Path.of("/foo/bar/baz.md"),
+                codeOwnerConfig.key(),
+                codeOwnerConfig.ignoreParentCodeOwners())
+            .addAllCodeOwnerSets(codeOwnerConfig.codeOwnerSets())
+            .addResolvedImport(
                 CodeOwnerConfigImport.createResolvedImport(
                     codeOwnerConfig,
                     CodeOwnerConfig.builder(
                             CodeOwnerConfig.Key.create(project, "master", "/bar/"), TEST_REVISION)
                         .build(),
-                    resolvableCodeOwnerConfigReference)),
-            ImmutableList.of(
+                    resolvableCodeOwnerConfigReference))
+            .addUnresolvedImport(
                 CodeOwnerConfigImport.createUnresolvedImport(
                     codeOwnerConfig,
                     CodeOwnerConfig.Key.create(project, "master", "/baz/"),
                     unresolvableCodeOwnerConfigReference,
-                    "test message")),
-            ImmutableList.of());
+                    "test message"))
+            .build();
     assertThatToStringIncludesAllData(pathCodeOwnersResult, PathCodeOwnersResult.class);
   }
 }
