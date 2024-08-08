@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_EXPLICITLY_MENTIONED_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NOT_EXPLICITLY_MENTIONED_SCORING_VALUE;
@@ -39,6 +40,7 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
@@ -48,6 +50,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolverResult;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScorings;
+import com.google.gerrit.plugins.codeowners.backend.Pair;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
@@ -332,10 +335,15 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
                 .collect(toImmutableList());
       }
     }
+    ImmutableMap<CodeOwner, ImmutableMap<CodeOwnerScore, Integer>> codeOwnerToScorings =
+        sortedAndLimitedCodeOwners.stream()
+            .map(codeOwner -> Pair.of(codeOwner, codeOwnerScorings.getScoringsByScore(codeOwner)))
+            .collect(toImmutableMap(Pair::key, Pair::value));
+    ImmutableList<CodeOwnerInfo> codeOwnersInfoList = codeOwnerJsonFactory.create(getFillOptions())
+        .format(sortedAndLimitedCodeOwners, codeOwnerToScorings);
 
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
-    codeOwnersInfo.codeOwners =
-        codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
+    codeOwnersInfo.codeOwners = codeOwnersInfoList;
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     codeOwnersInfo.codeOwnerConfigs = codeOwnerConfigFileInfosBuilder.build();
     ImmutableList<String> debugLogs = debugLogsBuilder.build();

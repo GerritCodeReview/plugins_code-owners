@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.gerrit.extensions.common.AccountInfo;
+import java.util.Map;
 
 /**
  * Representation of a code owner in the REST API.
@@ -24,4 +25,10 @@ import com.google.gerrit.extensions.common.AccountInfo;
 public class CodeOwnerInfo {
   /** The account of the code owner. */
   public AccountInfo account;
+
+  /**
+   * The scorings for code owners on a particular scores that express how good the code owners are
+   * considered as reviewers.
+   */
+  public Map<String, Integer> scorings;
 }
