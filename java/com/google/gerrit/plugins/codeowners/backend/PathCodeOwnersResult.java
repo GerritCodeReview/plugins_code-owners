@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.MoreObjects;
@@ -23,8 +24,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Set;
 
 /** The result of resolving path code owners via {@link PathCodeOwners}. */
 @AutoValue
@@ -112,22 +111,83 @@ public abstract class PathCodeOwnersResult {
         .toString();
   }
 
-  /** Creates a {@link PathCodeOwnersResult} instance. */
-  public static PathCodeOwnersResult create(
-      Path path,
-      CodeOwnerConfig.Key codeOwnerConfigKey,
-      boolean ignoreParentCodeOwners,
-      Set<CodeOwnerSet> codeOwnerSets,
-      List<CodeOwnerConfigImport> resolvedImports,
-      List<CodeOwnerConfigImport> unresolvedImports,
-      List<String> messages) {
-    return new AutoValue_PathCodeOwnersResult(
-        path,
-        codeOwnerConfigKey,
-        ignoreParentCodeOwners,
-        ImmutableSet.copyOf(codeOwnerSets),
-        ImmutableList.copyOf(resolvedImports),
-        ImmutableList.copyOf(unresolvedImports),
-        ImmutableList.copyOf(messages));
+  /** Creates a builder for a {@link PathCodeOwnersResult} instance. */
+  public static Builder builder(
+      Path path, CodeOwnerConfig.Key codeOwnerConfigKey, boolean ignoreParentCodeOwners) {
+    return new AutoValue_PathCodeOwnersResult.Builder()
+        .path(path)
+        .codeOwnerConfigKey(codeOwnerConfigKey)
+        .ignoreParentCodeOwners(ignoreParentCodeOwners);
+  }
+
+  @AutoValue.Builder
+  abstract static class Builder {
+    abstract Builder path(Path path);
+
+    abstract Builder codeOwnerConfigKey(CodeOwnerConfig.Key codeOwnerConfigKey);
+
+    abstract Builder ignoreParentCodeOwners(boolean ignoreParentCodeOwners);
+
+    Builder ignoreParentCodeOwners() {
+      return ignoreParentCodeOwners(true);
+    }
+
+    abstract ImmutableSet.Builder<CodeOwnerSet> codeOwnerSetsBuilder();
+
+    Builder addCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
+      requireNonNull(codeOwnerSet, "codeOwnerSet");
+      codeOwnerSetsBuilder().add(codeOwnerSet);
+      return this;
+    }
+
+    Builder addAllCodeOwnerSets(ImmutableSet<CodeOwnerSet> codeOwnerSets) {
+      requireNonNull(codeOwnerSets, "codeOwnerSet2");
+      codeOwnerSetsBuilder().addAll(codeOwnerSets);
+      return this;
+    }
+
+    abstract ImmutableList.Builder<CodeOwnerConfigImport> resolvedImportsBuilder();
+
+    Builder addResolvedImport(CodeOwnerConfigImport codeOwnerConfigImport) {
+      requireNonNull(codeOwnerConfigImport, "codeOwnerConfigImport");
+      resolvedImportsBuilder().add(codeOwnerConfigImport);
+      return this;
+    }
+
+    Builder addAllResolvedImports(ImmutableList<CodeOwnerConfigImport> codeOwnerConfigImports) {
+      requireNonNull(codeOwnerConfigImports, "codeOwnerConfigImports");
+      resolvedImportsBuilder().addAll(codeOwnerConfigImports);
+      return this;
+    }
+
+    abstract ImmutableList.Builder<CodeOwnerConfigImport> unresolvedImportsBuilder();
+
+    Builder addUnresolvedImport(CodeOwnerConfigImport codeOwnerConfigImport) {
+      requireNonNull(codeOwnerConfigImport, "codeOwnerConfigImport");
+      unresolvedImportsBuilder().add(codeOwnerConfigImport);
+      return this;
+    }
+
+    Builder addAllUnresolvedImports(ImmutableList<CodeOwnerConfigImport> codeOwnerConfigImports) {
+      requireNonNull(codeOwnerConfigImports, "codeOwnerConfigImports");
+      unresolvedImportsBuilder().addAll(codeOwnerConfigImports);
+      return this;
+    }
+
+    abstract ImmutableList.Builder<String> messagesBuilder();
+
+    Builder addMessage(String message) {
+      requireNonNull(message, "message");
+      messagesBuilder().add(message);
+      return this;
+    }
+
+    Builder addAllMessages(ImmutableList<String> messages) {
+      requireNonNull(messages, "messages");
+      messagesBuilder().addAll(messages);
+      return this;
+    }
+
+    abstract PathCodeOwnersResult build();
   }
 }
