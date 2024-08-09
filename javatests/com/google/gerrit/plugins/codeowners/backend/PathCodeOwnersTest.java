@@ -2836,6 +2836,83 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
+  @Test
+  public void transitiveImportsOfPerFileCodeOwners() throws Exception {
+    TestAccount mdCodeOwner =
+        accountCreator.create(
+            "mdCodeOwner", "mdCodeOwner@example.com", "Md Code Owner", /* displayName= */ null);
+
+    CodeOwnerConfigReference barCodeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.ALL, "/bar/" + getCodeOwnerConfigFileName());
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .fileName("OWNERS")
+            .addImport(barCodeOwnerConfigReference)
+            .create();
+
+    CodeOwnerConfigReference bazCodeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+            "/baz/" + getCodeOwnerConfigFileName());
+    CodeOwnerConfig.Key barCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .fileName("OWNERS")
+            .folderPath("/bar/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("md"))
+                    .addImport(bazCodeOwnerConfigReference)
+                    .build())
+            .create();
+
+    CodeOwnerConfig.Key bazCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/baz/")
+            .fileName("OWNERS")
+            .addCodeOwnerEmail(mdCodeOwner.email())
+            .create();
+
+    CodeOwnerConfig fooCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get();
+    CodeOwnerConfig barCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(barCodeOwnerConfigKey).get();
+    CodeOwnerConfig bazCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(bazCodeOwnerConfigKey).get();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            fooCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Path.of("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the per-file code owner of the code owner config that is transitively
+    // imported.
+    PathCodeOwnersResult pathCodeOwnersResult = pathCodeOwners.get().resolveCodeOwnerConfig().get();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(mdCodeOwner.email());
+    assertThat(pathCodeOwnersResult.resolvedImports())
+        .containsExactly(
+            CodeOwnerConfigImport.createResolvedImport(
+                fooCodeOwnerConfig, barCodeOwnerConfig, barCodeOwnerConfigReference),
+            CodeOwnerConfigImport.createResolvedImport(
+                barCodeOwnerConfig, bazCodeOwnerConfig, bazCodeOwnerConfigReference));
+    assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
+  }
+
   private CodeOwnerConfig.Builder createCodeOwnerBuilder() {
     return CodeOwnerConfig.builder(
         CodeOwnerConfig.Key.create(BranchNameKey.create(project, "master"), Path.of("/")),

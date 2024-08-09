@@ -248,8 +248,9 @@ public class PathCodeOwners {
       getGlobalCodeOwnerSets(codeOwnerConfig)
           .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
       boolean globalCodeOwnersIgnored = false;
-      for (CodeOwnerSet codeOwnerSet :
-          getMatchingPerFileCodeOwnerSets(codeOwnerConfig).collect(toImmutableSet())) {
+      ImmutableSet<CodeOwnerSet> matchingPerFileCodeOwnerSets =
+          getMatchingPerFileCodeOwnerSets(codeOwnerConfig).collect(toImmutableSet());
+      for (CodeOwnerSet codeOwnerSet : matchingPerFileCodeOwnerSets) {
         messages.add(
             String.format(
                 "per-file code owner set with path expressions %s matches",
@@ -329,7 +330,7 @@ public class PathCodeOwners {
 
       // Resolve per-file imports.
       ImmutableSet<CodeOwnerImport> perFileImports =
-          getPerFileImports(0, codeOwnerConfig, resolvedCodeOwnerConfigBuilder.codeOwnerSets());
+          getPerFileImports(0, codeOwnerConfig, matchingPerFileCodeOwnerSets);
       OptionalResultWithMessages<CodeOwnerConfigImports> perFileImportedCodeOwnerConfigs =
           resolveImports(codeOwnerConfig.key(), perFileImports, resolvedCodeOwnerConfigBuilder);
       messages.addAll(perFileImportedCodeOwnerConfigs.messages());
