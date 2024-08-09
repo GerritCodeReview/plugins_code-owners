@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "24afae95_fefc08d2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-09T13:55:49Z",
+      "side": 1,
+      "message": "This sentence is hard to read. I am not sure what exactly is being said. I am guessing you\u0027re using \"relevant code owner config files\" as a single established term. \n\nIf so, maybe it\u0027s more readable to just use \"all inspected owners files\", and not use the word \"relevant\" at all",
+      "range": {
+        "startLine": 15,
+        "startChar": 53,
+        "endLine": 17,
+        "endChar": 32
+      },
+      "revId": "28de170e6287649ee72e7750d76e3a9de1cce42e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d8669110_9eee29a5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-09T13:55:49Z",
+      "side": 1,
+      "message": "I am a bit confused, wouldn\u0027t this lead to the same config mentioned over and over.\nIt seems the codeOwnersConfigFileInfo is a tree-like structure that also contains info for all imported configs. \n\nIf you have files A -\u003e B -\u003e C -\u003e D (\"-\u003e\" means import), won\u0027t you end up with D included 4 times in the output? Or is that not the case?",
+      "range": {
+        "startLine": 184,
+        "startChar": 10,
+        "endLine": 188,
+        "endChar": 67
+      },
+      "revId": "28de170e6287649ee72e7750d76e3a9de1cce42e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
