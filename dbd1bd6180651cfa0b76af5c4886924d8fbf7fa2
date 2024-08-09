@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8275e7e3_ab5cdb4a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-09T14:00:47Z",
+      "side": 1,
+      "message": "What does it mean for the config to be resolved.\n\nI thought I understood what \"resolved\" means in relation to imports. (Whether or not we can successfully read the config that import points to). But now that you\u0027re using \"resolved\" outside of context of the import, I don\u0027t know what that means",
+      "range": {
+        "startLine": 14,
+        "startChar": 28,
+        "endLine": 14,
+        "endChar": 52
+      },
+      "revId": "dbd1bd6180651cfa0b76af5c4886924d8fbf7fa2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
