@@ -63,6 +63,30 @@
       },
       "revId": "7088891e07d8b4f7c1977ed9c9f5d00338ade31e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "50e6ace0_0a9b3418",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T12:58:55Z",
+      "side": 1,
+      "message": "Yeah, just realized this after reading the next change. I resolving this, since it\u0027s getting removed anyway.",
+      "parentUuid": "aa90593b_334419ec",
+      "range": {
+        "startLine": 298,
+        "startChar": 8,
+        "endLine": 310,
+        "endChar": 77
+      },
+      "revId": "7088891e07d8b4f7c1977ed9c9f5d00338ade31e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
