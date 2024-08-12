@@ -39,8 +39,14 @@ public abstract class PathCodeOwnersResult {
   /** Gets whether parent code owners should be ignored for the path. */
   public abstract boolean ignoreParentCodeOwners();
 
-  /** Gets the relevant code owner sets for the path. */
-  abstract ImmutableSet<CodeOwnerSet> codeOwnerSets();
+  /** Gets whether global code owners (aka folder code owners) should be ignored for the path. */
+  abstract boolean ignoreGlobalCodeOwners();
+
+  /** Gets code owner sets that contain global code owners (aka folder code owners). */
+  abstract ImmutableSet<CodeOwnerSet> globalCodeOwnerSets();
+
+  /** Gets code owner sets that contain per-file code owners that are matching the path. */
+  abstract ImmutableSet<CodeOwnerSet> perFileCodeOwnerSets();
 
   /** Gets a list of resolved imports. */
   public abstract ImmutableList<CodeOwnerConfigImport> resolvedImports();
@@ -65,7 +71,7 @@ public abstract class PathCodeOwnersResult {
   public ImmutableSet<CodeOwnerReference> getPathCodeOwners() {
     logger.atFine().log("retrieving path code owners for %s from %s", path(), codeOwnerConfigKey());
     ImmutableSet<CodeOwnerReference> pathCodeOwners =
-        codeOwnerSets().stream()
+        relevantCodeOwnerSets().stream()
             .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
             .collect(toImmutableSet());
     logger.atFine().log("pathCodeOwners = %s", pathCodeOwners);
@@ -83,7 +89,8 @@ public abstract class PathCodeOwnersResult {
         "retrieving path code owner annotations for %s from %s", path(), codeOwnerConfigKey());
     ImmutableMultimap.Builder<CodeOwnerReference, CodeOwnerAnnotation> annotationsBuilder =
         ImmutableMultimap.builder();
-    codeOwnerSets().forEach(codeOwnerSet -> annotationsBuilder.putAll(codeOwnerSet.annotations()));
+    relevantCodeOwnerSets()
+        .forEach(codeOwnerSet -> annotationsBuilder.putAll(codeOwnerSet.annotations()));
 
     ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> annotations =
         annotationsBuilder.build();
@@ -98,13 +105,26 @@ public abstract class PathCodeOwnersResult {
         .collect(toImmutableSet());
   }
 
+  private ImmutableSet<CodeOwnerSet> relevantCodeOwnerSets() {
+    if (ignoreGlobalCodeOwners()) {
+      return perFileCodeOwnerSets();
+    }
+
+    return ImmutableSet.<CodeOwnerSet>builder()
+        .addAll(globalCodeOwnerSets())
+        .addAll(perFileCodeOwnerSets())
+        .build();
+  }
+
   @Override
   public final String toString() {
     return MoreObjects.toStringHelper(this)
         .add("path", path())
         .add("codeOwnerConfigKey", codeOwnerConfigKey())
         .add("ignoreParentCodeOwners", ignoreParentCodeOwners())
-        .add("codeOwnerSets", codeOwnerSets())
+        .add("ignoreGlobalCodeOwners", ignoreGlobalCodeOwners())
+        .add("globalCodeOwnerSets", globalCodeOwnerSets())
+        .add("perFileCodeOwnerSets", perFileCodeOwnerSets())
         .add("resolvedImports", resolvedImports())
         .add("unresolvedImports", unresolvedImports())
         .add("messages", messages())
@@ -117,7 +137,8 @@ public abstract class PathCodeOwnersResult {
     return new AutoValue_PathCodeOwnersResult.Builder()
         .path(path)
         .codeOwnerConfigKey(codeOwnerConfigKey)
-        .ignoreParentCodeOwners(ignoreParentCodeOwners);
+        .ignoreParentCodeOwners(ignoreParentCodeOwners)
+        .ignoreGlobalCodeOwners(false);
   }
 
   @AutoValue.Builder
@@ -128,23 +149,54 @@ public abstract class PathCodeOwnersResult {
 
     abstract Builder ignoreParentCodeOwners(boolean ignoreParentCodeOwners);
 
-    Builder ignoreParentCodeOwners() {
-      return ignoreParentCodeOwners(true);
-    }
+    abstract Builder ignoreGlobalCodeOwners(boolean ignoreGlobalCodeOwners);
 
-    abstract ImmutableSet.Builder<CodeOwnerSet> codeOwnerSetsBuilder();
+    abstract boolean ignoreGlobalCodeOwners();
 
-    Builder addCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
-      requireNonNull(codeOwnerSet, "codeOwnerSet");
-      codeOwnerSetsBuilder().add(codeOwnerSet);
+    abstract ImmutableSet.Builder<CodeOwnerSet> globalCodeOwnerSetsBuilder();
+
+    Builder addGlobalCodeOwnerSet(CodeOwnerSet globalCodeOwnerSet) {
+      requireNonNull(globalCodeOwnerSet, "globalCodeOwnerSet");
+      globalCodeOwnerSetsBuilder().add(globalCodeOwnerSet);
       return this;
     }
 
-    Builder addAllCodeOwnerSets(ImmutableSet<CodeOwnerSet> codeOwnerSets) {
-      requireNonNull(codeOwnerSets, "codeOwnerSet2");
-      codeOwnerSetsBuilder().addAll(codeOwnerSets);
+    Builder addAllGlobalCodeOwnerSets(ImmutableSet<CodeOwnerSet> globalCodeOwnerSets) {
+      requireNonNull(globalCodeOwnerSets, "globalCodeOwnerSets");
+      globalCodeOwnerSetsBuilder().addAll(globalCodeOwnerSets);
       return this;
     }
+
+    abstract ImmutableSet.Builder<CodeOwnerSet> perFileCodeOwnerSetsBuilder();
+
+    Builder addPerFileCodeOwnerSet(CodeOwnerSet perFileCodeOwnerSet) {
+      requireNonNull(perFileCodeOwnerSet, "perFileCodeOwnerSet");
+      perFileCodeOwnerSetsBuilder().add(perFileCodeOwnerSet);
+
+      if (perFileCodeOwnerSet.ignoreGlobalAndParentCodeOwners()) {
+        ignoreParentCodeOwners(true);
+
+        if (!ignoreGlobalCodeOwners()) {
+          ignoreGlobalCodeOwners(true);
+
+          addMessage(
+              String.format(
+                  "found matching per-file code owner set (with path expressions = %s) that ignores"
+                      + " parent code owners, hence ignoring the folder code owners",
+                  perFileCodeOwnerSet.pathExpressions()));
+        }
+      }
+
+      return this;
+    }
+
+    Builder addAllPerFileCodeOwnerSets(ImmutableSet<CodeOwnerSet> perFileCodeOwnerSets) {
+      requireNonNull(perFileCodeOwnerSets, "perFileCodeOwnerSets");
+      perFileCodeOwnerSets.forEach(this::addPerFileCodeOwnerSet);
+      return this;
+    }
+
+    abstract ImmutableSet<CodeOwnerSet> perFileCodeOwnerSets();
 
     abstract ImmutableList.Builder<CodeOwnerConfigImport> resolvedImportsBuilder();
 
