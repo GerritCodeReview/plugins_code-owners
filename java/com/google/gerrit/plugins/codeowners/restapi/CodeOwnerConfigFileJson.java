@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.extensions.common.WebLinkInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileWithCheckResultsInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImport;
 import com.google.gerrit.plugins.codeowners.backend.UnresolvedImportFormatter;
@@ -54,12 +55,32 @@ public class CodeOwnerConfigFileJson {
       CodeOwnerConfig codeOwnerConfig,
       List<CodeOwnerConfigImport> resolvedImports,
       List<CodeOwnerConfigImport> unresolvedImports) {
+    CodeOwnerConfigFileInfo info = new CodeOwnerConfigFileInfo();
+    populate(info, codeOwnerConfig, resolvedImports, unresolvedImports);
+    return info;
+  }
+
+  public CodeOwnerConfigFileWithCheckResultsInfo formatWithCheckResults(
+      CodeOwnerConfig codeOwnerConfig,
+      List<CodeOwnerConfigImport> resolvedImports,
+      List<CodeOwnerConfigImport> unresolvedImports,
+      boolean assignsCodeOwnershipToUser) {
+    CodeOwnerConfigFileWithCheckResultsInfo info = new CodeOwnerConfigFileWithCheckResultsInfo();
+    populate(info, codeOwnerConfig, resolvedImports, unresolvedImports);
+    info.assignsCodeOwnershipToUser = assignsCodeOwnershipToUser;
+    return info;
+  }
+
+  public CodeOwnerConfigFileInfo populate(
+      CodeOwnerConfigFileInfo info,
+      CodeOwnerConfig codeOwnerConfig,
+      List<CodeOwnerConfigImport> resolvedImports,
+      List<CodeOwnerConfigImport> unresolvedImports) {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(resolvedImports, "resolvedImports");
     requireNonNull(unresolvedImports, "unresolvedImports");
 
-    CodeOwnerConfigFileInfo info =
-        format(codeOwnerConfig.key(), resolvedImports, unresolvedImports);
+    populate(info, codeOwnerConfig.key(), resolvedImports, unresolvedImports);
 
     ImmutableList<WebLinkInfo> fileLinks =
         webLinks.getFileLinks(
@@ -69,15 +90,14 @@ public class CodeOwnerConfigFileJson {
     return info;
   }
 
-  private CodeOwnerConfigFileInfo format(
+  private void populate(
+      CodeOwnerConfigFileInfo info,
       CodeOwnerConfig.Key codeOwnerConfigKey,
       List<CodeOwnerConfigImport> resolvedImports,
       List<CodeOwnerConfigImport> unresolvedImports) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     requireNonNull(resolvedImports, "resolvedImports");
     requireNonNull(unresolvedImports, "unresolvedImports");
-
-    CodeOwnerConfigFileInfo info = new CodeOwnerConfigFileInfo();
 
     info.project = codeOwnerConfigKey.project().get();
     info.branch = codeOwnerConfigKey.branchNameKey().branch();
@@ -91,10 +111,12 @@ public class CodeOwnerConfigFileJson {
             .map(
                 unresolvedImport -> {
                   CodeOwnerConfigFileInfo unresolvedCodeOwnerConfigFileInfo =
-                      format(
-                          unresolvedImport.keyOfImportedCodeOwnerConfig(),
-                          /* resolvedImports= */ ImmutableList.of(),
-                          /* unresolvedImports= */ ImmutableList.of());
+                      new CodeOwnerConfigFileInfo();
+                  populate(
+                      unresolvedCodeOwnerConfigFileInfo,
+                      unresolvedImport.keyOfImportedCodeOwnerConfig(),
+                      /* resolvedImports= */ ImmutableList.of(),
+                      /* unresolvedImports= */ ImmutableList.of());
                   unresolvedCodeOwnerConfigFileInfo.importMode =
                       unresolvedImport.codeOwnerConfigReference().importMode();
                   unresolvedCodeOwnerConfigFileInfo.unresolvedErrorMessage =
@@ -122,18 +144,18 @@ public class CodeOwnerConfigFileJson {
                       resolvedImport.importedCodeOwnerConfig().isPresent(),
                       "no imported code owner config for resolved import");
                   CodeOwnerConfigFileInfo resolvedCodeOwnerConfigFileInfo =
-                      format(
-                          resolvedImport.importedCodeOwnerConfig().get(),
-                          removeImportEntriesFor(resolvedImports, codeOwnerConfigKey),
-                          removeImportEntriesFor(unresolvedImports, codeOwnerConfigKey));
+                      new CodeOwnerConfigFileInfo();
+                  populate(
+                      resolvedCodeOwnerConfigFileInfo,
+                      resolvedImport.importedCodeOwnerConfig().get(),
+                      removeImportEntriesFor(resolvedImports, codeOwnerConfigKey),
+                      removeImportEntriesFor(unresolvedImports, codeOwnerConfigKey));
                   resolvedCodeOwnerConfigFileInfo.importMode =
                       resolvedImport.codeOwnerConfigReference().importMode();
                   return resolvedCodeOwnerConfigFileInfo;
                 })
             .collect(toImmutableList());
     info.imports = !importInfos.isEmpty() ? importInfos : null;
-
-    return info;
   }
 
   private ImmutableList<CodeOwnerConfigImport> removeImportEntriesFor(
