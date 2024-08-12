@@ -49,7 +49,7 @@ public class CodeOwnerConfigFileInfoSubject extends Subject {
 
   private final CodeOwnerConfigFileInfo codeOwnerConfigFileInfo;
 
-  private CodeOwnerConfigFileInfoSubject(
+  protected CodeOwnerConfigFileInfoSubject(
       FailureMetadata metadata, CodeOwnerConfigFileInfo codeOwnerConfigFileInfo) {
     super(metadata, codeOwnerConfigFileInfo);
     this.codeOwnerConfigFileInfo = codeOwnerConfigFileInfo;

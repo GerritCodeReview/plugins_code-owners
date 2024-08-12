@@ -60,6 +60,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigFileInfoSubject;
+import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigFileWithCheckResultsInfoSubject;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
@@ -173,6 +174,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
@@ -180,9 +182,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).canReadRef();
     assertThat(checkCodeOwnerInfo).canSeeChangeNotSet();
     assertThat(checkCodeOwnerInfo).canApproveChangeNotSet();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -217,6 +216,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .element(0)
         .assertKey(backend, fooBarCodeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
@@ -225,6 +225,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .element(1)
         .assertKey(backend, fooCodeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
@@ -233,18 +234,12 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .element(2)
         .assertKey(backend, rootCodeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
 
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(
-            getCodeOwnerConfigFilePath("/foo/bar/"),
-            getCodeOwnerConfigFilePath("/foo/"),
-            getCodeOwnerConfigFilePath(ROOT_PATH))
-        .inOrder();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -291,6 +286,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .element(0)
         .assertKey(backend, fooBarCodeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
@@ -299,16 +295,12 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .element(1)
         .assertKey(backend, fooCodeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
 
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(
-            getCodeOwnerConfigFilePath("/foo/bar/"), getCodeOwnerConfigFilePath("/foo/"))
-        .inOrder();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -345,13 +337,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -379,13 +369,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
@@ -415,13 +403,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
@@ -444,7 +430,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().isEmpty();
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -466,13 +451,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -503,13 +486,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -543,13 +524,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -582,13 +561,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -622,13 +599,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -664,13 +639,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -696,7 +669,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).canReadRefNotSet();
     assertThat(checkCodeOwnerInfo).canSeeChangeNotSet();
     assertThat(checkCodeOwnerInfo).canApproveChangeNotSet();
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -715,13 +687,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
@@ -753,11 +723,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -790,11 +760,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
@@ -824,7 +794,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().isEmpty();
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -852,7 +821,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().isEmpty();
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
@@ -879,13 +847,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -926,13 +892,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -967,13 +931,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
@@ -1267,13 +1229,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -1329,11 +1289,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertDoesNotAssignCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -1351,13 +1311,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasCodeOwnerConfigsThat()
         .onlyElement()
         .assertKey(backend, codeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoImports()
         .assertNoUnresolvedErrorMessage()
         .assertNoImportMode();
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -1413,10 +1371,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
 
-    CodeOwnerConfigFileInfoSubject codeOwnerConfigFileInfoSubject =
+    CodeOwnerConfigFileWithCheckResultsInfoSubject codeOwnerConfigFileInfoSubject =
         assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
-    codeOwnerConfigFileInfoSubject.assertKey(backend, fooCodeOwnerConfigKey);
     codeOwnerConfigFileInfoSubject
+        .assertKey(backend, fooCodeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoUnresolvedImports()
         .assertNoUnresolvedErrorMessage()
@@ -1434,9 +1393,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     transitiveImportSubject.assertImportMode(bazCodeOwnerConfigReference.importMode());
     transitiveImportSubject.assertNoWebLinks().assertNoImports().assertNoUnresolvedErrorMessage();
 
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -1499,10 +1455,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
 
-    CodeOwnerConfigFileInfoSubject codeOwnerConfigFileInfoSubject =
+    CodeOwnerConfigFileWithCheckResultsInfoSubject codeOwnerConfigFileInfoSubject =
         assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
-    codeOwnerConfigFileInfoSubject.assertKey(backend, fooCodeOwnerConfigKey);
     codeOwnerConfigFileInfoSubject
+        .assertKey(backend, fooCodeOwnerConfigKey)
+        .assertAssignsCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoUnresolvedImports()
         .assertNoUnresolvedErrorMessage()
@@ -1520,9 +1477,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     transitiveImportSubject.assertImportMode(bazCodeOwnerConfigReference.importMode());
     transitiveImportSubject.assertNoWebLinks().assertNoImports().assertNoUnresolvedErrorMessage();
 
-    assertThat(checkCodeOwnerInfo)
-        .hasCodeOwnerConfigFilePathsThat()
-        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -1551,8 +1505,9 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
 
     codeOwnerConfigFileInfoSubject =
         assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
-    codeOwnerConfigFileInfoSubject.assertKey(backend, fooCodeOwnerConfigKey);
     codeOwnerConfigFileInfoSubject
+        .assertKey(backend, fooCodeOwnerConfigKey)
+        .assertDoesNotAssignCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoUnresolvedImports()
         .assertNoUnresolvedErrorMessage()
@@ -1568,7 +1523,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     transitiveImportSubject.assertImportMode(bazCodeOwnerConfigReference.importMode());
     transitiveImportSubject.assertNoWebLinks().assertNoImports().assertNoUnresolvedErrorMessage();
 
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -1596,8 +1550,9 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
 
     codeOwnerConfigFileInfoSubject =
         assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigsThat().onlyElement();
-    codeOwnerConfigFileInfoSubject.assertKey(backend, fooCodeOwnerConfigKey);
     codeOwnerConfigFileInfoSubject
+        .assertKey(backend, fooCodeOwnerConfigKey)
+        .assertDoesNotAssignCodeOwnershipToUser()
         .assertNoWebLinks()
         .assertNoUnresolvedImports()
         .assertNoUnresolvedErrorMessage()
@@ -1608,7 +1563,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     importSubject.assertImportMode(barCodeOwnerConfigReference.importMode());
     importSubject.assertNoWebLinks().assertNoImports().assertNoUnresolvedErrorMessage();
 
-    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
