@@ -22,6 +22,30 @@
       },
       "revId": "15a982f84093b14bb91c5849dabc957987079339",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d687e9a3_1bfcf3af",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T12:16:50Z",
+      "side": 1,
+      "message": "Ah, I see it\u0027s removed in \"step 3\"",
+      "parentUuid": "c205dcf5_04e0d1d2",
+      "range": {
+        "startLine": 744,
+        "startChar": 4,
+        "endLine": 744,
+        "endChar": 56
+      },
+      "revId": "15a982f84093b14bb91c5849dabc957987079339",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
