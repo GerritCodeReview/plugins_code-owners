@@ -93,6 +93,30 @@
       },
       "revId": "28de170e6287649ee72e7750d76e3a9de1cce42e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fa6ab167_fd04f2b5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T09:32:38Z",
+      "side": 1,
+      "message": "I see. Thanks for the explanation, it does seem correct to me now. \n\nThe existence of different \"hierarchies\" makes the naming confusing: the file system based hierarchy of code owners files (which similar, but not the same as the file system hierarchy itself) and the tree structure of the CodeOwnerConfigFileInfo",
+      "parentUuid": "c2b5f6c6_c7b47b4a",
+      "range": {
+        "startLine": 184,
+        "startChar": 10,
+        "endLine": 188,
+        "endChar": 67
+      },
+      "revId": "28de170e6287649ee72e7750d76e3a9de1cce42e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
