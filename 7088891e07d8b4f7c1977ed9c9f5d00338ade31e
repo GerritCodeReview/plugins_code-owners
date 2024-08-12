@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ce66f0c3_a0d1b371",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T12:18:59Z",
+      "side": 1,
+      "message": "Nice!",
+      "revId": "7088891e07d8b4f7c1977ed9c9f5d00338ade31e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4cea6810_12697a13",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T12:18:59Z",
+      "side": 1,
+      "message": "What is this for?",
+      "range": {
+        "startLine": 298,
+        "startChar": 8,
+        "endLine": 310,
+        "endChar": 77
+      },
+      "revId": "7088891e07d8b4f7c1977ed9c9f5d00338ade31e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
