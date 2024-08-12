@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e1718b9c_1a5abba4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnersResult.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T13:23:35Z",
+      "side": 1,
+      "message": "This will end up adding the same message multiple times. You probably want to check if ignoreParentCodeOwners and ignoreGlobalCodeOwners are already set, before adding a message",
+      "range": {
+        "startLine": 186,
+        "startChar": 9,
+        "endLine": 186,
+        "endChar": 19
+      },
+      "revId": "49e32d9f96fcf11d0c767713fe27d6e1055c1038",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
