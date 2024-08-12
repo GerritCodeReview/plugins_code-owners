@@ -39,6 +39,30 @@
       },
       "revId": "7088891e07d8b4f7c1977ed9c9f5d00338ade31e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aa90593b_334419ec",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-12T12:52:58Z",
+      "side": 1,
+      "message": "At this point we already added global code owner sets to the pathCodeOwnersResultBuilder, but now we found that global code owners should be ignored, hence we want to drop them. The problem is that the builder doesn\u0027t allow us to remove items, hence as a workaround, we build the PathCodeOwnerResult and then we create a new builder that copies all the fields except global code owner sets. \n\nThis is a lot of boilerplate code, but I think I found a way to get rid of it in the next change (see change I6f7723c0ad49a216c5118ffd047216a9648c438a).",
+      "parentUuid": "4cea6810_12697a13",
+      "range": {
+        "startLine": 298,
+        "startChar": 8,
+        "endLine": 310,
+        "endChar": 77
+      },
+      "revId": "7088891e07d8b4f7c1977ed9c9f5d00338ade31e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
