@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7e563597_f8aa72df",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T12:57:40Z",
+      "side": 1,
+      "message": "Side-note: Not related to this change, but I don\u0027t like the name \"global\". I would replace it with \"Folder\"/\"Dir\" almost everywhere. To me it makes me think about something global to the repo, instead of something that applies to all files in directory.",
+      "revId": "c26421fa31fdad246e297591faa31a2f1c665701",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8c475e6e_53566bab",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T12:57:40Z",
+      "side": 1,
+      "message": "I am not sure that this log message is useful. It contains no request information and it will be present in every call to resolveCodeOwnerConfig(), so it\u0027s not informative about the code flow. It\u0027s also not tied to async processing so it\u0027s not informativie about timing.",
+      "range": {
+        "startLine": 242,
+        "startChar": 6,
+        "endLine": 242,
+        "endChar": 69
+      },
+      "revId": "c26421fa31fdad246e297591faa31a2f1c665701",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "62a29242_81378219",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-12T12:57:40Z",
+      "side": 1,
+      "message": "Do you think it makes sense to make this logic part of addPerFileCodeOwnerSet?",
+      "range": {
+        "startLine": 265,
+        "startChar": 6,
+        "endLine": 276,
+        "endChar": 17
+      },
+      "revId": "c26421fa31fdad246e297591faa31a2f1c665701",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
