@@ -15,14 +15,14 @@
 package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigFileInfoSubject.codeOwnerConfigFileInfos;
+import static com.google.gerrit.plugins.codeowners.testing.CheckedCodeOwnerConfigFileInfoSubject.checkedCodeOwnerConfigFileInfos;
 import static com.google.gerrit.truth.ListSubject.elements;
 
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.plugins.codeowners.api.CheckedCodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.truth.ListSubject;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerCheckInfo}s. */
@@ -74,11 +74,12 @@ public class CodeOwnerCheckInfoSubject extends Subject {
   }
 
   /** Returns a {@link ListSubject} for the code owner config file infos. */
-  public ListSubject<CodeOwnerConfigFileInfoSubject, CodeOwnerConfigFileInfo>
-      hasCodeOwnerConfigsThat() {
+  public ListSubject<CheckedCodeOwnerConfigFileInfoSubject, CheckedCodeOwnerConfigFileInfo>
+      hasCheckedCodeOwnerConfigsThat() {
     return check("codeOwnerConfigs")
         .about(elements())
-        .thatCustom(codeOwnerCheckInfo().codeOwnerConfigs, codeOwnerConfigFileInfos());
+        .thatCustom(
+            codeOwnerCheckInfo().checkedCodeOwnerConfigs, checkedCodeOwnerConfigFileInfos());
   }
 
   public void canReadRef() {
@@ -115,10 +116,6 @@ public class CodeOwnerCheckInfoSubject extends Subject {
 
   public void canApproveChangeNotSet() {
     check("canApproveChange").that(codeOwnerCheckInfo().canApproveChange).isNull();
-  }
-
-  public IterableSubject hasCodeOwnerConfigFilePathsThat() {
-    return check("codeOwnerConfigFilePaths").that(codeOwnerCheckInfo().codeOwnerConfigFilePaths);
   }
 
   public void isDefaultCodeOwner() {
