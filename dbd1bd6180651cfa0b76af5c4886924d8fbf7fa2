@@ -22,6 +22,30 @@
       },
       "revId": "dbd1bd6180651cfa0b76af5c4886924d8fbf7fa2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bd58a3e4_aa916b76",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-12T07:44:50Z",
+      "side": 1,
+      "message": "PathCodeOwners gets a code owner config and a path as input. It should compute from the code owner config who owns the given path. For this we resolve the imports and also drop all parts that are not relevant for the given path (e.g. non matching per-file rules, global code owners if they are ignored by a \"set noparent\" on a matching per-file rule). The result of this we call a \"resolved\" code owner config, but I\u0027m not super fond of this naming. With this change the result of resolving a code owner config for a path will no longer be represented as a CodeOwnerConig (aka the resolved code owner config), but we\u0027ll just have a PathCodeOwnersResult. I hope that\u0027s improving this a bit.\n\nIs it clearer now?",
+      "parentUuid": "8275e7e3_ab5cdb4a",
+      "range": {
+        "startLine": 14,
+        "startChar": 28,
+        "endLine": 14,
+        "endChar": 52
+      },
+      "revId": "dbd1bd6180651cfa0b76af5c4886924d8fbf7fa2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
