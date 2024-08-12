@@ -16,7 +16,6 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static java.util.stream.Collectors.toList;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -30,7 +29,7 @@ import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.extensions.restapi.TopLevelResource;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileWithCheckResultsInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
@@ -158,10 +157,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     validateInput(branchResource);
 
     Path absolutePath = JgitPath.of(path).getAsAbsolutePath();
-    ImmutableList.Builder<CodeOwnerConfigFileInfo> codeOwnerConfigFileInfosBuilder =
+    ImmutableList.Builder<CodeOwnerConfigFileWithCheckResultsInfo> codeOwnerConfigFileInfosBuilder =
         ImmutableList.builder();
     List<String> messages = new ArrayList<>();
-    List<Path> codeOwnerConfigFilePaths = new ArrayList<>();
     AtomicBoolean isCodeOwnershipAssignedToEmail = new AtomicBoolean(false);
     AtomicBoolean isCodeOwnershipAssignedToAllUsers = new AtomicBoolean(false);
     AtomicBoolean isDefaultCodeOwner = new AtomicBoolean(false);
@@ -173,6 +171,10 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
         ObjectId.fromString(branchResource.getRevision().get()),
         absolutePath,
         codeOwnerConfig -> {
+          // Whether this code owner config file assigns code ownership to the user (either directly
+          // to the email or by making all users code owners).
+          boolean assignsCodeOwnershipToUser = false;
+
           messages.add(
               String.format(
                   "checking code owner config file %s", codeOwnerConfig.key().format(codeOwners)));
@@ -180,12 +182,6 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               pathCodeOwnersFactory
                   .createWithoutCache(codeOwnerConfig, absolutePath)
                   .resolveCodeOwnerConfig();
-
-          codeOwnerConfigFileInfosBuilder.add(
-              codeOwnerConfigFileJson.format(
-                  codeOwnerConfig,
-                  pathCodeOwnersResult.resolvedImports(),
-                  pathCodeOwnersResult.unresolvedImports()));
 
           messages.addAll(pathCodeOwnersResult.messages());
           pathCodeOwnersResult
@@ -200,6 +196,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
           if (codeOwnerReference.isPresent()
               && !CodeOwnerResolver.ALL_USERS_WILDCARD.equals(email)) {
             isCodeOwnershipAssignedToEmail.set(true);
+            assignsCodeOwnershipToUser = true;
 
             if (RefNames.isConfigRef(codeOwnerConfig.key().ref())) {
               messages.add(
@@ -211,7 +208,6 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               messages.add(
                   String.format(
                       "found email %s as a code owner in %s", email, codeOwnerConfigFilePath));
-              codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
             }
 
             ImmutableSet<String> localAnnotations = pathCodeOwnersResult.getAnnotationsFor(email);
@@ -225,6 +221,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
           if (pathCodeOwnersResult.getPathCodeOwners().stream()
               .anyMatch(cor -> cor.email().equals(CodeOwnerResolver.ALL_USERS_WILDCARD))) {
             isCodeOwnershipAssignedToAllUsers.set(true);
+            assignsCodeOwnershipToUser = true;
 
             if (RefNames.isConfigRef(codeOwnerConfig.key().ref())) {
               messages.add(
@@ -240,9 +237,6 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                       "found the all users wildcard ('%s') as a code owner in %s which makes %s a"
                           + " code owner",
                       CodeOwnerResolver.ALL_USERS_WILDCARD, codeOwnerConfigFilePath, email));
-              if (!codeOwnerConfigFilePaths.contains(codeOwnerConfigFilePath)) {
-                codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
-              }
             }
 
             ImmutableSet<String> localAnnotations =
@@ -267,6 +261,13 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
             messages.add("parent code owners are ignored");
             parentCodeOwnersAreIgnored.set(true);
           }
+
+          codeOwnerConfigFileInfosBuilder.add(
+              codeOwnerConfigFileJson.formatWithCheckResults(
+                  codeOwnerConfig,
+                  pathCodeOwnersResult.resolvedImports(),
+                  pathCodeOwnersResult.unresolvedImports(),
+                  assignsCodeOwnershipToUser));
 
           return !pathCodeOwnersResult.ignoreParentCodeOwners();
         });
@@ -347,8 +348,6 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     codeOwnerCheckInfo.canReadRef = canReadRef;
     codeOwnerCheckInfo.canSeeChange = canSeeChange;
     codeOwnerCheckInfo.canApproveChange = canApproveChange;
-    codeOwnerCheckInfo.codeOwnerConfigFilePaths =
-        codeOwnerConfigFilePaths.stream().map(Path::toString).collect(toList());
     codeOwnerCheckInfo.isFallbackCodeOwner = isFallbackCodeOwner && isResolvable;
     codeOwnerCheckInfo.isDefaultCodeOwner = isDefaultCodeOwner.get();
     codeOwnerCheckInfo.isGlobalCodeOwner = isGlobalCodeOwner;

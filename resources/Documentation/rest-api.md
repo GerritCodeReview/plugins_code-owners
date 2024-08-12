@@ -303,15 +303,13 @@ As response a [CodeOwnerCheckInfo](#code-owner-check-info) entity is returned.
     "is_resolvable": false,
     "code_owner_configs": [
       {
+        "assigns_code_ownership_to_user": true,
         "project": "foo/bar",
         "branch": "master",
         "path": "/OWNERS"
       }
     ]
     "can_read_ref": true,
-    "code_owner_config_file_paths": [
-      "/OWNERS",
-    ],
     "is_fallback_code_owner": false,
     "is_default_code_owner": false,
     "is_global_code_owner": false,
@@ -946,13 +944,12 @@ ownership of a user for a path in a branch.
 
 | Field Name      | Description |
 | --------------- | ----------- |
-| `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) any code owner config file assigns codeownership to the email for the path (see field `code_owner_config_file_paths`) or the email is configured as default code owner (see field `is_default_code_owner` or the email is configured as global code owner (see field `is_global_code_owner`) or the user is a fallback code owner (see field `is_fallback_code_owner`).
+| `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) any code owner config file assigns codeownership to the email for the path (see `assigns_code_ownership_to_user` field of the inspected code owner configs that are return in the `code_owner_configs` field) or the email is configured as global code owner (see field `is_global_code_owner`) or the user is a fallback code owner (see field `is_fallback_code_owner`).
 | `is_resolvable` | Whether the given email is resolvable for the specified user or the calling user if no user was specified.
-| `code_owner_configs` | The code owner config files that have been inspected to check the code owner as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
+| `code_owner_configs` | The code owner config files that have been inspected to check the code owner as [CodeOwnerConfigFileWithCheckResultsInfo](#code-owner-config-file-with-check-results-info) entities.
 | `can_read_ref` | Whether the user to which the given email was resolved has read permissions on the branch. Not set if the given email is not resolvable or if the given email is the all users wildcard (aka '*').
 | `can_see_change`| Whether the user to which the given email was resolved can see the specified change. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
 | `can_approve_change`| Whether the user to which the given email was resolved can code-owner approve the specified change. Being able to code-owner approve the change means that the user has permissions to vote on the label that is [required as code owner approval](config.html#pluginCodeOwnersRequiredApproval). Other permissions are not considered for computing this flag. In particular missing read permissions on the change don't have any effect on this flag. Whether the user misses read permissions on the change (and hence cannot apply the code owner approval) can be seen from the `can_see_change` flag. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
-| `code_owner_config_file_paths` | Paths of the code owner config files that assign code ownership to the specified email and path as a list. Note that if code ownership is assigned to the email via a code owner config files, but the email is not resolvable (see field `is_resolvable` field), the user is not a code owner.
 | `is_fallback_code_owner` | Whether the given email is a fallback code owner of the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) no code owners are defined for the specified path in the branch and c) parent code owners are not ignored and d) the user is a fallback code owner according to the [configured fallback code owner policy](config.html#pluginCodeOwnersFallbackCodeOwners)
 | `is_default_code_owner` | Whether the given email is configured as a default code owner in the code owner config file in `refs/meta/config`. Note that if the email is configured as default code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_global_code_owner` | Whether the given email is configured as a global code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
@@ -976,6 +973,20 @@ config file and its imports.
 | `unresolved_imports` | optional | Imported code owner config files that couldn't be resolved as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
 | `unresolved_error_message` | optional | Message explaining why this code owner config couldn't be resolved. Only set if the `CodeOwnerConfigFileInfo` represents an imported code owner config file that couldn't be resolved.
 | `import_mode` | optional | The import mode (`ALL` or `GLOBAL_CODE_OWNER_SETS_ONLY`). Only set if the `CodeOwnerConfigFileInfo` represents an imported code owner config file.
+
+---
+
+### <a id="code-owner-config-file-with-check-results-info"> CodeOwnerConfigFileWithCheckResultsInfo
+The `CodeOwnerConfigFileWithCheckResultsInfo` entity contains information about
+a code owner config file, its imports and check results.
+
+The `CodeOwnerConfigFileWithCheckResultsInfo` entity has the same fields as
+[CodeOwnerConfigFileInfo](#code-owner-config-file-info). In addition it contains
+the following fields to return check results:
+
+| Field Name  | Description |
+| ----------- | ----------- |
+| `assigns_code_ownership_to_user` | Whether this code owner config file assigns code ownership to the specified email and path. Note that if code ownership is assigned to the email via a code owner config files, but the email is not resolvable (see field `is_resolvable` field), the user is not a code owner.
 
 ---
 
