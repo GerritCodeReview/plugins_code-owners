@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "77f4bdc9_7d90db23",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-12T07:19:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "24afae95_fefc08d2",
+      "range": {
+        "startLine": 15,
+        "startChar": 53,
+        "endLine": 17,
+        "endChar": 32
+      },
+      "revId": "28de170e6287649ee72e7750d76e3a9de1cce42e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d8669110_9eee29a5",
@@ -37,6 +61,30 @@
       "writtenOn": "2024-08-09T13:55:49Z",
       "side": 1,
       "message": "I am a bit confused, wouldn\u0027t this lead to the same config mentioned over and over.\nIt seems the codeOwnersConfigFileInfo is a tree-like structure that also contains info for all imported configs. \n\nIf you have files A -\u003e B -\u003e C -\u003e D (\"-\u003e\" means import), won\u0027t you end up with D included 4 times in the output? Or is that not the case?",
+      "range": {
+        "startLine": 184,
+        "startChar": 10,
+        "endLine": 188,
+        "endChar": 67
+      },
+      "revId": "28de170e6287649ee72e7750d76e3a9de1cce42e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c2b5f6c6_c7b47b4a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-12T07:19:06Z",
+      "side": 1,
+      "message": "\u003e wouldn\u0027t this lead to the same config mentioned over and over.\n\nNo, let me try to explain this with an example below.\n\n\u003e It seems the codeOwnersConfigFileInfo is a tree-like structure that also\n\u003e contains info for all imported configs.\n\nYes, that\u0027s correct.\n\nWe use CodeOwnerConfigHierarchy here to iterate over the parent code owner config files. This only looks at code owner config files in parent directories, but doesn\u0027t look at imported code owner config files.\n\nE.g. if we compute code owners for a file \u0027/foo/bar/baz.txt\u0027 then CodeOwnerConfigHierarchy.visit will be invoked for \u0027/foo/bar/OWNERS\u0027, \u0027/foo/OWNERS\u0027 and \u0027/OWNERS\u0027 (if they exist), so it only follows the line of parent folders (unless we find a \u0027set noparent\u0027 instruction which leads to ignoring code owner config files from parent directories).\n\nFor each of the files we create one CodeOwnersConfigFileInfo entity:\n\n```\n[\n  {\n    ...\n    \"path\": \"/foo/bar/OWNERS\",\n    ...\n  },\n  {\n    ...\n    \"path\": \"/foo/OWNERS\",\n    ...\n  },\n  {\n    ...\n    \"path\": \"/OWNERS\",\n    ...\n  }\n]\n```\n\nNow, each of these files (\u0027/foo/bar/OWNERS\u0027, \u0027/foo/OWNERS\u0027, \u0027/OWNERS\u0027) can have imports, which get resolved via PathCodeOwners. E.g. let\u0027s say \u0027/foo/bar/OWNERS\u0027 imports \u0027/x/OWNERS\u0027 which imports \u0027/y/OWNERS\u0027, and \u0027/foo/OWNERS\u0027 imports /a/OWNERS\u0027, then the result will look like this:\n\n```\n[\n  {\n    ...\n    \"path\": \"/foo/bar/OWNERS\",\n    \"imports\": [\n      {\n        ...\n        \"path\": \"/x/OWNERS\",\n        \"imports\": [\n          {\n            ...\n            \"path\": \"/y/OWNERS\",\n            ...\n          }\n        ]\n        ...\n      }\n    ]\n    ...\n  },\n  {\n    ...\n    \"path\": \"/foo/OWNERS\",\n    \"imports\": [\n      {\n        ...\n        \"path\": \"/a/OWNERS\",\n      }\n    ]\n    ...\n  },\n  {\n    ...\n    \"path\": \"/OWNERS\",\n    ...\n  }\n]\n```",
+      "parentUuid": "d8669110_9eee29a5",
       "range": {
         "startLine": 184,
         "startChar": 10,
