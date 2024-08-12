@@ -41,6 +41,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c83545ec_89af8561",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-12T13:16:55Z",
+      "side": 1,
+      "message": "Yeah, let me drop this again.\n\nDone.",
+      "parentUuid": "8c475e6e_53566bab",
+      "range": {
+        "startLine": 242,
+        "startChar": 6,
+        "endLine": 242,
+        "endChar": 69
+      },
+      "revId": "c26421fa31fdad246e297591faa31a2f1c665701",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "62a29242_81378219",
@@ -54,6 +78,30 @@
       "writtenOn": "2024-08-12T12:57:40Z",
       "side": 1,
       "message": "Do you think it makes sense to make this logic part of addPerFileCodeOwnerSet?",
+      "range": {
+        "startLine": 265,
+        "startChar": 6,
+        "endLine": 276,
+        "endChar": 17
+      },
+      "revId": "c26421fa31fdad246e297591faa31a2f1c665701",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ff1752b0_bdad7669",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-12T13:16:55Z",
+      "side": 1,
+      "message": "Thank you! That\u0027s a very neat idea! Looks much nicer to have this removed here.\n\nDone.",
+      "parentUuid": "62a29242_81378219",
       "range": {
         "startLine": 265,
         "startChar": 6,
