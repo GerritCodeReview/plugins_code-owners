@@ -22,6 +22,30 @@
       },
       "revId": "49e32d9f96fcf11d0c767713fe27d6e1055c1038",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "28bccd41_cfebdf19",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnersResult.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-12T13:52:04Z",
+      "side": 1,
+      "message": "Yeah, I was a bit undecided if we want this message only once for the first per-file code owner set that ignores parent and global code owners or once for each per-file code owner set that ignores parent and global code owners. Note in the latter case the messages are not exactly the same, but the logged path expressions would be different. I actually believe before the refactoring we logged the message only once. Should be fine to go back to this.\n\nFWIW we should only check on ignoreGlobalCodeOwners, as ignoreParentCodeOwners can be set without having issued this message (when \"set noparent\" is used on global level).\n\nSince this is a builder, we need to add a getter method for the ignoreGlobalCodeOwners flag to be able to read it. This getter must have the exact same name as the getter in PathCodeOwnersResult. This means we must drop having ignoreGlobalCodeOwners() as a shortcut for ignoreGlobalCodeOwners(true), but it shouldn\u0027t be a problem.\n\nDone.",
+      "parentUuid": "e1718b9c_1a5abba4",
+      "range": {
+        "startLine": 186,
+        "startChar": 9,
+        "endLine": 186,
+        "endChar": 19
+      },
+      "revId": "49e32d9f96fcf11d0c767713fe27d6e1055c1038",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
