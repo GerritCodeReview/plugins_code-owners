@@ -239,8 +239,9 @@ public class PathCodeOwners {
       // Add all data from the original code owner config that is relevant for the path
       // (ignoreParentCodeOwners flag, global code owner sets and matching per-file code owner
       // sets). Effectively this means we are dropping all non-matching per-file rules.
-      getGlobalCodeOwnerSets(codeOwnerConfig).forEach(pathCodeOwnersResultBuilder::addCodeOwnerSet);
-      boolean globalCodeOwnersIgnored = false;
+      getGlobalCodeOwnerSets(codeOwnerConfig)
+          .forEach(pathCodeOwnersResultBuilder::addGlobalCodeOwnerSet);
+
       ImmutableSet<CodeOwnerSet> matchingPerFileCodeOwnerSets =
           getMatchingPerFileCodeOwnerSets(codeOwnerConfig).collect(toImmutableSet());
       for (CodeOwnerSet codeOwnerSet : matchingPerFileCodeOwnerSets) {
@@ -248,67 +249,12 @@ public class PathCodeOwners {
             String.format(
                 "per-file code owner set with path expressions %s matches",
                 codeOwnerSet.pathExpressions()));
-        pathCodeOwnersResultBuilder.addCodeOwnerSet(codeOwnerSet);
-        if (codeOwnerSet.ignoreGlobalAndParentCodeOwners()) {
-          globalCodeOwnersIgnored = true;
-        }
+        pathCodeOwnersResultBuilder.addPerFileCodeOwnerSet(codeOwnerSet);
       }
 
       // Resolve global imports.
       ImmutableSet<CodeOwnerImport> globalImports = getGlobalImports(0, codeOwnerConfig);
-      if (!globalCodeOwnersIgnored) {
-        resolveImports(codeOwnerConfig.key(), globalImports, pathCodeOwnersResultBuilder);
-      } else {
-        // skip global import with mode GLOBAL_CODE_OWNER_SETS_ONLY,
-        // since we already know that global code owners will be ignored, we do not need to resolve
-        // these imports
-        resolveImports(
-            codeOwnerConfig.key(),
-            globalImports.stream()
-                .filter(
-                    codeOwnerConfigImport ->
-                        codeOwnerConfigImport.referenceToImportedCodeOwnerConfig().importMode()
-                            != CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY)
-                .collect(toImmutableSet()),
-            pathCodeOwnersResultBuilder);
-      }
-
-      // Remove all global code owner sets if any per-file code owner set has the
-      // ignoreGlobalAndParentCodeOwners flag set to true (as in this case they are ignored and
-      // hence not relevant).
-      // In this case also set ignoreParentCodeOwners to true, so that we do not need to inspect the
-      // ignoreGlobalAndParentCodeOwners flags on per-file code owner sets again, but can just rely
-      // on the global ignoreParentCodeOwners flag.
-      Optional<CodeOwnerSet> matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners =
-          getMatchingPerFileCodeOwnerSets(pathCodeOwnersResultBuilder.build().codeOwnerSets())
-              .filter(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)
-              .findAny();
-      if (matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners.isPresent()) {
-        logger.atFine().log("remove folder code owner sets and set ignoreParentCodeOwners to true");
-        pathCodeOwnersResultBuilder.addMessage(
-            String.format(
-                "found matching per-file code owner set (with path expressions = %s) that ignores"
-                    + " parent code owners, hence ignoring the folder code owners",
-                matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners
-                    .get()
-                    .pathExpressions()));
-        // If a per-file rule ignores global and parent code owners we have to drop all global code
-        // owner sets.
-        pathCodeOwnersResultBuilder.ignoreParentCodeOwners();
-        PathCodeOwnersResult intermediatePathCodeOwnersResult = pathCodeOwnersResultBuilder.build();
-        pathCodeOwnersResultBuilder =
-            PathCodeOwnersResult.builder(
-                    intermediatePathCodeOwnersResult.path(),
-                    intermediatePathCodeOwnersResult.codeOwnerConfigKey(),
-                    intermediatePathCodeOwnersResult.ignoreParentCodeOwners())
-                .addAllCodeOwnerSets(
-                    intermediatePathCodeOwnersResult.codeOwnerSets().stream()
-                        .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
-                        .collect(toImmutableSet()))
-                .addAllResolvedImports(intermediatePathCodeOwnersResult.resolvedImports())
-                .addAllUnresolvedImports(intermediatePathCodeOwnersResult.unresolvedImports())
-                .addAllMessages(intermediatePathCodeOwnersResult.messages());
-      }
+      resolveImports(codeOwnerConfig.key(), globalImports, pathCodeOwnersResultBuilder);
 
       // Resolve per-file imports.
       ImmutableSet<CodeOwnerImport> perFileImports =
@@ -443,9 +389,17 @@ public class PathCodeOwners {
           }
 
           if (importMode.importGlobalCodeOwnerSets()) {
-            logger.atFine().log("import global code owners");
-            getGlobalCodeOwnerSets(importedCodeOwnerConfig)
-                .forEach(pathCodeOwnersResultBuilder::addCodeOwnerSet);
+            if (codeOwnerConfigImport.isGlobalImport()) {
+              logger.atFine().log("add possibly ignored imported global code owners");
+              getGlobalCodeOwnerSets(importedCodeOwnerConfig)
+                  .forEach(pathCodeOwnersResultBuilder::addGlobalCodeOwnerSet);
+            } else {
+              // global code owners which are being imported by a per-file rule become per-file code
+              // owners
+              logger.atFine().log("add imported global code owners as per-file code owners");
+              getGlobalCodeOwnerSets(importedCodeOwnerConfig)
+                  .forEach(pathCodeOwnersResultBuilder::addPerFileCodeOwnerSet);
+            }
           }
 
           ImmutableSet<CodeOwnerSet> matchingPerFileCodeOwnerSets =
@@ -459,7 +413,7 @@ public class PathCodeOwners {
                           String.format(
                               "per-file code owner set with path expressions %s matches\n",
                               codeOwnerSet.pathExpressions())));
-                  pathCodeOwnersResultBuilder.addCodeOwnerSet(codeOwnerSet);
+                  pathCodeOwnersResultBuilder.addPerFileCodeOwnerSet(codeOwnerSet);
                 });
           }
 
@@ -634,20 +588,24 @@ public class PathCodeOwners {
     /** The code owner set that specified the import, empty if it is a global import. */
     public abstract Optional<CodeOwnerSet> codeOwnerSet();
 
+    boolean isGlobalImport() {
+      return codeOwnerSet().isEmpty();
+    }
+
     public String format() {
-      if (codeOwnerSet().isPresent()) {
+      if (isGlobalImport()) {
         return getPrefix()
             + String.format(
-                "* %s (per-file import, import mode = %s, path expressions = %s)\n",
+                "* %s (global import, import mode = %s)\n",
                 referenceToImportedCodeOwnerConfig().format(),
-                referenceToImportedCodeOwnerConfig().importMode(),
-                codeOwnerSet().get().pathExpressions());
+                referenceToImportedCodeOwnerConfig().importMode());
       }
       return getPrefix()
           + String.format(
-              "* %s (global import, import mode = %s)\n",
+              "* %s (per-file import, import mode = %s, path expressions = %s)\n",
               referenceToImportedCodeOwnerConfig().format(),
-              referenceToImportedCodeOwnerConfig().importMode());
+              referenceToImportedCodeOwnerConfig().importMode(),
+              codeOwnerSet().get().pathExpressions());
     }
 
     public String formatSubItem(String message) {
