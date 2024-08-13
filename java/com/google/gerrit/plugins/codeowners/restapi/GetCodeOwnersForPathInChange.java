@@ -34,6 +34,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
+import com.google.gerrit.plugins.codeowners.backend.DebugMessage;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
@@ -143,7 +144,7 @@ public class GetCodeOwnersForPathInChange
       CodeOwnersInChangeCollection.PathResource rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       Stream<CodeOwner> codeOwners,
-      ImmutableList.Builder<String> debugLogs) {
+      ImmutableList.Builder<DebugMessage> debugLogs) {
 
     // The change owner and service users should never be suggested, hence filter them out.
     ImmutableList<CodeOwner> filteredCodeOwners =
@@ -171,14 +172,17 @@ public class GetCodeOwnersForPathInChange
   }
 
   private Predicate<CodeOwner> filterOutChangeOwner(
-      CodeOwnersInChangeCollection.PathResource rsrc, ImmutableList.Builder<String> debugLogs) {
+      CodeOwnersInChangeCollection.PathResource rsrc,
+      ImmutableList.Builder<DebugMessage> debugLogs) {
     return codeOwner -> {
       if (!codeOwner.accountId().equals(rsrc.getRevisionResource().getChange().getOwner())) {
         // Returning true from the Predicate here means that the code owner should be kept.
         return true;
       }
       debugLogs.add(
-          String.format("filtering out %s because this code owner is the change owner", codeOwner));
+          DebugMessage.createMessage(
+              String.format(
+                  "filtering out %s because this code owner is the change owner", codeOwner)));
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
@@ -187,7 +191,7 @@ public class GetCodeOwnersForPathInChange
   private Predicate<CodeOwner> filterOutCodeOwnersThatAreAnnotatedWithLastResortSuggestion(
       CodeOwnersInChangeCollection.PathResource rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
-      ImmutableList.Builder<String> debugLogs) {
+      ImmutableList.Builder<DebugMessage> debugLogs) {
     return codeOwner -> {
       boolean lastResortSuggestion =
           annotations.containsEntry(
@@ -198,9 +202,10 @@ public class GetCodeOwnersForPathInChange
       if (isReviewer(rsrc, codeOwner)) {
         if (lastResortSuggestion) {
           debugLogs.add(
-              String.format(
-                  "ignoring %s annotation for %s because this code owner is a reviewer",
-                  CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key(), codeOwner));
+              DebugMessage.createMessage(
+                  String.format(
+                      "ignoring %s annotation for %s because this code owner is a reviewer",
+                      CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key(), codeOwner)));
         }
 
         // Returning true from the Predicate here means that the code owner should be kept.
@@ -211,9 +216,10 @@ public class GetCodeOwnersForPathInChange
         return true;
       }
       debugLogs.add(
-          String.format(
-              "filtering out %s because this code owner is annotated with %s",
-              codeOwner, CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key()));
+          DebugMessage.createMessage(
+              String.format(
+                  "filtering out %s because this code owner is annotated with %s",
+                  codeOwner, CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key())));
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
@@ -227,7 +233,8 @@ public class GetCodeOwnersForPathInChange
         .contains(codeOwner.accountId());
   }
 
-  private Predicate<CodeOwner> filterOutServiceUsers(ImmutableList.Builder<String> debugLogs) {
+  private Predicate<CodeOwner> filterOutServiceUsers(
+      ImmutableList.Builder<DebugMessage> debugLogs) {
     if (!cfg.getBoolean(
         "suggest", "skipServiceUsers", SuggestReviewers.DEFAULT_SKIP_SERVICE_USERS)) {
       // Returning true from the Predicate here means that the code owner should not be filtered
@@ -241,7 +248,9 @@ public class GetCodeOwnersForPathInChange
         return true;
       }
       debugLogs.add(
-          String.format("filtering out %s because this code owner is a service user", codeOwner));
+          DebugMessage.createMessage(
+              String.format(
+                  "filtering out %s because this code owner is a service user", codeOwner)));
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
