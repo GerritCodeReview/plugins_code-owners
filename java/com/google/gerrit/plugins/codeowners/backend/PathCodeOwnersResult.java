@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.nio.file.Path;
 
 /** The result of resolving path code owners via {@link PathCodeOwners}. */
@@ -155,12 +156,14 @@ public abstract class PathCodeOwnersResult {
 
     abstract ImmutableSet.Builder<CodeOwnerSet> globalCodeOwnerSetsBuilder();
 
+    @CanIgnoreReturnValue
     Builder addGlobalCodeOwnerSet(CodeOwnerSet globalCodeOwnerSet) {
       requireNonNull(globalCodeOwnerSet, "globalCodeOwnerSet");
       globalCodeOwnerSetsBuilder().add(globalCodeOwnerSet);
       return this;
     }
 
+    @CanIgnoreReturnValue
     Builder addAllGlobalCodeOwnerSets(ImmutableSet<CodeOwnerSet> globalCodeOwnerSets) {
       requireNonNull(globalCodeOwnerSets, "globalCodeOwnerSets");
       globalCodeOwnerSetsBuilder().addAll(globalCodeOwnerSets);
@@ -169,6 +172,7 @@ public abstract class PathCodeOwnersResult {
 
     abstract ImmutableSet.Builder<CodeOwnerSet> perFileCodeOwnerSetsBuilder();
 
+    @CanIgnoreReturnValue
     Builder addPerFileCodeOwnerSet(CodeOwnerSet perFileCodeOwnerSet) {
       requireNonNull(perFileCodeOwnerSet, "perFileCodeOwnerSet");
       perFileCodeOwnerSetsBuilder().add(perFileCodeOwnerSet);
@@ -190,6 +194,7 @@ public abstract class PathCodeOwnersResult {
       return this;
     }
 
+    @CanIgnoreReturnValue
     Builder addAllPerFileCodeOwnerSets(ImmutableSet<CodeOwnerSet> perFileCodeOwnerSets) {
       requireNonNull(perFileCodeOwnerSets, "perFileCodeOwnerSets");
       perFileCodeOwnerSets.forEach(this::addPerFileCodeOwnerSet);
@@ -200,12 +205,14 @@ public abstract class PathCodeOwnersResult {
 
     abstract ImmutableList.Builder<CodeOwnerConfigImport> resolvedImportsBuilder();
 
+    @CanIgnoreReturnValue
     Builder addResolvedImport(CodeOwnerConfigImport codeOwnerConfigImport) {
       requireNonNull(codeOwnerConfigImport, "codeOwnerConfigImport");
       resolvedImportsBuilder().add(codeOwnerConfigImport);
       return this;
     }
 
+    @CanIgnoreReturnValue
     Builder addAllResolvedImports(ImmutableList<CodeOwnerConfigImport> codeOwnerConfigImports) {
       requireNonNull(codeOwnerConfigImports, "codeOwnerConfigImports");
       resolvedImportsBuilder().addAll(codeOwnerConfigImports);
@@ -214,12 +221,14 @@ public abstract class PathCodeOwnersResult {
 
     abstract ImmutableList.Builder<CodeOwnerConfigImport> unresolvedImportsBuilder();
 
+    @CanIgnoreReturnValue
     Builder addUnresolvedImport(CodeOwnerConfigImport codeOwnerConfigImport) {
       requireNonNull(codeOwnerConfigImport, "codeOwnerConfigImport");
       unresolvedImportsBuilder().add(codeOwnerConfigImport);
       return this;
     }
 
+    @CanIgnoreReturnValue
     Builder addAllUnresolvedImports(ImmutableList<CodeOwnerConfigImport> codeOwnerConfigImports) {
       requireNonNull(codeOwnerConfigImports, "codeOwnerConfigImports");
       unresolvedImportsBuilder().addAll(codeOwnerConfigImports);
@@ -228,12 +237,14 @@ public abstract class PathCodeOwnersResult {
 
     abstract ImmutableList.Builder<String> messagesBuilder();
 
+    @CanIgnoreReturnValue
     Builder addMessage(String message) {
       requireNonNull(message, "message");
       messagesBuilder().add(message);
       return this;
     }
 
+    @CanIgnoreReturnValue
     Builder addAllMessages(ImmutableList<String> messages) {
       requireNonNull(messages, "messages");
       messagesBuilder().addAll(messages);
