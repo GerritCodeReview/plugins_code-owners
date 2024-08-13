@@ -511,6 +511,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "6eef927a_f6b5889f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 2040,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-13T13:50:54Z",
+      "side": 1,
+      "message": "Right, this is the abstract base class that contains common tests for the GetCodeOwnersForPathInBranch and GetCodeOwnersForPathInChange REST endpoints, and a change with reviewers only exists for the latter. \n\nHence the test for the IS_REVIEWER score can be found in GetCodeOwnersForPathInChangeIT, see codeOwnersThatAreReviewersAreReturnedFirst(). You may add a test to verify that the IS_REVIEWER scoring is returned there.",
+      "parentUuid": "a99aaab6_f46a58c1",
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "807f79b2_73bd8736",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 14
