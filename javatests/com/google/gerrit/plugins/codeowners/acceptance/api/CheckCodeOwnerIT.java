@@ -1348,6 +1348,14 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
     assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigsThat()
+        .onlyElement()
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoWebLinks()
+        .assertNoImports()
+        .assertNoUnresolvedErrorMessage()
+        .assertNoImportMode();
+    assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo)
