@@ -48,6 +48,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolverResult;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScorings;
+import com.google.gerrit.plugins.codeowners.backend.DebugMessage;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
@@ -216,7 +217,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     Set<CodeOwner> codeOwners = new HashSet<>();
     ListMultimap<CodeOwner, CodeOwnerAnnotation> annotations = LinkedListMultimap.create();
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
-    ImmutableList.Builder<String> debugLogsBuilder = ImmutableList.builder();
+    ImmutableList.Builder<DebugMessage> debugLogsBuilder = ImmutableList.builder();
     ImmutableList.Builder<CodeOwnerConfigFileInfo> codeOwnerConfigFileInfosBuilder =
         ImmutableList.builder();
     codeOwnerConfigHierarchy.visit(
@@ -280,7 +281,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     if (!ownedByAllUsers.get()) {
       CodeOwnerResolverResult globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
 
-      debugLogsBuilder.add("resolve global code owners");
+      debugLogsBuilder.add(DebugMessage.createMessage("resolve global code owners"));
       debugLogsBuilder.addAll(globalCodeOwners.messages());
 
       globalCodeOwners
@@ -338,8 +339,11 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
         codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     codeOwnersInfo.codeOwnerConfigs = codeOwnerConfigFileInfosBuilder.build();
-    ImmutableList<String> debugLogs = debugLogsBuilder.build();
-    codeOwnersInfo.debugLogs = debug ? debugLogs : null;
+    ImmutableList<DebugMessage> debugLogs = debugLogsBuilder.build();
+    codeOwnersInfo.debugLogs =
+        debug
+            ? debugLogs.stream().map(DebugMessage::adminMessage).collect(toImmutableList())
+            : null;
     logger.atFine().log("debug logs: %s", debugLogs);
 
     return Response.ok(codeOwnersInfo);
@@ -392,7 +396,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       R rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       ImmutableSet<CodeOwner> codeOwners,
-      ImmutableList.Builder<String> debugLogs) {
+      ImmutableList.Builder<DebugMessage> debugLogs) {
     return filterCodeOwners(rsrc, annotations, getVisibleCodeOwners(rsrc, codeOwners), debugLogs)
         .collect(toImmutableSet());
   }
@@ -410,7 +414,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       R rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       Stream<CodeOwner> codeOwners,
-      ImmutableList.Builder<String> debugLogs) {
+      ImmutableList.Builder<DebugMessage> debugLogs) {
     return codeOwners;
   }
 
