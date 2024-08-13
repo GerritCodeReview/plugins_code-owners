@@ -74,6 +74,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "57eccc65_ee32d5c3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-13T15:32:19Z",
+      "side": 1,
+      "message": "Yeah, I was asking this myself too. Unfortunately this is tricky.\n\nLet\u0027s say you check the code ownership for user user@example.com and file foo/bar.md and this is the OWNERS file that is being imported:\n\n```\nother-user@example.com\nper-file *.md\u003duser@example.com\n```\n\nI guess people would expect \u0027assigns_code_ownership_to_user\u0027 to be true, since the per-file rule matches.\n\nBut if the importing code owner config file imports this code owner config via the \"file\" keyword only global code owners are imported, i.e. not the per-file rule that assigns code ownership to the user. So one could argue that in this case \u0027assigns_code_ownership_to_user\u0027 should be false. Either way it\u0027s confusing, either \u0027assigns_code_ownership_to_user\u0027 says true although it\u0027s actually not making the user a code owner (because the per-file rule that assigns the code ownership is not imported) or it says false, but without looking at the importing code owner config file this looks wrong.\n\nThere are other ways how there are dependencies between importing and imported code owner configs that influence which parts of the code owner configs are relevant and which parts are being ignored (e.g. importing a per-file rule with \"set noparent\" makes global code owners in the importing code owner config file ignored).\n\nDue to this ambiguity I\u0027m not sure that adding \u0027assigns_code_ownership_to_user\u0027 for the imported code owner config file would actually improve clarity, but maybe it would rather increase confusion.\n\nIn any case, with the data that we currently collect in PathCodeOwnersResult we cannot answer the question whether the user is a code owner due to the importing code owner config or due an imported code owner config (and due to which one). Currently finding out about this still requires looking at the involved OWNERS files manually. Collecting this data is probably possible but I guess it\u0027s more work than we would like to invest now.",
+      "parentUuid": "d276402c_67e0cb36",
+      "range": {
+        "startLine": 74,
+        "startChar": 16,
+        "endLine": 77,
+        "endChar": 31
+      },
+      "revId": "87184582260102d3cdf5f8fbaa8b0566798d83fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "113e9c90_332ba055",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 2
