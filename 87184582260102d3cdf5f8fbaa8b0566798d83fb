@@ -1,0 +1,68 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e9f8add3_e3f9ebc7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-13T11:46:52Z",
+      "side": 1,
+      "message": "Honestly, I disagree with this.\n\nI think inheritance is generally more difficult for readability. In the same way that with an optional field you need to know when is it set, you need to know that CodeOwnerConfigFileInfo can be represented by a different derived class (only I would argue it\u0027s less trivially obvious at a glance if the codepath I am looking at uses base or derived instances).\n\nI agree that it makes more sense if we expand number of fields which are only relevant for the \"user check\", but since we have only one field and no immediate plans to add more, I think this adds complexity to the code prematurely. (Even then, I think that having a something like UserCheckInfo field that groups all such field would be better for readability than inheritance).\n\nI think it would be sufficient to have \"only set if ownership is being checked in regards to a specific user\". I don\u0027t think it causes any confusion (confusion would require reader to care about the user, but to not know if they are in the context where the user is specified, which seems unlikely). Besides from the perspective of the REST API user the presence of the field has to be explained anyway\n\nI admit, that readability of inheritance is somewhat of an opinionated topic. So feel free to disagree, if you don\u0027t find my argument convincing.",
+      "range": {
+        "startLine": 74,
+        "startChar": 16,
+        "endLine": 77,
+        "endChar": 31
+      },
+      "revId": "87184582260102d3cdf5f8fbaa8b0566798d83fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "113e9c90_332ba055",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 947,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-13T11:46:52Z",
+      "side": 1,
+      "message": "assigns_code_ownership_to_user",
+      "range": {
+        "startLine": 947,
+        "startChar": 241,
+        "endLine": 947,
+        "endChar": 270
+      },
+      "fixSuggestions": [
+        {
+          "fixId": "f2bb08bb_092f8366",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "resources/Documentation/rest-api.md",
+              "range": {
+                "startLine": 947,
+                "startChar": 0,
+                "endLine": 948,
+                "endChar": 0
+              },
+              "replacement": "| `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable\u0027) and b) any code owner config file assigns codeownership to the email for the path (see `assigns_code_ownership_to_user` field of the inspected code owner configs that are return in the `code_owner_configs` field) or the email is configured as global code owner (see field `is_global_code_owner`) or the user is a fallback code owner (see field `is_fallback_code_owner`).\n"
+            }
+          ]
+        }
+      ],
+      "revId": "87184582260102d3cdf5f8fbaa8b0566798d83fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
