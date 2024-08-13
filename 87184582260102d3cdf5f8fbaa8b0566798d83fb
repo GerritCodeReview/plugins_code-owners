@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "06228631_f61231c9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-13T14:53:10Z",
+      "side": 1,
+      "message": "No problem, I don\u0027t feel strongly about this (I\u0027m not a fan of using inheritance here either). So I\u0027m fine with changing this, however I realise that I forgot to mention one point that made me favour the solution with the inheritance. Let me try to explain this before making any changes.\n\nThe argument that this solution avoids confusion about when this field is set is purely from a user\u0027s point of view (I agree that using inheritance doesn\u0027t make code readability better for devs). \n\nIt\u0027s important to note that CodeOwnerConfigFileInfo is a recursive type, i.e. the resolved/unresolved imports inside the CodeOwnerConfigFileInfo are represented as CodeOwnerConfigFileInfo\u0027s too. However the \u0027assigns_code_ownership_to_user\u0027 information is only available for the outer CodeOwnerConfigFileInfo and not for CodeOwnerConfigFileInfos that represent imports.\n\nE.g.:\n```\n\"code_owner_configs\": [\n{\n  \"assigns_code_ownership_to_user\": false,\n  \"project\": \"Code-Owners-Test\",\n  \"branch\": \"refs/heads/master\",\n  \"path\": \"/foo/bar/OWNERS\"\n  \"imports\": [\n    {\n      // no \"assigns_code_ownership_to_user\" field here\n      \"project\": \"Code-Owners-Test\",\n      \"branch\": \"refs/heads/master\",\n      \"path\": \"/other/OWNERS\"\n    }\n  ]\n},\n```\n\nWith the change as it is now this is CodeOwnerConfigFileWithCheckResultsInfo that contains imports as CodeOwnerConfigFileInfo, which makes it clear the \"assigns_code_ownership_to_user\" field is only set for CodeOwnerConfigFileWithCheckResultsInfo, but nor for CodeOwnerConfigFileInfo.\n\nIf we make this so that CodeOwnerConfigFileInfo contains imports as CodeOwnerConfigFileInfo, with \"assigns_code_ownership_to_user\" as an optional field, we somehow have to explain this. As I find this difficult to phrase I believe users would find it difficult to understand. E.g. \"Only set if the CodeOwnerConfigFileInfo is returned when checking code ownership via the Check Code Owner REST endpoint, but then only for CodeOwnerConfigFileInfos that represent the code owner config files in the parent folders, but not for CodeOwnerConfigFileInfos that represent imported code owner config files.\"\n\nAs an example of further information that we may include in the future, we could include global code owners that have been ignored (globalCodeOwnerSets() from PathCodeOwnersResult when ignoreGlobalCodeOwners() is true), but at this point I have no actual plan to include this information, so I can understand the argument of premature optimisation.\n\nSo yeah, what made me distinguish between CodeOwnerConfigFileInfo and CodeOwnerConfigFileWithCheckResultsInfo was mostly to avoid explaining to the user when the \"assigns_code_ownership_to_user\" field is being set (especially with the recursive type situation).\n\nThinking about this now, maybe a better API would be something like this:\n```\n\"checked_code_owner_configs\": [\n{\n  \"code_owner_config\": {\n    \"project\": \"Code-Owners-Test\",\n    \"branch\": \"refs/heads/master\",\n    \"path\": \"/foo/bar/OWNERS\"\n    \"imports\": [\n      {\n        \"project\": \"Code-Owners-Test\",\n        \"branch\": \"refs/heads/master\",\n        \"path\": \"/other/OWNERS\"\n      }\n    ]\n  },\n  \"assigns_code_ownership_to_user\": false\n},\n```\n\nBasically have CheckedCodeOwnerConfigInfo at the root which has 2 fields: \"code_owner_config\" of type CodeOwnerConfigInfo and \"assigns_code_ownership_to_user\". This way we would avoid the confusion of when \"assigns_code_ownership_to_user\" is set and also avoid using inheritance.\n\nWDYT?",
+      "parentUuid": "e9f8add3_e3f9ebc7",
+      "range": {
+        "startLine": 74,
+        "startChar": 16,
+        "endLine": 77,
+        "endChar": 31
+      },
+      "revId": "87184582260102d3cdf5f8fbaa8b0566798d83fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "113e9c90_332ba055",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 2
@@ -61,6 +85,30 @@
           ]
         }
       ],
+      "revId": "87184582260102d3cdf5f8fbaa8b0566798d83fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2d6fb9e_8ea2bf84",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 947,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-13T14:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "113e9c90_332ba055",
+      "range": {
+        "startLine": 947,
+        "startChar": 241,
+        "endLine": 947,
+        "endChar": 270
+      },
       "revId": "87184582260102d3cdf5f8fbaa8b0566798d83fb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
