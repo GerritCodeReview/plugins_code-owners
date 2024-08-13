@@ -192,13 +192,10 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
-        .containsAnyOf(
+        .contains(
             String.format(
                 "cannot resolve account %s for email %s: account does not exists",
-                accountId, email),
-            String.format(
-                "cannost resolve code owner email %s: no active account with this email found",
-                email));
+                accountId, email));
   }
 
   @Test
