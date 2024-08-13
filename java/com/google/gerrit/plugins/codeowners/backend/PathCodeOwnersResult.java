@@ -60,7 +60,7 @@ public abstract class PathCodeOwnersResult {
     return !unresolvedImports().isEmpty();
   }
 
-  public abstract ImmutableList<String> messages();
+  public abstract ImmutableList<DebugMessage> messages();
 
   /**
    * Gets the code owners from the code owner config that apply to the path.
@@ -184,10 +184,11 @@ public abstract class PathCodeOwnersResult {
           ignoreGlobalCodeOwners(true);
 
           addMessage(
-              String.format(
-                  "found matching per-file code owner set (with path expressions = %s) that ignores"
-                      + " parent code owners, hence ignoring the folder code owners",
-                  perFileCodeOwnerSet.pathExpressions()));
+              DebugMessage.createMessage(
+                  String.format(
+                      "found matching per-file code owner set (with path expressions = %s) that ignores"
+                          + " parent code owners, hence ignoring the folder code owners",
+                      perFileCodeOwnerSet.pathExpressions())));
         }
       }
 
@@ -235,17 +236,17 @@ public abstract class PathCodeOwnersResult {
       return this;
     }
 
-    abstract ImmutableList.Builder<String> messagesBuilder();
+    abstract ImmutableList.Builder<DebugMessage> messagesBuilder();
 
     @CanIgnoreReturnValue
-    Builder addMessage(String message) {
+    Builder addMessage(DebugMessage message) {
       requireNonNull(message, "message");
       messagesBuilder().add(message);
       return this;
     }
 
     @CanIgnoreReturnValue
-    Builder addAllMessages(ImmutableList<String> messages) {
+    Builder addAllMessages(ImmutableList<DebugMessage> messages) {
       requireNonNull(messages, "messages");
       messagesBuilder().addAll(messages);
       return this;

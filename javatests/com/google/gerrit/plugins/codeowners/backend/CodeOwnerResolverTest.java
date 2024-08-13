@@ -93,10 +93,12 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(nonExistingEmail));
     assertThat(result).isEmpty();
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
-            String.format(
+        .assertContainsMessage(
+            /* adminMessage= */ String.format(
                 "cannot resolve code owner email %s: no account with this email exists",
+                nonExistingEmail),
+            /* userMessage= */ String.format(
+                "cannot resolve code owner email %s: email doesn't exist or is not visible",
                 nonExistingEmail));
   }
 
@@ -108,8 +110,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(admin.email()));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(admin.id());
     assertThat(result)
-        .hasMessagesThat()
-        .contains(String.format("account %s is visible to user %s", admin.id(), admin.username()));
+        .assertContainsMessage(
+            String.format("account %s is visible to user %s", admin.id(), admin.username()));
   }
 
   @Test
@@ -120,8 +122,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD));
     assertThat(result).isEmpty();
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
+        .assertContainsMessage(
             String.format(
                 "cannot resolve code owner email %s: no account with this email exists",
                 CodeOwnerResolver.ALL_USERS_WILDCARD));
@@ -170,9 +171,12 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(admin.email()));
     assertThat(result).isEmpty();
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
-            String.format("cannot resolve code owner email %s: email is ambiguous", admin.email()));
+        .assertContainsMessage(
+            /* adminMessage= */ String.format(
+                "cannot resolve code owner email %s: email is ambiguous", admin.email()),
+            /* userMessage= */ String.format(
+                "cannot resolve code owner email %s: email doesn't exist or is not visible",
+                admin.email()));
   }
 
   @Test
@@ -191,11 +195,13 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         codeOwnerResolverProvider.get().resolveWithMessages(CodeOwnerReference.create(email));
     assertThat(result).isEmpty();
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
-            String.format(
+        .assertContainsMessage(
+            /* adminMessage= */ String.format(
                 "cannot resolve account %s for email %s: account does not exists",
-                accountId, email));
+                accountId, email),
+            /* userMessage= */ String.format(
+                "cannot resolve code owner email %s: email doesn't exist or is not visible",
+                email));
   }
 
   @Test
@@ -207,8 +213,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(user.email()));
     assertThat(result).isEmpty();
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
+        .assertContainsMessage(
             String.format("ignoring inactive account %s for email %s", user.id(), user.email()));
   }
 
@@ -228,11 +233,13 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(admin.email()));
     assertThat(result).isEmpty();
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
-            String.format(
+        .assertContainsMessage(
+            /* adminMessage= */ String.format(
                 "cannot resolve code owner email %s: account %s is not visible to user %s",
-                admin.email(), admin.id(), user2.username()));
+                admin.email(), admin.id(), user2.username()),
+            /* userMessage= */ String.format(
+                "cannot resolve code owner email %s: email doesn't exist or is not visible",
+                admin.email()));
   }
 
   @Test
@@ -251,8 +258,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(user.id());
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
+        .assertContainsMessage(
             String.format(
                 "resolved code owner email %s: account %s is referenced by secondary email and the"
                     + " calling user %s can see secondary emails",
@@ -268,8 +274,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(user.id());
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
+        .assertContainsAdminOnlyMessage(
             String.format(
                 "resolved code owner email %s: account %s is referenced by secondary email and user"
                     + " %s can see secondary emails",
@@ -283,8 +288,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(user.id());
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
+        .assertContainsMessage(
             String.format(
                 "email %s is visible to the calling user %s: email is a secondary email that is"
                     + " owned by this user",
@@ -299,8 +303,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(user.id());
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
+        .assertContainsAdminOnlyMessage(
             String.format(
                 "email %s is visible to user %s: email is a secondary email that is owned by this"
                     + " user",
@@ -322,12 +325,14 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result).isEmpty();
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
-            String.format(
+        .assertContainsMessage(
+            /* adminMessage= */ String.format(
                 "cannot resolve code owner email %s: account %s is referenced by secondary email"
                     + " but the calling user %s cannot see secondary emails",
-                secondaryEmail, admin.id(), user.username()));
+                secondaryEmail, admin.id(), user.username()),
+            /* userMessage= */ String.format(
+                "cannot resolve code owner email %s: email doesn't exist or is not visible",
+                secondaryEmail));
 
     // user doesn't have the "Modify Account" global capability and hence cannot see the secondary
     // email of the admin account if another user is the calling user
@@ -339,8 +344,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result).isEmpty();
     assertThat(result)
-        .hasMessagesThat()
-        .contains(
+        .assertContainsAdminOnlyMessage(
             String.format(
                 "cannot resolve code owner email %s: account %s is referenced by secondary email"
                     + " but user %s cannot see secondary emails",
@@ -678,7 +682,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     OptionalResultWithMessages<Boolean> isEmailDomainAllowedResult =
         codeOwnerResolverProvider.get().isEmailDomainAllowed(email);
     assertThat(isEmailDomainAllowedResult.get()).isEqualTo(expectedResult);
-    assertThat(isEmailDomainAllowedResult.messages()).containsExactly(expectedMessage);
+    assertThat(isEmailDomainAllowedResult).assertContainsExactlyMessage(expectedMessage);
   }
 
   @Test

@@ -14,13 +14,16 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.truth.OptionalSubject.optionals;
 
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.plugins.codeowners.backend.DebugMessage;
 import com.google.gerrit.plugins.codeowners.backend.OptionalResultWithMessages;
+import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link OptionalResultWithMessages}s. */
 public class OptionalResultWithMessagesSubject extends Subject {
@@ -57,8 +60,48 @@ public class OptionalResultWithMessagesSubject extends Subject {
     check("result()").about(optionals()).that(optionalResultWithMessages().result()).isEmpty();
   }
 
-  public IterableSubject hasMessagesThat() {
-    return check("messages()").that(optionalResultWithMessages().messages());
+  public OptionalResultWithMessagesSubject assertContainsAdminOnlyMessage(
+      String expectedAdminMessage) {
+    hasAdminMessagesThat().contains(expectedAdminMessage);
+    hasUserMessagesThat().doesNotContain(expectedAdminMessage);
+    return this;
+  }
+
+  public OptionalResultWithMessagesSubject assertContainsMessage(String expectedMessage) {
+    hasAdminMessagesThat().contains(expectedMessage);
+    hasUserMessagesThat().contains(expectedMessage);
+    return this;
+  }
+
+  public OptionalResultWithMessagesSubject assertContainsMessage(
+      String expectedAdminMessage, String expectedUserMessage) {
+    hasAdminMessagesThat().contains(expectedAdminMessage);
+    hasUserMessagesThat().contains(expectedUserMessage);
+    return this;
+  }
+
+  public OptionalResultWithMessagesSubject assertContainsExactlyMessage(String expectedMessage) {
+    hasAdminMessagesThat().containsExactly(expectedMessage);
+    hasUserMessagesThat().containsExactly(expectedMessage);
+    return this;
+  }
+
+  public IterableSubject hasAdminMessagesThat() {
+    return check("messages()")
+        .that(
+            optionalResultWithMessages().messages().stream()
+                .map(DebugMessage::adminMessage)
+                .collect(toImmutableList()));
+  }
+
+  public IterableSubject hasUserMessagesThat() {
+    return check("messages()")
+        .that(
+            optionalResultWithMessages().messages().stream()
+                .map(DebugMessage::userMessage)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toImmutableList()));
   }
 
   private OptionalResultWithMessages<?> optionalResultWithMessages() {
