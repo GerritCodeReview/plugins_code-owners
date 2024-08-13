@@ -50,7 +50,7 @@ public class CodeOwnerResolverResultTest extends AbstractAutoValueTest {
                     CodeOwnerConfig.Key.create(project, "master", "/bar/"),
                     CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"),
                     "test message")),
-            ImmutableList.of("test message"));
+            ImmutableList.of(DebugMessage.createMessage("test message")));
     assertThatToStringIncludesAllData(codeOwnerResolverResult, CodeOwnerResolverResult.class);
   }
 }

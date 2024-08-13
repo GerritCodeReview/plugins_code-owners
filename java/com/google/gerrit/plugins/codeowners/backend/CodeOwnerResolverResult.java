@@ -64,7 +64,7 @@ public abstract class CodeOwnerResolverResult {
   }
 
   /** Gets messages that were collected while resolving the code owners. */
-  public abstract ImmutableList<String> messages();
+  public abstract ImmutableList<DebugMessage> messages();
 
   /**
    * Whether there are any code owners defined for the path, regardless of whether they can be
@@ -98,7 +98,7 @@ public abstract class CodeOwnerResolverResult {
       boolean hasUnresolvedCodeOwners,
       ImmutableList<CodeOwnerConfigImport> resolvedImports,
       ImmutableList<CodeOwnerConfigImport> unresolvedImports,
-      List<String> messages) {
+      List<DebugMessage> messages) {
     return new AutoValue_CodeOwnerResolverResult(
         codeOwners,
         annotations,

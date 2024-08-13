@@ -281,18 +281,19 @@ public class CodeOwnerResolver {
       ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> annotationsByCodeOwnerReference,
       ImmutableList<CodeOwnerConfigImport> resolvedImports,
       ImmutableList<CodeOwnerConfigImport> unresolvedImports,
-      ImmutableList<String> pathCodeOwnersMessages) {
+      ImmutableList<DebugMessage> pathCodeOwnersMessages) {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
     requireNonNull(resolvedImports, "resolvedImports");
     requireNonNull(unresolvedImports, "unresolvedImports");
     requireNonNull(pathCodeOwnersMessages, "pathCodeOwnersMessages");
 
     try (Timer0.Context ctx = codeOwnerMetrics.resolveCodeOwnerReferences.start()) {
-      ImmutableList.Builder<String> messageBuilder = ImmutableList.builder();
+      ImmutableList.Builder<DebugMessage> messageBuilder = ImmutableList.builder();
       messageBuilder.addAll(pathCodeOwnersMessages);
       unresolvedImports.forEach(
           unresolvedImport ->
-              messageBuilder.add(unresolvedImportFormatter.format(unresolvedImport)));
+              messageBuilder.add(
+                  DebugMessage.createMessage(unresolvedImportFormatter.format(unresolvedImport))));
 
       AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
       AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
@@ -356,12 +357,13 @@ public class CodeOwnerResolver {
 
     if (CodeOwnerResolver.ALL_USERS_WILDCARD.equals(codeOwnerReference.email())) {
       return OptionalResultWithMessages.createEmpty(
-          String.format(
-              "cannot resolve code owner email %s: no account with this email exists",
-              CodeOwnerResolver.ALL_USERS_WILDCARD));
+          DebugMessage.createMessage(
+              String.format(
+                  "cannot resolve code owner email %s: no account with this email exists",
+                  CodeOwnerResolver.ALL_USERS_WILDCARD)));
     }
 
-    ImmutableList.Builder<String> messageBuilder = ImmutableList.builder();
+    ImmutableList.Builder<DebugMessage> messageBuilder = ImmutableList.builder();
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
     AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
     ImmutableMap<CodeOwner, ImmutableSet<CodeOwnerAnnotation>> codeOwnersWithAnnotations =
@@ -371,7 +373,7 @@ public class CodeOwnerResolver {
             hasUnresolvedCodeOwners,
             ImmutableSet.of(codeOwnerReference),
             /* annotations= */ ImmutableMultimap.of());
-    ImmutableList<String> messages = messageBuilder.build();
+    ImmutableList<DebugMessage> messages = messageBuilder.build();
     if (codeOwnersWithAnnotations.isEmpty()) {
       return OptionalResultWithMessages.createEmpty(messages);
     }
@@ -397,7 +399,7 @@ public class CodeOwnerResolver {
    *     owners without annotations and Multimap doesn't store keys for which no values are stored)
    */
   private ImmutableMap<CodeOwner, ImmutableSet<CodeOwnerAnnotation>> resolve(
-      ImmutableList.Builder<String> messages,
+      ImmutableList.Builder<DebugMessage> messages,
       AtomicBoolean ownedByAllUsers,
       AtomicBoolean hasUnresolvedCodeOwners,
       Set<CodeOwnerReference> codeOwnerReferences,
@@ -435,7 +437,7 @@ public class CodeOwnerResolver {
               .filter(filterOutEmailsOfNonVisibleAccounts(messages))
               .filter(filterOutNonVisibleSecondaryEmails(messages));
     } else {
-      messages.add("code owner visibility is not checked");
+      messages.add(DebugMessage.createMessage("code owner visibility is not checked"));
     }
 
     ImmutableMap<String, CodeOwner> codeOwnersByEmail =
@@ -501,7 +503,7 @@ public class CodeOwnerResolver {
    * @param messages builder to which debug messages are added
    */
   private Predicate<String> filterOutEmailsWithNonAllowedDomains(
-      ImmutableList.Builder<String> messages) {
+      ImmutableList.Builder<DebugMessage> messages) {
     return email -> {
       boolean isEmailDomainAllowed = isEmailDomainAllowed(messages, email);
       if (!isEmailDomainAllowed) {
@@ -525,7 +527,7 @@ public class CodeOwnerResolver {
    *     contains {@code false}
    */
   public OptionalResultWithMessages<Boolean> isEmailDomainAllowed(String email) {
-    ImmutableList.Builder<String> messages = ImmutableList.builder();
+    ImmutableList.Builder<DebugMessage> messages = ImmutableList.builder();
     boolean isEmailDomainAllowed = isEmailDomainAllowed(messages, email);
     return OptionalResultWithMessages.create(isEmailDomainAllowed, messages.build());
   }
@@ -541,19 +543,19 @@ public class CodeOwnerResolver {
    * @return {@code true} if the domain of the given email is allowed for code owners, otherwise
    *     {@code false}
    */
-  private boolean isEmailDomainAllowed(ImmutableList.Builder<String> messages, String email) {
+  private boolean isEmailDomainAllowed(ImmutableList.Builder<DebugMessage> messages, String email) {
     requireNonNull(messages, "messages");
     requireNonNull(email, "email");
 
     ImmutableSet<String> allowedEmailDomains =
         codeOwnersPluginConfiguration.getGlobalConfig().getAllowedEmailDomains();
     if (allowedEmailDomains.isEmpty()) {
-      messages.add("all domains are allowed");
+      messages.add(DebugMessage.createMessage("all domains are allowed"));
       return true;
     }
 
     if (email.equals(ALL_USERS_WILDCARD)) {
-      messages.add("all users wildcard is allowed");
+      messages.add(DebugMessage.createMessage("all users wildcard is allowed"));
       return true;
     }
 
@@ -562,13 +564,14 @@ public class CodeOwnerResolver {
       String emailDomain = email.substring(emailAtIndex + 1);
       boolean isEmailDomainAllowed = allowedEmailDomains.contains(emailDomain);
       messages.add(
-          String.format(
-              "domain %s of email %s is %s",
-              emailDomain, email, isEmailDomainAllowed ? "allowed" : "not allowed"));
+          DebugMessage.createMessage(
+              String.format(
+                  "domain %s of email %s is %s",
+                  emailDomain, email, isEmailDomainAllowed ? "allowed" : "not allowed")));
       return isEmailDomainAllowed;
     }
 
-    messages.add(String.format("email %s has no domain", email));
+    messages.add(DebugMessage.createMessage(String.format("email %s has no domain", email)));
     return false;
   }
 
@@ -583,7 +586,7 @@ public class CodeOwnerResolver {
    * @return external IDs per email
    */
   private ImmutableMap<String, Collection<ExternalId>> lookupExternalIds(
-      ImmutableList.Builder<String> messages, ImmutableSet<String> emails) {
+      ImmutableList.Builder<DebugMessage> messages, ImmutableSet<String> emails) {
     try {
       ImmutableMap<String, Collection<ExternalId>> extIdsByEmail =
           externalIdCache.byEmails(emails.toArray(new String[0])).asMap();
@@ -593,9 +596,11 @@ public class CodeOwnerResolver {
               email -> {
                 transientCodeOwnerCache.cacheNonResolvable(email);
                 messages.add(
-                    String.format(
-                        "cannot resolve code owner email %s: no account with this email exists",
-                        email));
+                    createDebugMessageForNonResolvableEmail(
+                        email,
+                        String.format(
+                            "cannot resolve code owner email %s: no account with this email exists",
+                            email)));
               });
       return extIdsByEmail;
     } catch (IOException e) {
@@ -615,7 +620,7 @@ public class CodeOwnerResolver {
    * @return account states per email
    */
   private Stream<Pair<String, Collection<AccountState>>> lookupAccounts(
-      ImmutableList.Builder<String> messages,
+      ImmutableList.Builder<DebugMessage> messages,
       ImmutableMap<String, Collection<ExternalId>> externalIdsByEmail) {
     ImmutableSet<Account.Id> accountIds =
         externalIdsByEmail.values().stream()
@@ -635,10 +640,12 @@ public class CodeOwnerResolver {
                               AccountState accountState = accounts.get(accountId);
                               if (accountState == null) {
                                 messages.add(
-                                    String.format(
-                                        "cannot resolve account %s for email %s: account does not"
-                                            + " exists",
-                                        accountId, e.getKey()));
+                                    createDebugMessageForNonResolvableEmail(
+                                        e.getKey(),
+                                        String.format(
+                                            "cannot resolve account %s for email %s: account does not"
+                                                + " exists",
+                                            accountId, e.getKey())));
                               }
                               return accountState;
                             })
@@ -656,7 +663,7 @@ public class CodeOwnerResolver {
    * @param messages builder to which debug messages are added
    */
   private Function<Pair<String, Collection<AccountState>>, Pair<String, Collection<AccountState>>>
-      removeInactiveAccounts(ImmutableList.Builder<String> messages) {
+      removeInactiveAccounts(ImmutableList.Builder<DebugMessage> messages) {
     return e -> Pair.of(e.key(), removeInactiveAccounts(messages, e.key(), e.value()));
   }
 
@@ -669,7 +676,7 @@ public class CodeOwnerResolver {
    * @return the account states that belong to active accounts
    */
   private ImmutableSet<AccountState> removeInactiveAccounts(
-      ImmutableList.Builder<String> messages,
+      ImmutableList.Builder<DebugMessage> messages,
       String email,
       Collection<AccountState> accountStates) {
     return accountStates.stream()
@@ -677,9 +684,10 @@ public class CodeOwnerResolver {
             accountState -> {
               if (!accountState.account().isActive()) {
                 messages.add(
-                    String.format(
-                        "ignoring inactive account %s for email %s",
-                        accountState.account().id(), email));
+                    DebugMessage.createMessage(
+                        String.format(
+                            "ignoring inactive account %s for email %s",
+                            accountState.account().id(), email)));
                 return false;
               }
               return true;
@@ -696,15 +704,17 @@ public class CodeOwnerResolver {
    * @param messages builder to which debug messages are added
    */
   private Predicate<Pair<String, Collection<AccountState>>> filterOutEmailsWithoutAccounts(
-      ImmutableList.Builder<String> messages) {
+      ImmutableList.Builder<DebugMessage> messages) {
     return e -> {
       if (e.value().isEmpty()) {
         String email = e.key();
         transientCodeOwnerCache.cacheNonResolvable(email);
         messages.add(
-            String.format(
-                "cannot resolve code owner email %s: no active account with this email found",
-                email));
+            createDebugMessageForNonResolvableEmail(
+                email,
+                String.format(
+                    "cannot resolve code owner email %s: no active account with this email found",
+                    email)));
         return false;
       }
       return true;
@@ -721,13 +731,15 @@ public class CodeOwnerResolver {
    * @param messages builder to which debug messages are added
    */
   private Predicate<Pair<String, Collection<AccountState>>> filterOutAmbiguousEmails(
-      ImmutableList.Builder<String> messages) {
+      ImmutableList.Builder<DebugMessage> messages) {
     return e -> {
       if (e.value().size() > 1) {
         String email = e.key();
         transientCodeOwnerCache.cacheNonResolvable(email);
         messages.add(
-            String.format("cannot resolve code owner email %s: email is ambiguous", email));
+            createDebugMessageForNonResolvableEmail(
+                email,
+                String.format("cannot resolve code owner email %s: email is ambiguous", email)));
         return false;
       }
       return true;
@@ -745,12 +757,14 @@ public class CodeOwnerResolver {
    * @param messages builder to which debug messages are added
    */
   private Function<Pair<String, Collection<AccountState>>, Pair<String, AccountState>>
-      mapToOnlyAccount(ImmutableList.Builder<String> messages) {
+      mapToOnlyAccount(ImmutableList.Builder<DebugMessage> messages) {
     return e -> {
       String email = e.key();
       AccountState accountState = Iterables.getOnlyElement(e.value());
       messages.add(
-          String.format("resolved email %s to account %s", email, accountState.account().id()));
+          DebugMessage.createMessage(
+              String.format(
+                  "resolved email %s to account %s", email, accountState.account().id())));
       return Pair.of(email, accountState);
     };
   }
@@ -761,18 +775,20 @@ public class CodeOwnerResolver {
    * @param messages builder to which debug messages are added
    */
   private Predicate<Pair<String, AccountState>> filterOutEmailsOfNonVisibleAccounts(
-      ImmutableList.Builder<String> messages) {
+      ImmutableList.Builder<DebugMessage> messages) {
     return e -> {
       String email = e.key();
       AccountState accountState = e.value();
       if (!canSee(accountState)) {
         transientCodeOwnerCache.cacheNonResolvable(email);
         messages.add(
-            String.format(
-                "cannot resolve code owner email %s: account %s is not visible to user %s",
+            createDebugMessageForNonResolvableEmail(
                 email,
-                accountState.account().id(),
-                user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
+                String.format(
+                    "cannot resolve code owner email %s: account %s is not visible to user %s",
+                    email,
+                    accountState.account().id(),
+                    user != null ? user.getLoggableName() : currentUser.get().getLoggableName())));
         return false;
       }
 
@@ -801,27 +817,29 @@ public class CodeOwnerResolver {
    * @param messages builder to which debug messages are added
    */
   private Predicate<Pair<String, AccountState>> filterOutNonVisibleSecondaryEmails(
-      ImmutableList.Builder<String> messages) {
+      ImmutableList.Builder<DebugMessage> messages) {
     return e -> {
       String email = e.key();
       AccountState accountState = e.value();
       if (email.equals(accountState.account().preferredEmail())) {
         // the email is a primary email of the account
         messages.add(
-            String.format(
-                "account %s is visible to user %s",
-                accountState.account().id(),
-                user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
+            DebugMessage.createMessage(
+                String.format(
+                    "account %s is visible to user %s",
+                    accountState.account().id(),
+                    user != null ? user.getLoggableName() : currentUser.get().getLoggableName())));
         return true;
       }
 
       if (user != null) {
         if (user.hasEmailAddress(email)) {
           messages.add(
-              String.format(
-                  "email %s is visible to user %s: email is a secondary email that is owned by this"
-                      + " user",
-                  email, user.getLoggableName()));
+              DebugMessage.createAdminOnlyMessage(
+                  String.format(
+                      "email %s is visible to user %s: email is a secondary email that is owned by this"
+                          + " user",
+                      email, user.getLoggableName())));
           return true;
         }
       } else if (currentUser.get().isIdentifiedUser()
@@ -829,10 +847,11 @@ public class CodeOwnerResolver {
         // it's a secondary email of the calling user, users can always see their own secondary
         // emails
         messages.add(
-            String.format(
-                "email %s is visible to the calling user %s: email is a secondary email that is"
-                    + " owned by this user",
-                email, currentUser.get().getLoggableName()));
+            DebugMessage.createMessage(
+                String.format(
+                    "email %s is visible to the calling user %s: email is a secondary email that is"
+                        + " owned by this user",
+                    email, currentUser.get().getLoggableName())));
         return true;
       }
 
@@ -843,32 +862,37 @@ public class CodeOwnerResolver {
           if (!permissionBackend.user(user).test(GlobalPermission.VIEW_SECONDARY_EMAILS)) {
             transientCodeOwnerCache.cacheNonResolvable(email);
             messages.add(
-                String.format(
-                    "cannot resolve code owner email %s: account %s is referenced by secondary"
-                        + " email but user %s cannot see secondary emails",
-                    email, accountState.account().id(), user.getLoggableName()));
+                DebugMessage.createAdminOnlyMessage(
+                    String.format(
+                        "cannot resolve code owner email %s: account %s is referenced by secondary"
+                            + " email but user %s cannot see secondary emails",
+                        email, accountState.account().id(), user.getLoggableName())));
             return false;
           }
           messages.add(
-              String.format(
-                  "resolved code owner email %s: account %s is referenced by secondary email"
-                      + " and user %s can see secondary emails",
-                  email, accountState.account().id(), user.getLoggableName()));
+              DebugMessage.createAdminOnlyMessage(
+                  String.format(
+                      "resolved code owner email %s: account %s is referenced by secondary email"
+                          + " and user %s can see secondary emails",
+                      email, accountState.account().id(), user.getLoggableName())));
           return true;
         } else if (!permissionBackend.currentUser().test(GlobalPermission.VIEW_SECONDARY_EMAILS)) {
           transientCodeOwnerCache.cacheNonResolvable(email);
           messages.add(
-              String.format(
-                  "cannot resolve code owner email %s: account %s is referenced by secondary email"
-                      + " but the calling user %s cannot see secondary emails",
-                  email, accountState.account().id(), currentUser.get().getLoggableName()));
+              createDebugMessageForNonResolvableEmail(
+                  email,
+                  String.format(
+                      "cannot resolve code owner email %s: account %s is referenced by secondary email"
+                          + " but the calling user %s cannot see secondary emails",
+                      email, accountState.account().id(), currentUser.get().getLoggableName())));
           return false;
         } else {
           messages.add(
-              String.format(
-                  "resolved code owner email %s: account %s is referenced by secondary email"
-                      + " and the calling user %s can see secondary emails",
-                  email, accountState.account().id(), currentUser.get().getLoggableName()));
+              DebugMessage.createMessage(
+                  String.format(
+                      "resolved code owner email %s: account %s is referenced by secondary email"
+                          + " and the calling user %s can see secondary emails",
+                      email, accountState.account().id(), currentUser.get().getLoggableName())));
           return true;
         }
       } catch (PermissionBackendException ex) {
@@ -878,6 +902,15 @@ public class CodeOwnerResolver {
             ex);
       }
     };
+  }
+
+  private DebugMessage createDebugMessageForNonResolvableEmail(String email, String adminMessage) {
+    // for non-admins we cannot reveal why a code owner email cannot be resolved so that they are
+    // not able to probe whether an email exists or not
+    return DebugMessage.createMessage(
+        adminMessage,
+        String.format(
+            "cannot resolve code owner email %s: email doesn't exist or is not visible", email));
   }
 
   /**
