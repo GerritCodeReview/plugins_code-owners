@@ -17,11 +17,8 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -68,8 +65,7 @@ public abstract class CodeOwnerScorings {
   public ImmutableMap<CodeOwnerScore, Integer> getScoringsByScore(CodeOwner codeOwner) {
     ImmutableMap.Builder<CodeOwnerScore, Integer> builder = ImmutableMap.builder();
     for (CodeOwnerScoring scoring : scorings()) {
-      scoring.bestValue(codeOwner)
-          .ifPresent(value -> builder.put(scoring.score(), value));
+      scoring.bestValue(codeOwner).ifPresent(value -> builder.put(scoring.score(), value));
     }
     return builder.build();
   }

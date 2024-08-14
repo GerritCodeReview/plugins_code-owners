@@ -87,14 +87,17 @@ class CodeOwnerJson {
    * @param scorings the scorings data that should be populated in {@link CodeOwnerInfo}s
    * @return the provided code owner as {@link CodeOwnerInfo}
    */
-  private static CodeOwnerInfo format(AccountLoader accountLoader, CodeOwner codeOwner,
+  private static CodeOwnerInfo format(
+      AccountLoader accountLoader,
+      CodeOwner codeOwner,
       ImmutableMap<CodeOwnerScore, Integer> scorings) {
     CodeOwnerInfo info = new CodeOwnerInfo();
     info.account = accountLoader.get(requireNonNull(codeOwner, "codeOwner").accountId());
     if (scorings != null) {
-      info.scorings = scorings.entrySet().stream()
-          .map(e -> Pair.of(e.getKey().name(), e.getValue()))
-          .collect(toImmutableMap(Pair::key, Pair::value));
+      info.scorings =
+          scorings.entrySet().stream()
+              .map(e -> Pair.of(e.getKey().name(), e.getValue()))
+              .collect(toImmutableMap(Pair::key, Pair::value));
     }
     return info;
   }

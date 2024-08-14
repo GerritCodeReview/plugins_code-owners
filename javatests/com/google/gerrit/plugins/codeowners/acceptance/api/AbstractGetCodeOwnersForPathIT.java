@@ -391,8 +391,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
   @Test
   public void
-  cannotGetCodeOwnersWithSecondaryEmailsWithoutViewSecondaryEmailAndWithoutModifyAccountCapability()
-      throws Exception {
+      cannotGetCodeOwnersWithSecondaryEmailsWithoutViewSecondaryEmailAndWithoutModifyAccountCapability()
+          throws Exception {
     // create a code owner config
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -1421,9 +1421,9 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
             .collect(toList());
     for (int i = 0; i < 10; i++) {
       assertThat(
-          queryCodeOwners(
-              getCodeOwnersApi().query().setResolveAllUsers(true).withSeed(seed),
-              "/foo/bar/baz.md"))
+              queryCodeOwners(
+                  getCodeOwnersApi().query().setResolveAllUsers(true).withSeed(seed),
+                  "/foo/bar/baz.md"))
           .hasCodeOwnersThat()
           .comparingElementsUsing(hasAccountId())
           .containsExactlyElementsIn(expectedAccountIds)
@@ -1988,7 +1988,6 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .assertNoUnresolvedErrorMessage();
   }
 
-
   @Test
   public void testCodeOwnersScoringsDistance() throws Exception {
     TestAccount user2 = accountCreator.user2();
@@ -2017,8 +2016,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .addCodeOwnerEmail(user2.email())
         .create();
 
-    CodeOwnersInfo codeOwnersInfo =
-        queryCodeOwners("/foo/bar/baz.md");
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -2034,7 +2032,6 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .containsExactly(user2OwnershipDistance, userOwnershipDistance, adminOwnershipDistance)
         .inOrder();
   }
-
 
   @Test
   @GerritConfig(name = "accounts.visibility", value = "ALL")
