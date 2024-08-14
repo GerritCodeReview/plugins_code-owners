@@ -46,6 +46,7 @@ import com.google.gerrit.plugins.codeowners.backend.UnresolvedImportFormatter;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.change.ChangeFinder;
 import com.google.gerrit.server.notedb.ChangeNotes;
@@ -63,6 +64,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -88,6 +90,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   private final UnresolvedImportFormatter unresolvedImportFormatter;
   private final ChangeFinder changeFinder;
   private final CodeOwnerConfigFileJson codeOwnerConfigFileJson;
+  private final Provider<CurrentUser> self;
 
   private String email;
   private String path;
@@ -95,6 +98,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   private ChangeNotes changeNotes;
   private String user;
   private IdentifiedUser identifiedUser;
+  private boolean isAdmin;
 
   @Inject
   public CheckCodeOwner(
@@ -108,7 +112,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       AccountsCollection accountsCollection,
       UnresolvedImportFormatter unresolvedImportFormatter,
       ChangeFinder changeFinder,
-      CodeOwnerConfigFileJson codeOwnerConfigFileJson) {
+      CodeOwnerConfigFileJson codeOwnerConfigFileJson,
+      Provider<CurrentUser> self) {
     this.checkCodeOwnerCapability = checkCodeOwnerCapability;
     this.permissionBackend = permissionBackend;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -120,6 +125,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     this.unresolvedImportFormatter = unresolvedImportFormatter;
     this.changeFinder = changeFinder;
     this.codeOwnerConfigFileJson = codeOwnerConfigFileJson;
+    this.self = self;
   }
 
   @Option(name = "--email", usage = "email for which the code ownership should be checked")
@@ -154,7 +160,11 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   public Response<CodeOwnerCheckInfo> apply(BranchResource branchResource)
       throws BadRequestException, AuthException, IOException, ConfigInvalidException,
           PermissionBackendException, ResourceNotFoundException {
-    permissionBackend.currentUser().check(checkCodeOwnerCapability.getPermission());
+    if (!self.get().isIdentifiedUser()) {
+      throw new AuthException("Authentication required");
+    }
+
+    isAdmin = permissionBackend.currentUser().test(checkCodeOwnerCapability.getPermission());
 
     validateInput(branchResource);
 
@@ -376,8 +386,15 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     codeOwnerCheckInfo.isGlobalCodeOwner = isGlobalCodeOwner;
     codeOwnerCheckInfo.isOwnedByAllUsers = isCodeOwnershipAssignedToAllUsers.get();
     codeOwnerCheckInfo.annotations = sort(annotations);
+
     codeOwnerCheckInfo.debugLogs =
-        messages.stream().map(DebugMessage::adminMessage).collect(toImmutableList());
+        messages.stream()
+            .map(
+                debugMessage ->
+                    isAdmin ? debugMessage.adminMessage() : debugMessage.userMessage().orElse(null))
+            .filter(Objects::nonNull)
+            .collect(toImmutableList());
+
     return Response.ok(codeOwnerCheckInfo);
   }
 
@@ -395,6 +412,16 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       throw new BadRequestException("path required");
     }
     if (user != null) {
+      try {
+        permissionBackend.currentUser().check(checkCodeOwnerCapability.getPermission());
+      } catch (AuthException e) {
+        throw new AuthException(
+            String.format(
+                "%s: cannot specify a user to check a code owner on behalf of this user",
+                e.getMessage()),
+            e);
+      }
+
       try {
         identifiedUser =
             accountsCollection
@@ -449,8 +476,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     if (identifiedUser != null) {
       codeOwnerResolver.forUser(identifiedUser);
     } else {
-      codeOwnerResolver.enforceVisibility(false);
+      codeOwnerResolver.enforceVisibility(isAdmin ? false : true);
     }
+
     OptionalResultWithMessages<CodeOwner> resolveResult =
         codeOwnerResolver.resolveWithMessages(CodeOwnerReference.create(email));
 
