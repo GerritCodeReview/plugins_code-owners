@@ -958,6 +958,8 @@ owner config file and results of checking it.
 | ----------- | ----------- |
 | `code_owner_config` | The code owner config file as a [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entity.
 | `assigns_code_ownership_to_user` | Whether this code owner config file assigns code ownership to the specified email and path. Note that if code ownership is assigned to the email via a code owner config file, but the email is not resolvable (see the `is_resolvable` field in [CodeOwnerCheckInfo](#code-owner-check-info)), the user is not a code owner.
+| `are_parent_code_owners_ignored` | Whether code owners from parent directory are ignored.
+| `are_folder_code_owners_ignored` | Whether folder code owners are ignored (i.e. whether there is a matching per-file rule that ignores folder code owners, e.g. by using "set noparent").
 
 ---
 

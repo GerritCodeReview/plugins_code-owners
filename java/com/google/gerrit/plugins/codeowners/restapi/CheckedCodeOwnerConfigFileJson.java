@@ -20,10 +20,15 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 /** Collection of routines to populate {@link CheckedCodeOwnerConfigFileInfo}. */
 public class CheckedCodeOwnerConfigFileJson {
   public static CheckedCodeOwnerConfigFileInfo format(
-      CodeOwnerConfigFileInfo codeOwnerConfigFileInfo, boolean assignsCodeOwnershipToUser) {
+      CodeOwnerConfigFileInfo codeOwnerConfigFileInfo,
+      boolean assignsCodeOwnershipToUser,
+      boolean areParentCodeOwnersIgnored,
+      boolean areFolderCodeOwnersIgnored) {
     CheckedCodeOwnerConfigFileInfo info = new CheckedCodeOwnerConfigFileInfo();
     info.codeOwnerConfigFileInfo = codeOwnerConfigFileInfo;
     info.assignsCodeOwnershipToUser = assignsCodeOwnershipToUser;
+    info.areParentCodeOwnersIgnored = areParentCodeOwnersIgnored;
+    info.areFolderCodeOwnersIgnored = areFolderCodeOwnersIgnored;
     return info;
   }
 }

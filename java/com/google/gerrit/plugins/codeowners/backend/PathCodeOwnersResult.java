@@ -41,7 +41,7 @@ public abstract class PathCodeOwnersResult {
   public abstract boolean ignoreParentCodeOwners();
 
   /** Gets whether global code owners (aka folder code owners) should be ignored for the path. */
-  abstract boolean ignoreGlobalCodeOwners();
+  public abstract boolean ignoreGlobalCodeOwners();
 
   /** Gets code owner sets that contain global code owners (aka folder code owners). */
   abstract ImmutableSet<CodeOwnerSet> globalCodeOwnerSets();
