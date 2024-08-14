@@ -269,18 +269,11 @@ The following request parameters can be specified:
 | `email`     | mandatory | Email for which the code ownership should be checked.
 | `path`      | mandatory | Path for which the code ownership should be checked.
 | `change`    | optional  | Change for which permissions should be checked. If not specified change permissions are not checked.
-| `user`      | optional  | User for which the code owner visibility should be checked. If not specified the code owner visibility is not checked. Can be used to investigate why a code owner is not shown/suggested to this user.
-
-Requires that the caller has the [Check Code Owner](#checkCodeOwner) or the
-[Administrate Server](../../../Documentation/access-control.html#capability_administrateServer)
-global capability.
+| `user`      | optional  | User for which the code owner visibility should be checked. Can be used to investigate why a code owner is not shown/suggested to this user. Requires that the caller has the [Check Code Owner](#checkCodeOwner) or the [Administrate Server](../../../Documentation/access-control.html#capability_administrateServer) global capability. If not specified the code owner visibility is checked for the calling user.
 
 This REST endpoint is intended to investigate code owner configurations that do
 not work as intended. The response contains debug logs that may point out issues
-with the code owner configuration. For example, with this REST endpoint it is
-possible to find out why a certain email that is listed as code owner in a code
-owner config file is ignored (e.g. because it is ambiguous or because it belongs
-to an inactive account).
+with the code owner configuration.
 
 #### Request
 
@@ -990,7 +983,7 @@ ownership of a user for a path in a branch.
 | `is_global_code_owner` | Whether the given email is configured as a global code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_owned_by_all_users` | Whether the the specified path in the branch is owned by all users (aka `*`).
 | `annotation` | Annotations that were set for the user. Contains only supported annotations (unsupported annotations are reported in the `debugs_logs`). Sorted alphabetically.
-| `debug_logs` | List of debug logs that may help to understand why the user is or isn't a code owner. This information is purely for debugging and the output may be changed at any time. This means bot callers must not parse the debug logs.
+| `debug_logs` | List of debug logs that may help to understand why the user is or isn't a code owner. Full debug logs are only returned for callers that have the [Check Code Owner](#checkCodeOwner) or the [Administrate Server](../../../Documentation/access-control.html#capability_administrateServer) global capability, for other callers the debug logs are limited. This information is purely for debugging and the output may be changed at any time. This means bot callers must not parse the debug logs.
 
 ---
 
