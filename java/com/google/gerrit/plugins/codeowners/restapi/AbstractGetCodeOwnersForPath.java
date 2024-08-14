@@ -339,8 +339,10 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
         sortedAndLimitedCodeOwners.stream()
             .map(codeOwner -> Pair.of(codeOwner, codeOwnerScorings.getScoringsByScore(codeOwner)))
             .collect(toImmutableMap(Pair::key, Pair::value));
-    ImmutableList<CodeOwnerInfo> codeOwnersInfoList = codeOwnerJsonFactory.create(getFillOptions())
-        .format(sortedAndLimitedCodeOwners, codeOwnerToScorings);
+    ImmutableList<CodeOwnerInfo> codeOwnersInfoList =
+        codeOwnerJsonFactory
+            .create(getFillOptions())
+            .format(sortedAndLimitedCodeOwners, codeOwnerToScorings);
 
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
     codeOwnersInfo.codeOwners = codeOwnersInfoList;

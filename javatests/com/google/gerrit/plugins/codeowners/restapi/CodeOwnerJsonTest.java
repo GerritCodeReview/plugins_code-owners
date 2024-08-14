@@ -51,8 +51,10 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void formatEmptyListOfCodeOwners() throws Exception {
-    assertThat(codeOwnerJsonFactory.create(EnumSet.of(FillOptions.ID))
-        .format(ImmutableList.of(), ImmutableMap.of()))
+    assertThat(
+            codeOwnerJsonFactory
+                .create(EnumSet.of(FillOptions.ID))
+                .format(ImmutableList.of(), ImmutableMap.of()))
         .isEmpty();
   }
 
@@ -61,7 +63,9 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID))
-            .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())), ImmutableMap.of());
+            .format(
+                ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())),
+                ImmutableMap.of());
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id())
@@ -74,7 +78,9 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID, FillOptions.NAME))
-            .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())), ImmutableMap.of());
+            .format(
+                ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())),
+                ImmutableMap.of());
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id())
@@ -84,7 +90,6 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
         .containsExactly(admin.fullName(), user.fullName())
         .inOrder();
   }
-
 
   @Test
   public void formatCodeOwnersWithAccountIdAndScorings() throws Exception {
@@ -101,8 +106,7 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID))
-            .format(ImmutableList.of(adminCodeOwner, userCodeOwner),
-                scorings);
+            .format(ImmutableList.of(adminCodeOwner, userCodeOwner), scorings);
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id())

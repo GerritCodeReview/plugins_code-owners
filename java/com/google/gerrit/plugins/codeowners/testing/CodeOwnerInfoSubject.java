@@ -44,11 +44,12 @@ public class CodeOwnerInfoSubject extends Subject {
   /** Constructs a {@link Correspondence} that maps {@link CodeOwnerInfo}s to scoring. */
   public static final Correspondence<CodeOwnerInfo, Integer> hasScoring(CodeOwnerScore score) {
     return NullAwareCorrespondence.transforming(
-        codeOwnerInfo -> codeOwnerInfo.scorings.entrySet().stream()
-            .filter(factor -> factor.getKey().equals(score.name()))
-            .findFirst()
-            .orElseThrow()
-            .getValue(),
+        codeOwnerInfo ->
+            codeOwnerInfo.scorings.entrySet().stream()
+                .filter(factor -> factor.getKey().equals(score.name()))
+                .findFirst()
+                .orElseThrow()
+                .getValue(),
         "has scoring");
   }
 
