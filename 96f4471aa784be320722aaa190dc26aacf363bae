@@ -20,6 +20,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "86f21735_8884fa11",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 16
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-14T01:23:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9dc7a232_bbc5ca1e",
+      "revId": "96f4471aa784be320722aaa190dc26aacf363bae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "54316761_ba80caaf",
         "filename": "/COMMIT_MSG",
         "patchSetId": 16
@@ -69,6 +87,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "11e22b4e_1d0103bd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerJson.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-14T01:23:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef50bf54_0e2be2a5",
+      "revId": "96f4471aa784be320722aaa190dc26aacf363bae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c3245b34_fd561b02",
@@ -92,6 +128,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bcab69af_605acae0",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 16
+      },
+      "lineNbr": 1011,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-14T01:23:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3245b34_fd561b02",
+      "range": {
+        "startLine": 1011,
+        "startChar": 26,
+        "endLine": 1011,
+        "endChar": 166
+      },
+      "revId": "96f4471aa784be320722aaa190dc26aacf363bae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "93d8d619_bd088c8d",
@@ -105,6 +165,24 @@
       "writtenOn": "2024-08-13T13:50:54Z",
       "side": 1,
       "message": "nit: unnecessary addition of blank line",
+      "revId": "96f4471aa784be320722aaa190dc26aacf363bae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "733236c9_9c921e1e",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 16
+      },
+      "lineNbr": 1083,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-14T01:23:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "93d8d619_bd088c8d",
       "revId": "96f4471aa784be320722aaa190dc26aacf363bae",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }

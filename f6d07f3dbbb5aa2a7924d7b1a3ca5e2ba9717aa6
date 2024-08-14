@@ -527,6 +527,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d356ccc4_6621335e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 2040,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-14T01:23:11Z",
+      "side": 1,
+      "message": "Good point, acknowledged. I\u0027ll add it separately to not delay this CL getting into prod",
+      "parentUuid": "6eef927a_f6b5889f",
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "807f79b2_73bd8736",
