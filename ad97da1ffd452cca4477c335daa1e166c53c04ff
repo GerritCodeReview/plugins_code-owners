@@ -108,6 +108,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "31b77e46_0a84c634",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3570843
+      },
+      "writtenOn": "2024-08-14T03:42:46Z",
+      "side": 1,
+      "message": "\u003e Done\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/432957/comment/db143fb1_e69c130f/",
+      "parentUuid": "8cf61011_6627ce35",
+      "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "b327c28f_239f28b4",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 10
