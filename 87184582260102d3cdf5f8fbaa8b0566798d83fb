@@ -98,6 +98,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a0a535c3_9a25316f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-14T07:53:26Z",
+      "side": 1,
+      "message": "I don\u0027t want to block this much longer, so feel free to resolve. I can see that there is complexity that maybe ends up with perfect being the enemy of good. Though I do still think that inheritance is making code more complex.\n\n\u003e But if the importing code owner config file imports this code owner config via the \"file\" keyword only global code owners are imported, i.e. not the per-file rule that assigns code ownership to the user. So one could argue that in this case \u0027assigns_code_ownership_to_user\u0027 should be false. Either way it\u0027s confusing, either \u0027assigns_code_ownership_to_user\u0027 says true although it\u0027s actually not making the user a code owner (because the per-file rule that assigns the code ownership is not imported) or it says false, but without looking at the importing code owner config file this looks wrong.\n\nCan we avoid confusion, by also including \"ignore_globals\" \"ignore_per_file\" boolean flags in the output. I think then confusion is resolved, ie.\n```\nassigns_code_ownership_to_user: false // WHY?\nignore_global_rules: true // Oh, I see why?\n```",
+      "parentUuid": "57eccc65_ee32d5c3",
+      "range": {
+        "startLine": 74,
+        "startChar": 16,
+        "endLine": 77,
+        "endChar": 31
+      },
+      "revId": "87184582260102d3cdf5f8fbaa8b0566798d83fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "113e9c90_332ba055",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 2
