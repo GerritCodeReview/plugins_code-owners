@@ -16,11 +16,15 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
+import com.google.gerrit.plugins.codeowners.backend.Pair;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import com.google.gerrit.server.account.AccountLoader;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -58,14 +62,17 @@ class CodeOwnerJson {
    * Formats the provided {@link CodeOwner}s as {@link CodeOwnerInfo}s.
    *
    * @param codeOwners the code owners that should be formatted as {@link CodeOwnerInfo}s
+   * @param scorings provides the scorings data that should be populated in {@link CodeOwnerInfo}s
    * @return the provided code owners as {@link CodeOwnerInfo}s
    */
-  ImmutableList<CodeOwnerInfo> format(ImmutableList<CodeOwner> codeOwners)
+  ImmutableList<CodeOwnerInfo> format(
+      ImmutableList<CodeOwner> codeOwners,
+      ImmutableMap<CodeOwner, ImmutableMap<CodeOwnerScore, Integer>> scorings)
       throws PermissionBackendException {
     AccountLoader accountLoader = accountLoaderFactory.create(accountOptions);
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
         requireNonNull(codeOwners, "codeOwners").stream()
-            .map(codeOwner -> format(accountLoader, codeOwner))
+            .map(codeOwner -> format(accountLoader, codeOwner, scorings.get(codeOwner)))
             .collect(toImmutableList());
     accountLoader.fill();
     return codeOwnerInfos;
@@ -77,11 +84,18 @@ class CodeOwnerJson {
    * @param accountLoader the account loader instance that should be used to create the {@link
    *     com.google.gerrit.extensions.common.AccountInfo} in the code owner info
    * @param codeOwner the code owner that should be formatted as {@link CodeOwnerInfo}
+   * @param scorings the scorings data that should be populated in {@link CodeOwnerInfo}s
    * @return the provided code owner as {@link CodeOwnerInfo}
    */
-  private static CodeOwnerInfo format(AccountLoader accountLoader, CodeOwner codeOwner) {
+  private static CodeOwnerInfo format(AccountLoader accountLoader, CodeOwner codeOwner,
+      ImmutableMap<CodeOwnerScore, Integer> scorings) {
     CodeOwnerInfo info = new CodeOwnerInfo();
     info.account = accountLoader.get(requireNonNull(codeOwner, "codeOwner").accountId());
+    if (scorings != null) {
+      info.scorings = scorings.entrySet().stream()
+          .map(e -> Pair.of(e.getKey().name(), e.getValue()))
+          .collect(toImmutableMap(Pair::key, Pair::value));
+    }
     return info;
   }
 }
