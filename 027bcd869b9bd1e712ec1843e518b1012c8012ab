@@ -16,6 +16,24 @@
       "message": "Do we not run the format check in CI?",
       "revId": "027bcd869b9bd1e712ec1843e518b1012c8012ab",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b3218334_ce3d5242",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-14T08:03:44Z",
+      "side": 1,
+      "message": "Not for plugins unfortunately :(",
+      "parentUuid": "ed4af782_ceb51f42",
+      "revId": "027bcd869b9bd1e712ec1843e518b1012c8012ab",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
