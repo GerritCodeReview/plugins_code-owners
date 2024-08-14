@@ -30,11 +30,11 @@ public class CodeOwnerCheckInfo {
    *
    * <ul>
    *   <li>the given email is resolvable (see {@link #isResolvable}) and
-   *   <li>any code owner config file assigns codeownership to the email for the path (see {@link
-   *       #codeOwnerConfigFilePaths}) or the email is configured as default code owner (see {@link
-   *       CodeOwnerCheckInfo#isDefaultCodeOwner} field) or the email is configured as global code
-   *       owner (see {@link #isGlobalCodeOwner} field) or the user is a fallback code owner (see
-   *       {@link #isFallbackCodeOwner} field)
+   *   <li>any code owner config file assigns code ownership to the email for the path (see {@link
+   *       CheckedCodeOwnerConfigFileInfo#assignsCodeOwnershipToUser} field of the inspected {@link
+   *       #checkedCodeOwnerConfigs}) or the email is configured as global code owner (see {@link
+   *       #isGlobalCodeOwner} field) or the user is a fallback code owner (see {@link
+   *       #isFallbackCodeOwner} field)
    * </ul>
    */
   public boolean isCodeOwner;
@@ -49,7 +49,7 @@ public class CodeOwnerCheckInfo {
    * The code owner config files that are relevant for computing the code ownership, i.e. all code
    * owner config files which have been inspected to compute the code ownership.
    */
-  public List<CodeOwnerConfigFileInfo> codeOwnerConfigs;
+  public List<CheckedCodeOwnerConfigFileInfo> checkedCodeOwnerConfigs;
 
   /**
    * Whether the user to which the given email was resolved has read permissions on the branch.
@@ -95,15 +95,6 @@ public class CodeOwnerCheckInfo {
    * </ul>
    */
   public Boolean canApproveChange;
-
-  /**
-   * Paths of the code owner config files that assign code ownership to the given email for the
-   * specified path.
-   *
-   * <p>If code ownership is assigned to the email via a code owner config files, but the email is
-   * not resolvable (see {@link #isResolvable} field), the user is not a code owner.
-   */
-  public List<String> codeOwnerConfigFilePaths;
 
   /**
    * Whether the given email is a fallback code owner of the specified path in the branch.

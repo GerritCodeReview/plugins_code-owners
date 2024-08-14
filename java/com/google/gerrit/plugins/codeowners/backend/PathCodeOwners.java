@@ -229,12 +229,13 @@ public class PathCodeOwners {
           codeOwnerConfigFilePath);
 
       pathCodeOwnersResultBuilder.addMessage(
-          String.format(
-              "resolve code owners for %s from code owner config %s:%s:%s",
-              path,
-              codeOwnerConfig.key().project(),
-              codeOwnerConfig.key().shortBranchName(),
-              codeOwnerConfigFilePath));
+          DebugMessage.createMessage(
+              String.format(
+                  "resolve code owners for %s from code owner config %s:%s:%s",
+                  path,
+                  codeOwnerConfig.key().project(),
+                  codeOwnerConfig.key().shortBranchName(),
+                  codeOwnerConfigFilePath)));
 
       // Add all data from the original code owner config that is relevant for the path
       // (ignoreParentCodeOwners flag, global code owner sets and matching per-file code owner
@@ -246,9 +247,10 @@ public class PathCodeOwners {
           getMatchingPerFileCodeOwnerSets(codeOwnerConfig).collect(toImmutableSet());
       for (CodeOwnerSet codeOwnerSet : matchingPerFileCodeOwnerSets) {
         pathCodeOwnersResultBuilder.addMessage(
-            String.format(
-                "per-file code owner set with path expressions %s matches",
-                codeOwnerSet.pathExpressions()));
+            DebugMessage.createMessage(
+                String.format(
+                    "per-file code owner set with path expressions %s matches",
+                    codeOwnerSet.pathExpressions())));
         pathCodeOwnersResultBuilder.addPerFileCodeOwnerSet(codeOwnerSet);
       }
 
@@ -461,7 +463,7 @@ public class PathCodeOwners {
       message = message.substring(0, message.length() - 1);
     }
     if (!message.isEmpty()) {
-      pathCodeOwnersResultBuilder.addMessage(message);
+      pathCodeOwnersResultBuilder.addMessage(DebugMessage.createMessage(message));
     }
   }
 

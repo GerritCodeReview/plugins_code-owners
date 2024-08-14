@@ -41,7 +41,7 @@ public abstract class PathCodeOwnersResult {
   public abstract boolean ignoreParentCodeOwners();
 
   /** Gets whether global code owners (aka folder code owners) should be ignored for the path. */
-  abstract boolean ignoreGlobalCodeOwners();
+  public abstract boolean ignoreGlobalCodeOwners();
 
   /** Gets code owner sets that contain global code owners (aka folder code owners). */
   abstract ImmutableSet<CodeOwnerSet> globalCodeOwnerSets();
@@ -60,7 +60,7 @@ public abstract class PathCodeOwnersResult {
     return !unresolvedImports().isEmpty();
   }
 
-  public abstract ImmutableList<String> messages();
+  public abstract ImmutableList<DebugMessage> messages();
 
   /**
    * Gets the code owners from the code owner config that apply to the path.
@@ -184,10 +184,11 @@ public abstract class PathCodeOwnersResult {
           ignoreGlobalCodeOwners(true);
 
           addMessage(
-              String.format(
-                  "found matching per-file code owner set (with path expressions = %s) that ignores"
-                      + " parent code owners, hence ignoring the folder code owners",
-                  perFileCodeOwnerSet.pathExpressions()));
+              DebugMessage.createMessage(
+                  String.format(
+                      "found matching per-file code owner set (with path expressions = %s) that ignores"
+                          + " parent code owners, hence ignoring the folder code owners",
+                      perFileCodeOwnerSet.pathExpressions())));
         }
       }
 
@@ -235,17 +236,17 @@ public abstract class PathCodeOwnersResult {
       return this;
     }
 
-    abstract ImmutableList.Builder<String> messagesBuilder();
+    abstract ImmutableList.Builder<DebugMessage> messagesBuilder();
 
     @CanIgnoreReturnValue
-    Builder addMessage(String message) {
+    Builder addMessage(DebugMessage message) {
       requireNonNull(message, "message");
       messagesBuilder().add(message);
       return this;
     }
 
     @CanIgnoreReturnValue
-    Builder addAllMessages(ImmutableList<String> messages) {
+    Builder addAllMessages(ImmutableList<DebugMessage> messages) {
       requireNonNull(messages, "messages");
       messagesBuilder().addAll(messages);
       return this;

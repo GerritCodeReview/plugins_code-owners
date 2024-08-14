@@ -47,7 +47,7 @@ public abstract class OptionalResultWithMessages<T> {
   }
 
   /** Gets the messages. */
-  public abstract ImmutableList<String> messages();
+  public abstract ImmutableList<DebugMessage> messages();
 
   /** Creates a {@link OptionalResultWithMessages} instance without messages. */
   public static <T> OptionalResultWithMessages<T> create(T result) {
@@ -55,26 +55,26 @@ public abstract class OptionalResultWithMessages<T> {
   }
 
   /** Creates an empty {@link OptionalResultWithMessages} instance with a single message. */
-  public static <T> OptionalResultWithMessages<T> createEmpty(String message) {
+  public static <T> OptionalResultWithMessages<T> createEmpty(DebugMessage message) {
     requireNonNull(message, "message");
     return createEmpty(ImmutableList.of(message));
   }
 
   /** Creates an empty {@link OptionalResultWithMessages} instance with messages. */
-  public static <T> OptionalResultWithMessages<T> createEmpty(List<String> messages) {
+  public static <T> OptionalResultWithMessages<T> createEmpty(List<DebugMessage> messages) {
     requireNonNull(messages, "messages");
     return new AutoValue_OptionalResultWithMessages<>(
         Optional.empty(), ImmutableList.copyOf(messages));
   }
 
   /** Creates a {@link OptionalResultWithMessages} instance with messages. */
-  public static <T> OptionalResultWithMessages<T> create(T result, String message) {
+  public static <T> OptionalResultWithMessages<T> create(T result, DebugMessage message) {
     requireNonNull(message, "message");
     return create(result, ImmutableList.of(message));
   }
 
   /** Creates a {@link OptionalResultWithMessages} instance with messages. */
-  public static <T> OptionalResultWithMessages<T> create(T result, List<String> messages) {
+  public static <T> OptionalResultWithMessages<T> create(T result, List<DebugMessage> messages) {
     requireNonNull(result, "result");
     requireNonNull(messages, "messages");
     return new AutoValue_OptionalResultWithMessages<>(
@@ -83,7 +83,7 @@ public abstract class OptionalResultWithMessages<T> {
 
   /** Creates a {@link OptionalResultWithMessages} instance with messages. */
   public static <T> OptionalResultWithMessages<T> create(
-      Optional<T> result, List<String> messages) {
+      Optional<T> result, List<DebugMessage> messages) {
     requireNonNull(result, "result");
     requireNonNull(messages, "messages");
     return new AutoValue_OptionalResultWithMessages<>(result, ImmutableList.copyOf(messages));
