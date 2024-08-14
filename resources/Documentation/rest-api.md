@@ -501,26 +501,46 @@ limit.
       {
         "account": {
           "_account_id": 1000096
+        },
+        "scorings": {
+          "DISTANCE": 0,
+          "IS_EXPLICITLY_MENTIONED": 1
         }
       },
       {
         "account": {
           "_account_id": 1001439
+        },
+        "scorings": {
+          "DISTANCE": 0,
+          "IS_EXPLICITLY_MENTIONED": 1
         }
       },
       {
         "account": {
           "_account_id": 1007265
+        },
+        "scorings": {
+          "DISTANCE": 1,
+          "IS_EXPLICITLY_MENTIONED": 1
         }
       },
       {
         "account": {
           "_account_id": 1009877
+        },
+        "scorings": {
+          "DISTANCE": 2,
+          "IS_EXPLICITLY_MENTIONED": 1
         }
       },
       {
         "account": {
           "_account_id": 1002930
+        },
+        "scorings": {
+          "DISTANCE": 2,
+          "IS_EXPLICITLY_MENTIONED": 0
         }
       }
     ],
@@ -568,8 +588,8 @@ returned first.
 Other factors like OOO state, recent review activity or code authorship are not
 considered.
 
-**NOTE:** The scores for the code owners are not exposed via the REST API but
-only influence the sort order.
+The scorings (without weights applied) are exposed via the REST API and can be found in the
+[CodeOwnerInfo](#code-owner-info) entity.
 
 #### <a id="sortingExample">Sorting Example
 
@@ -993,9 +1013,10 @@ for a path.
 ### <a id="code-owner-info"> CodeOwnerInfo
 The `CodeOwnerInfo` entity contains information about a code owner.
 
-| Field Name  |          | Description |
-| ----------- | -------- | ----------- |
-| `account`   | optional | The account of the code owner as an [AccountInfo](../../../Documentation/rest-api-accounts.html#account-info) entity. At the moment the `account` field is always set, but it's marked as optional as in the future we may also return groups as code owner and then the `account` field would be unset.
+| Field Name |          | Description |
+|------------| -------- | ----------- |
+| `account`  | optional | The account of the code owner as an [AccountInfo](../../../Documentation/rest-api-accounts.html#account-info) entity. At the moment the `account` field is always set, but it's marked as optional as in the future we may also return groups as code owner and then the `account` field would be unset.
+| `scorings` | optional | Score name to scoring value map, that contains the scorings that were taken into account when computing the score of the listed code owner. Note that the returned values are not weighted.
 
 ---
 

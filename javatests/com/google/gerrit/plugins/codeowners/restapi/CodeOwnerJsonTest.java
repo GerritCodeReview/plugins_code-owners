@@ -17,13 +17,16 @@ package com.google.gerrit.plugins.codeowners.restapi;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasScoring;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import java.util.EnumSet;
 import org.junit.Before;
@@ -48,7 +51,8 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void formatEmptyListOfCodeOwners() throws Exception {
-    assertThat(codeOwnerJsonFactory.create(EnumSet.of(FillOptions.ID)).format(ImmutableList.of()))
+    assertThat(codeOwnerJsonFactory.create(EnumSet.of(FillOptions.ID))
+        .format(ImmutableList.of(), ImmutableMap.of()))
         .isEmpty();
   }
 
@@ -57,7 +61,7 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID))
-            .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())));
+            .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())), ImmutableMap.of());
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id())
@@ -70,7 +74,7 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID, FillOptions.NAME))
-            .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())));
+            .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())), ImmutableMap.of());
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id())
@@ -78,6 +82,34 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountName())
         .containsExactly(admin.fullName(), user.fullName())
+        .inOrder();
+  }
+
+
+  @Test
+  public void formatCodeOwnersWithAccountIdAndScorings() throws Exception {
+    CodeOwner adminCodeOwner = CodeOwner.create(admin.id());
+    CodeOwner userCodeOwner = CodeOwner.create(user.id());
+    Integer adminOwnershipDistance = 1;
+    Integer userOwnershipDistance = 2;
+    ImmutableMap<CodeOwner, ImmutableMap<CodeOwnerScore, Integer>> scorings =
+        ImmutableMap.<CodeOwner, ImmutableMap<CodeOwnerScore, Integer>>builder()
+            .put(adminCodeOwner, ImmutableMap.of(CodeOwnerScore.DISTANCE, adminOwnershipDistance))
+            .put(userCodeOwner, ImmutableMap.of(CodeOwnerScore.DISTANCE, userOwnershipDistance))
+            .build();
+
+    ImmutableList<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnerJsonFactory
+            .create(EnumSet.of(FillOptions.ID))
+            .format(ImmutableList.of(adminCodeOwner, userCodeOwner),
+                scorings);
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id())
+        .inOrder();
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasScoring(CodeOwnerScore.DISTANCE))
+        .containsExactly(adminOwnershipDistance, userOwnershipDistance)
         .inOrder();
   }
 
@@ -89,7 +121,7 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerJsonFactory
                     .create(EnumSet.of(FillOptions.ID))
-                    .format(/* codeOwners= */ null));
+                    .format(/* codeOwners= */ null, ImmutableMap.of()));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwners");
   }
 }
