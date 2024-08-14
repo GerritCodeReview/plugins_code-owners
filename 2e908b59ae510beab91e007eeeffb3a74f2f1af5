@@ -113,6 +113,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "38773995_2c9def5c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CheckedCodeOwnerConfigFileInfoSubject.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-14T14:29:36Z",
+      "side": 1,
+      "message": "\u003e Seems that this made the follow-up changes require a re-approval.\n\nActually not, I was just confused.",
+      "parentUuid": "5f5957ab_40fa8cfe",
+      "range": {
+        "startLine": 77,
+        "startChar": 47,
+        "endLine": 77,
+        "endChar": 83
+      },
+      "revId": "2e908b59ae510beab91e007eeeffb3a74f2f1af5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9ba7d6a4_96854648",
