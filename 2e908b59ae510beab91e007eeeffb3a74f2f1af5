@@ -42,6 +42,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c163a1cb_3a94ecd9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CheckedCodeOwnerConfigFileInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-14T14:28:53Z",
+      "side": 1,
+      "message": "What is meant here are per-file rules with \"set noparent\". Using \"set noparent\" on a per-file rule has the effect that both folder and parent code owners are ignored.\n\nDone.",
+      "parentUuid": "41073e53_497b7ed4",
+      "range": {
+        "startLine": 41,
+        "startChar": 13,
+        "endLine": 41,
+        "endChar": 19
+      },
+      "revId": "2e908b59ae510beab91e007eeeffb3a74f2f1af5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0ae20691_12a2d2c1",
@@ -55,6 +79,30 @@
       "writtenOn": "2024-08-14T13:45:39Z",
       "side": 1,
       "message": "I think we should drop the \"assertThat\" part, otherwise it reads weird in the fluent style.\n\nie. `assertThat(...).assertThatParentCodeOwnersAreNotIgnored()` instead of `assertThat(...).parentCodeOwnersAreNotIgnored()`\n\nMissed this when reviewing other changes, but technically this applies to other lines as well.",
+      "range": {
+        "startLine": 77,
+        "startChar": 47,
+        "endLine": 77,
+        "endChar": 83
+      },
+      "revId": "2e908b59ae510beab91e007eeeffb3a74f2f1af5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f5957ab_40fa8cfe",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CheckedCodeOwnerConfigFileInfoSubject.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-14T14:28:53Z",
+      "side": 1,
+      "message": "Makes sense. Dropped the prefix in this change, and added a predecessor change [1] to drop the prefix for the existing methods. \n\nSeems that this made the follow-up changes require a re-approval.\n\n[1] https://gerrit-review.git.corp.google.com/c/plugins/code-owners/+/435060",
+      "parentUuid": "0ae20691_12a2d2c1",
       "range": {
         "startLine": 77,
         "startChar": 47,
@@ -102,6 +150,30 @@
           ]
         }
       ],
+      "revId": "2e908b59ae510beab91e007eeeffb3a74f2f1af5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c1fa1387_aa3804f1",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 962,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-14T14:28:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ba7d6a4_96854648",
+      "range": {
+        "startLine": 962,
+        "startChar": 137,
+        "endLine": 962,
+        "endChar": 143
+      },
       "revId": "2e908b59ae510beab91e007eeeffb3a74f2f1af5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
