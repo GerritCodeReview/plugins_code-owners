@@ -59,12 +59,12 @@ public class CheckedCodeOwnerConfigFileInfoSubject extends Subject {
         .that(checkedCodeOwnerConfigFileInfo().assignsCodeOwnershipToUser);
   }
 
-  public CheckedCodeOwnerConfigFileInfoSubject assertAssignsCodeOwnershipToUser() {
+  public CheckedCodeOwnerConfigFileInfoSubject assignsCodeOwnershipToUser() {
     hasAssignsCodeOwnershipToUserThat().isTrue();
     return this;
   }
 
-  public CheckedCodeOwnerConfigFileInfoSubject assertDoesNotAssignCodeOwnershipToUser() {
+  public CheckedCodeOwnerConfigFileInfoSubject doesNotAssignCodeOwnershipToUser() {
     hasAssignsCodeOwnershipToUserThat().isFalse();
     return this;
   }
