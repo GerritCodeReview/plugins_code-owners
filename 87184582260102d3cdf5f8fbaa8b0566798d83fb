@@ -146,6 +146,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a69fa15d_0e2da3d9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-14T12:41:09Z",
+      "side": 1,
+      "message": "\u003e I may still try out the other solution with \"checked_code_owner_configs\" which\n\u003e I outlined above, which would avoid using inheritance and also avoid confusion \n\u003e about when the assigns_code_ownership_to_user field is being set.\n\nI\u0027m implemented this with the new patch set now. PTAL and let me know if you like it more, otherwise it\u0027s also fine to go back to this solution.\n\n\u003e Nice idea! Including a flag telling whether global code owners are ignored is\n\u003e a good idea.\n\nI\u0027ve added this in the follow-up change now:\nhttps://gerrit-review.git.corp.google.com/c/plugins/code-owners/+/435082",
+      "parentUuid": "997b0adb_762a9e74",
+      "range": {
+        "startLine": 74,
+        "startChar": 16,
+        "endLine": 77,
+        "endChar": 31
+      },
+      "revId": "87184582260102d3cdf5f8fbaa8b0566798d83fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "113e9c90_332ba055",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 2
