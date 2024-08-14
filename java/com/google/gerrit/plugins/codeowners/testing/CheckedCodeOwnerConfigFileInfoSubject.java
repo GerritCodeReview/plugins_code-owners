@@ -69,6 +69,36 @@ public class CheckedCodeOwnerConfigFileInfoSubject extends Subject {
     return this;
   }
 
+  public BooleanSubject hasAreParentCodeOwnersIgnoredThat() {
+    return check("areParentCodeOwnersIgnored()")
+        .that(checkedCodeOwnerConfigFileInfo().areParentCodeOwnersIgnored);
+  }
+
+  public CheckedCodeOwnerConfigFileInfoSubject assertThatParentCodeOwnersAreIgnored() {
+    hasAreParentCodeOwnersIgnoredThat().isTrue();
+    return this;
+  }
+
+  public CheckedCodeOwnerConfigFileInfoSubject assertThatParentCodeOwnersAreNotIgnored() {
+    hasAreParentCodeOwnersIgnoredThat().isFalse();
+    return this;
+  }
+
+  public BooleanSubject hasAreFolderCodeOwnersIgnoredThat() {
+    return check("areFolderCodeOwnersIgnored()")
+        .that(checkedCodeOwnerConfigFileInfo().areFolderCodeOwnersIgnored);
+  }
+
+  public CheckedCodeOwnerConfigFileInfoSubject assertThatFolderCodeOwnersAreIgnored() {
+    hasAreFolderCodeOwnersIgnoredThat().isTrue();
+    return this;
+  }
+
+  public CheckedCodeOwnerConfigFileInfoSubject assertThatFolderCodeOwnersAreNotIgnored() {
+    hasAreFolderCodeOwnersIgnoredThat().isFalse();
+    return this;
+  }
+
   private CheckedCodeOwnerConfigFileInfo checkedCodeOwnerConfigFileInfo() {
     isNotNull();
     return checkedCodeOwnerConfigFileInfo;

@@ -270,7 +270,10 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                   pathCodeOwnersResult.unresolvedImports());
           checkedCodeOwnerConfigFileInfosBuilder.add(
               CheckedCodeOwnerConfigFileJson.format(
-                  codeOwnerConfigFileInfo, assignsCodeOwnershipToUser));
+                  codeOwnerConfigFileInfo,
+                  assignsCodeOwnershipToUser,
+                  pathCodeOwnersResult.ignoreParentCodeOwners(),
+                  pathCodeOwnersResult.ignoreGlobalCodeOwners()));
 
           return !pathCodeOwnersResult.ignoreParentCodeOwners();
         });

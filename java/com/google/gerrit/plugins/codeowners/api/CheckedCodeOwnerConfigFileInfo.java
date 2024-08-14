@@ -32,4 +32,13 @@ public class CheckedCodeOwnerConfigFileInfo {
    * not a code owner.
    */
   public boolean assignsCodeOwnershipToUser;
+
+  /** Whether code owners from parent directory are ignored. */
+  public boolean areParentCodeOwnersIgnored;
+
+  /**
+   * Whether folder code owners are ignored (i.e. whether there is a matching per-file rule that
+   * ignores parent code owners).
+   */
+  public boolean areFolderCodeOwnersIgnored;
 }
