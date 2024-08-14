@@ -63,6 +63,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -95,6 +96,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   private ChangeNotes changeNotes;
   private String user;
   private IdentifiedUser identifiedUser;
+  private boolean isAdmin;
 
   @Inject
   public CheckCodeOwner(
@@ -154,7 +156,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   public Response<CodeOwnerCheckInfo> apply(BranchResource branchResource)
       throws BadRequestException, AuthException, IOException, ConfigInvalidException,
           PermissionBackendException, ResourceNotFoundException {
-    permissionBackend.currentUser().check(checkCodeOwnerCapability.getPermission());
+    isAdmin = permissionBackend.currentUser().test(checkCodeOwnerCapability.getPermission());
 
     validateInput(branchResource);
 
@@ -376,8 +378,15 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     codeOwnerCheckInfo.isGlobalCodeOwner = isGlobalCodeOwner;
     codeOwnerCheckInfo.isOwnedByAllUsers = isCodeOwnershipAssignedToAllUsers.get();
     codeOwnerCheckInfo.annotations = sort(annotations);
+
     codeOwnerCheckInfo.debugLogs =
-        messages.stream().map(DebugMessage::adminMessage).collect(toImmutableList());
+        messages.stream()
+            .map(
+                debugMessage ->
+                    isAdmin ? debugMessage.adminMessage() : debugMessage.userMessage().orElse(null))
+            .filter(Objects::nonNull)
+            .collect(toImmutableList());
+
     return Response.ok(codeOwnerCheckInfo);
   }
 
@@ -395,6 +404,16 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       throw new BadRequestException("path required");
     }
     if (user != null) {
+      try {
+        permissionBackend.currentUser().check(checkCodeOwnerCapability.getPermission());
+      } catch (AuthException e) {
+        throw new AuthException(
+            String.format(
+                "%s: cannot specify a user to check a code owner on behalf of this user",
+                e.getMessage()),
+            e);
+      }
+
       try {
         identifiedUser =
             accountsCollection
@@ -449,8 +468,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     if (identifiedUser != null) {
       codeOwnerResolver.forUser(identifiedUser);
     } else {
-      codeOwnerResolver.enforceVisibility(false);
+      codeOwnerResolver.enforceVisibility(isAdmin ? false : true);
     }
+
     OptionalResultWithMessages<CodeOwner> resolveResult =
         codeOwnerResolver.resolveWithMessages(CodeOwnerReference.create(email));
 

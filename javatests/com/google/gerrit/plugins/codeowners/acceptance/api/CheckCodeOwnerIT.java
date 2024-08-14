@@ -134,14 +134,52 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void requiresCallerToBeAdminOrHaveTheCheckCodeOwnerCapability() throws Exception {
+  public void checkCodeOwnerForOtherUserRequiresCallerToBeAdminOrHaveTheCheckCodeOwnerCapability()
+      throws Exception {
     requestScopeOperations.setApiUser(user.id());
     AuthException authException =
-        assertThrows(AuthException.class, () -> checkCodeOwner(ROOT_PATH, user.email()));
+        assertThrows(
+            AuthException.class, () -> checkCodeOwner(ROOT_PATH, user.email(), admin.email()));
     assertThat(authException)
         .hasMessageThat()
         .isEqualTo(
-            String.format("%s for plugin code-owners not permitted", CheckCodeOwnerCapability.ID));
+            String.format(
+                "%s for plugin code-owners not permitted: "
+                    + "cannot specify a user to check a code owner on behalf of this user",
+                CheckCodeOwnerCapability.ID));
+  }
+
+  @Test
+  public void adminMessagesAreNotReturnedForNormalUser() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+    String secondaryEmail = "codeOwnerSecondary@example.com";
+    accountOperations
+        .account(codeOwner.id())
+        .forUpdate()
+        .addSecondaryEmail(secondaryEmail)
+        .update();
+
+    setAsRootCodeOwners(secondaryEmail);
+
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, secondaryEmail, user.email());
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "cannot resolve code owner email %s: account %s is referenced by secondary email but user %s cannot see secondary emails",
+                secondaryEmail, codeOwner.id(), user.username()));
+
+    requestScopeOperations.setApiUser(user.id());
+    checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, secondaryEmail);
+
+    // For a non-admin the message doesn't reveal that the email exists as a secondary email that is
+    // not visible to the user.
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "cannot resolve code owner email %s: email doesn't exist or is not visible",
+                secondaryEmail));
   }
 
   @Test
