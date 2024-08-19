@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4074bb13_7caf6842",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 5
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-19T12:33:54Z",
+      "side": 1,
+      "message": "nit:\n\n```\n  this.hasAdminPermissions \u003d capabilities \u0026\u0026 (capabilities[\u0027administrateServer\u0027] || capabilities[\u0027code-owners-checkCodeOwner\u0027])\n```\n\nA little bit more robust (and easier to reason about), by letting this method assign both `true` and `false` value, instead of only overriding default `false` value.",
+      "range": {
+        "startLine": 233,
+        "startChar": 10,
+        "endLine": 233,
+        "endChar": 42
+      },
+      "revId": "a69e15043eb3b07b030bc7bd756fd8fdc8c2a500",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
