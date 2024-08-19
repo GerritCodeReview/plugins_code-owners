@@ -51,6 +51,9 @@ export class GrCheckCodeOwner extends LitElement {
   @query('#resultOutput')
   resultOutput!: HTMLInputElement;
 
+  @query('#noteAboutLimitedDebugLogs')
+  noteAboutLimitedDebugLogs!: HTMLInputElement;
+
   @property()
   plugin!: PluginApi;
 
@@ -82,7 +85,10 @@ export class GrCheckCodeOwner extends LitElement {
 
   override render() {
     return html`
-      <main class="gr-form-styles read-only">
+      <main
+        class="gr-form-styles read-only"
+        onload=${this.checkAdminPermissions()}
+      >
         <div>
           <h1 class="heading">Check Code Owner</h1>
         </div>
@@ -182,7 +188,6 @@ export class GrCheckCodeOwner extends LitElement {
                 id="userInput"
                 type="text"
                 disabled
-                onload=${this.enableUserInputForAdmins()}
                 @input=${this.validateData}
               />
             </span>
@@ -209,6 +214,18 @@ export class GrCheckCodeOwner extends LitElement {
             </iron-autogrow-textarea>
           </span>
         </section>
+        <p
+          id="noteAboutLimitedDebugLogs"
+          style="visibility: hidden;"
+        >
+          Note: The calling user doesn't have the
+          <a href="${window.CANONICAL_PATH || ''}/plugins/code-owners/Documentation/rest-api.html#checkCodeOwner" target="_blank">Check Code Owner</a>
+          or the
+          <a href="${window.CANONICAL_PATH || ''}/Documentation/access-control.html#capability_administrateServer" target="_blank">Administrate Server</a>
+          global capability, hence the returned debug logs are limited. If more
+          information is needed, please reach out to a host administrator to
+          check the code ownership.
+        </p>
       </main>
     `;
   }
@@ -237,7 +254,7 @@ export class GrCheckCodeOwner extends LitElement {
     return false;
   }
 
-  private async enableUserInputForAdmins() {
+  private async checkAdminPermissions() {
     await this.plugin
       .restApi()
       .get<AccountCapabilityInfo>('/accounts/self/capabilities/')
@@ -248,7 +265,15 @@ export class GrCheckCodeOwner extends LitElement {
             capabilities['code-owners-checkCodeOwner'])
         ) {
           this.userInput.disabled = false;
+        } else {
+          this.noteAboutLimitedDebugLogs.style.visibility = 'visible';
         }
+      })
+      // @ts-ignore
+      .catch(error => {
+        // The request fails with '403 Forbidden' if the user is not logged in
+        // (due to "Resolving account 'self' requires login")
+        this.noteAboutLimitedDebugLogs.style.visibility = 'visible';
       });
   }
 
