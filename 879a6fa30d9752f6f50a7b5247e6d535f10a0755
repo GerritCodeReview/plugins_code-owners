@@ -1,12 +1,13 @@
 {
   "checks": {
     "zuul-check:plugins_code-owners": {
-      "state": "RUNNING",
-      "message": "Jobs have started running",
-      "url": "https://ci.gerritcodereview.com/t/gerrit/status/change/435039,4",
+      "state": "FAILED",
+      "message": "Change failed",
+      "url": "https://ci.gerritcodereview.com/t/gerrit/buildset/91e6a8b4d24d4c81913c839ad64885c7",
       "started": "2024-08-19T08:27:36Z",
+      "finished": "2024-08-19T08:47:54Z",
       "created": "2024-08-19T08:27:36Z",
-      "updated": "2024-08-19T08:27:52Z"
+      "updated": "2024-08-19T08:47:55Z"
     }
   }
 }
