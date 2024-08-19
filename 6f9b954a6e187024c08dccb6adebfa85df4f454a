@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d49ad0ea_2bde4182",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-19T12:44:22Z",
+      "side": 1,
+      "message": "Instead of directly setting the style, you can re-use hasAdminPermission and once again show or not show in render()\n\nYou can do this by:\n1) Creating a class in styles()\n```\n  .hidden {\n    display: none;\n   }\n```\n2) Set the class dynamically in render using classMap (https://lit.dev/docs/templates/directives/#classmap)\n\n```\n  \u003cp class\u003d${classMap({hidden: hasAdminPermissions})}\u003e\n```",
+      "range": {
+        "startLine": 250,
+        "startChar": 10,
+        "endLine": 250,
+        "endChar": 72
+      },
+      "revId": "6f9b954a6e187024c08dccb6adebfa85df4f454a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
