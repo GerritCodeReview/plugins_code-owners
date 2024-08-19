@@ -275,6 +275,10 @@ This REST endpoint is intended to investigate code owner configurations that do
 not work as intended. The response contains debug logs that may point out issues
 with the code owner configuration.
 
+This REST endpoint is available as a
+[Self Service](@URL@/x/code-owners/check-code-owner) so that users can easily
+inspect issues with code ownerships.
+
 #### Request
 
 ```

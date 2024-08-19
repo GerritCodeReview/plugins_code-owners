@@ -17,6 +17,7 @@
 
 import {customElement, query, property, state} from 'lit/decorators';
 import {css, CSSResult, html, LitElement} from 'lit';
+import {classMap} from 'lit/directives/class-map.js';
 import {PluginApi} from '@gerritcodereview/typescript-api/plugin';
 
 declare global {
@@ -51,6 +52,9 @@ export class GrCheckCodeOwner extends LitElement {
   @query('#resultOutput')
   resultOutput!: HTMLInputElement;
 
+  @query('#noteAboutLimitedDebugInformation')
+  noteAboutLimitedDebugInformation!: HTMLInputElement;
+
   @property()
   plugin!: PluginApi;
 
@@ -78,6 +82,9 @@ export class GrCheckCodeOwner extends LitElement {
         }
         .output {
           min-width: 50em;
+        }
+        .hidden {
+          display: none;
         }
       `,
     ];
@@ -211,6 +218,17 @@ export class GrCheckCodeOwner extends LitElement {
             </iron-autogrow-textarea>
           </span>
         </section>
+        <p
+          class=${classMap({hidden: this.hasAdminPermissions})}
+        >
+          Note: The calling user doesn't have the
+          <a href="${window.CANONICAL_PATH || ''}/plugins/code-owners/Documentation/rest-api.html#checkCodeOwner" target="_blank">Check Code Owner</a>
+          or the
+          <a href="${window.CANONICAL_PATH || ''}/Documentation/access-control.html#capability_administrateServer" target="_blank">Administrate Server</a>
+          global capability, hence the returned debug information (field
+          'debug_logs') is limited. If more information is needed, please reach
+          out to a host administrator to check the code ownership.
+        </p>
       </main>
     `;
   }
