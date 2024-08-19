@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f8ff39da_7683dfb7",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-19T12:28:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "66b5f0c9_534ca36d",
+      "range": {
+        "startLine": 90,
+        "startChar": 8,
+        "endLine": 90,
+        "endChar": 46
+      },
+      "revId": "da62210b2da6877ca22327d3f797ccce8ec54b95",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7b31420b_56ad39a7",
@@ -37,6 +61,30 @@
       "writtenOn": "2024-08-19T09:52:47Z",
       "side": 1,
       "message": "More idiomatic way to do this is to put the this in the \"styles\" above.\n\nYou can then still override it in the code, because the override will take precedence.\n\nExtra note: you can use `display:none` instead of `visibility: hidden`. Otherwise it will leave the empty space on the page, where the message is supposed to be. (Unless you want that space to be there)",
+      "range": {
+        "startLine": 219,
+        "startChar": 10,
+        "endLine": 219,
+        "endChar": 37
+      },
+      "revId": "da62210b2da6877ca22327d3f797ccce8ec54b95",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "01b1d510_a2a94f8e",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-19T12:28:37Z",
+      "side": 1,
+      "message": "Thanks! Using \"display:none\" in the styles section now.",
+      "parentUuid": "7b31420b_56ad39a7",
       "range": {
         "startLine": 219,
         "startChar": 10,
@@ -70,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "43baee96_2c8eded4",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-19T12:28:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c86da650_e7158997",
+      "range": {
+        "startLine": 225,
+        "startChar": 48,
+        "endLine": 225,
+        "endChar": 58
+      },
+      "revId": "da62210b2da6877ca22327d3f797ccce8ec54b95",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "100ed5fe_c9f3d816",
@@ -83,6 +155,30 @@
       "writtenOn": "2024-08-19T09:52:47Z",
       "side": 1,
       "message": "@ts-ignore ideally must have a comment explaining why and what we are ignoring.",
+      "range": {
+        "startLine": 272,
+        "startChar": 6,
+        "endLine": 272,
+        "endChar": 19
+      },
+      "revId": "da62210b2da6877ca22327d3f797ccce8ec54b95",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "18b18907_2c7630d2",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-19T12:28:37Z",
+      "side": 1,
+      "message": "Done, figured out how to write this so that the @ts-ignore is not needed.",
+      "parentUuid": "100ed5fe_c9f3d816",
       "range": {
         "startLine": 272,
         "startChar": 6,
