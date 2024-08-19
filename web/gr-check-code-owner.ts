@@ -51,6 +51,9 @@ export class GrCheckCodeOwner extends LitElement {
   @query('#resultOutput')
   resultOutput!: HTMLInputElement;
 
+  @query('#noteAboutLimitedDebugInformation')
+  noteAboutLimitedDebugInformation!: HTMLInputElement;
+
   @property()
   plugin!: PluginApi;
 
@@ -78,6 +81,9 @@ export class GrCheckCodeOwner extends LitElement {
         }
         .output {
           min-width: 50em;
+        }
+        #noteAboutLimitedDebugInformation {
+          display: none;
         }
       `,
     ];
@@ -211,6 +217,15 @@ export class GrCheckCodeOwner extends LitElement {
             </iron-autogrow-textarea>
           </span>
         </section>
+        <p id="noteAboutLimitedDebugInformation">
+          Note: The calling user doesn't have the
+          <a href="${window.CANONICAL_PATH || ''}/plugins/code-owners/Documentation/rest-api.html#checkCodeOwner" target="_blank">Check Code Owner</a>
+          or the
+          <a href="${window.CANONICAL_PATH || ''}/Documentation/access-control.html#capability_administrateServer" target="_blank">Administrate Server</a>
+          global capability, hence the returned debug information (field
+          'debug_logs') is limited. If more information is needed, please reach
+          out to a host administrator to check the code ownership.
+        </p>
       </main>
     `;
   }
@@ -231,7 +246,14 @@ export class GrCheckCodeOwner extends LitElement {
             capabilities['code-owners-checkCodeOwner'])
         ) {
           this.hasAdminPermissions = true;
+        } else {
+          this.noteAboutLimitedDebugInformation.style.display = 'block';
         }
+      })
+      .catch(() => {
+        // The request fails with '403 Forbidden' if the user is not logged in
+        // (due to "Resolving account 'self' requires login")
+        this.noteAboutLimitedDebugInformation.style.display = 'block';
       });
   }
 
