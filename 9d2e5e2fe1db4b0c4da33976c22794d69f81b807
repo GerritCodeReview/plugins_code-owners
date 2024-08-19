@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c1bdf48e_18375b3d",
+        "filename": "resources/Documentation/config-faqs.md",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-19T09:54:41Z",
+      "side": 1,
+      "message": "Same as in the other commit, I prefer debug information. As \"debug logs\" has a different meaning, that can be confusing.",
+      "range": {
+        "startLine": 102,
+        "startChar": 39,
+        "endLine": 102,
+        "endChar": 43
+      },
+      "revId": "9d2e5e2fe1db4b0c4da33976c22794d69f81b807",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
