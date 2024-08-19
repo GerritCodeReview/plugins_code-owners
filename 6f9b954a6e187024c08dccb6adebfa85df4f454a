@@ -22,6 +22,30 @@
       },
       "revId": "6f9b954a6e187024c08dccb6adebfa85df4f454a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e6803d1_03c844f0",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-19T12:56:36Z",
+      "side": 1,
+      "message": "Cool! Done.\n\nThanks for helping me learning these frontend tricks.",
+      "parentUuid": "d49ad0ea_2bde4182",
+      "range": {
+        "startLine": 250,
+        "startChar": 10,
+        "endLine": 250,
+        "endChar": 72
+      },
+      "revId": "6f9b954a6e187024c08dccb6adebfa85df4f454a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
