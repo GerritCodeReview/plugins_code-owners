@@ -88,16 +88,20 @@ by:
 * a bug in the @PLUGIN@ plugin
 
 Since code owner config files are part of the source code, any issues with them
-should be investigated and fixed by the project owners and host administrators.
+should be investigated and fixed by the project team, the project owners and
+the host administrators.
 
 To do this they can:
 
+* Check the code ownership of a user for a certain path by using the [Check Code
+  Owner Self Service](@URL@/x/code-owners/check-code-owner). This is calling the
+  [Check Code Owner REST endpoint](rest-api.html#check-code-owner). Any user can
+  use this self sevice, but for users that have the
+  [Administrate Server](../../../Documentation/access-control.html#capability_administrateServer)
+  global capability or the [Check Code Owner](rest-api.html#checkCodeOwner)
+  global capability the returned debug logs are more detailed.
 * Check the code owner config files for issues by calling the [Check Code Owner
   Config File REST endpoint](rest-api.html#check-code-owner-config-files)
-* Check the code ownership of a user for a certain path by calling the [Check
-  Code Owner REST endpoint](rest-api.html#check-code-owner) (requires the caller
-  to be host administrator or have the [Check Code Owner
-  capability](rest-api.html#checkCodeOwner)).
 
 Bugs with the @PLUGIN@ plugin should be filed as issues for the Gerrit team, but
 only after issues with the code owner config files have been excluded.
@@ -117,22 +121,26 @@ caused by:
 * a bug in the @PLUGIN@ plugin
 
 Issues with code owner config files, user permissions, account visibility and
-account states should be investigated and fixed by the project owners and host
-administrators.
+account states should be investigated and fixed by the project team, the project
+owners and the host administrators.
 
 To do this they can:
 
+* Check the code ownership of a user for a certain path by using the [Check Code
+  Owner Self Service](@URL@/x/code-owners/check-code-owner). This is calling the
+  [Check Code Owner REST endpoint](rest-api.html#check-code-owner). Any user can
+  use this self sevice, but for users that have the
+  [Administrate Server](../../../Documentation/access-control.html#capability_administrateServer)
+  global capability or the [Check Code Owner](rest-api.html#checkCodeOwner)
+  global capability the returned debug logs are more detailed.
 * Use the `--debug` option of the [List Code
   Owners](rest-api.html#list-code-owners-for-path-in-branch) REST endpoints to
-  get debug logs included into the response (requires the caller
-  to be host administrator or have the [Check Code Owner
-  capability](rest-api.html#checkCodeOwner)).
+  get debug logs included into the response (requires the caller to have the
+  [Administrate Server](../../../Documentation/access-control.html#capability_administrateServer)
+  global capability or the [Check Code Owner](rest-api.html#checkCodeOwner)
+  global capability).
 * Check the code owner config files for issues by calling the [Check Code Owner
   Config File REST endpoint](rest-api.html#check-code-owner-config-files).
-* Check the code ownership of a user for a certain path by calling the [Check
-  Code Owner REST endpoint](rest-api.html#check-code-owner) (requires the caller
-  to be host administrator or have the [Check Code Owner
-  capability](rest-api.html#checkCodeOwner)).
 
 Bugs with the @PLUGIN@ plugin should be filed as issues for the Gerrit team, but
 only after other causes have been excluded.
