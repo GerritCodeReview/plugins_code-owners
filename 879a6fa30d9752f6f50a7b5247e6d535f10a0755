@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f6ce2b2d_26c12842",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-19T12:27:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "353889b1_4d98ecce",
+      "range": {
+        "startLine": 93,
+        "startChar": 11,
+        "endLine": 93,
+        "endChar": 26
+      },
+      "revId": "879a6fa30d9752f6f50a7b5247e6d535f10a0755",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bfe75865_1852cc3c",
@@ -71,6 +95,30 @@
           ]
         }
       ],
+      "revId": "879a6fa30d9752f6f50a7b5247e6d535f10a0755",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2dd318e_9717a134",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-19T12:27:26Z",
+      "side": 1,
+      "message": "Thanks a lot! Much nicer!",
+      "parentUuid": "bfe75865_1852cc3c",
+      "range": {
+        "startLine": 185,
+        "startChar": 16,
+        "endLine": 185,
+        "endChar": 57
+      },
       "revId": "879a6fa30d9752f6f50a7b5247e6d535f10a0755",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
