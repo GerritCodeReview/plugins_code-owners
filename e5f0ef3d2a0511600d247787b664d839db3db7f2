@@ -22,6 +22,30 @@
       },
       "revId": "e5f0ef3d2a0511600d247787b664d839db3db7f2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4b5a59c9_67c1e48f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-19T11:01:14Z",
+      "side": 1,
+      "message": "It\u0027s checked implicitly. Users that have ADMINISTRATE_SERVER have the Check Code Owner capability automatically.\n\nBasically ADMINISTRATE_SERVER makes you a Gerrit admin and then there are lots of capabilities for admin tasks that admins have automatically, but can be assigned to non-admins as well. The Check Code Owner capability is one of these capabilities. This way you only need to assign a single capability for admins that allows them everything (ADMINISTRATE_SERVER) but you still can delegate certain admin tasks to non-admins (other capabilities).\n\nIn the code the fallback to ADMINISTRATE_SERVER is implemented by using PluginPermission [1], which uses fallBackToAdmin\u003dtrue by default [2].\n\n[1] https://gerrit.googlesource.com/plugins/code-owners/+/master/java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwnerCapability.java#41\n[2] https://gerrit.googlesource.com/gerrit/+/master/java/com/google/gerrit/extensions/api/access/PluginPermission.java#28",
+      "parentUuid": "87c5a050_3fb64cd1",
+      "range": {
+        "startLine": 167,
+        "startChar": 14,
+        "endLine": 167,
+        "endChar": 93
+      },
+      "revId": "e5f0ef3d2a0511600d247787b664d839db3db7f2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
