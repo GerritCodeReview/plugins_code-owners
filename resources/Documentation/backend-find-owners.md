@@ -280,7 +280,7 @@ directory and the subdirectories.
   john.doe@example.com
   per-file docs.config,*.md=richard.roe@example.com
 ```
-
+\
 **NOTE:** It's important to not include additional spaces in `per-file` lines.
 E.g. "per-file docs.config, test.config=richard.roe@example.com" will make
 Richard Roe a code owner of the files "docs.config" and " test.config" (pay
