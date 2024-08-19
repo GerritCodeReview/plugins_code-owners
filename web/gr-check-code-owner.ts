@@ -17,12 +17,19 @@
 
 import {customElement, query, property, state} from 'lit/decorators';
 import {css, CSSResult, html, LitElement} from 'lit';
+import {classMap} from 'lit/directives/class-map.js';
 import {PluginApi} from '@gerritcodereview/typescript-api/plugin';
 
 declare global {
   interface Window {
     CANONICAL_PATH?: string;
   }
+}
+
+// https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#capability-info
+export interface AccountCapabilityInfo {
+  administrateServer: boolean;
+  'code-owners-checkCodeOwner': boolean;
 }
 
 @customElement('gr-check-code-owner')
@@ -45,6 +52,9 @@ export class GrCheckCodeOwner extends LitElement {
   @query('#resultOutput')
   resultOutput!: HTMLInputElement;
 
+  @query('#noteAboutLimitedDebugInformation')
+  noteAboutLimitedDebugInformation!: HTMLInputElement;
+
   @property()
   plugin!: PluginApi;
 
@@ -53,6 +63,9 @@ export class GrCheckCodeOwner extends LitElement {
 
   @state()
   isChecking = false;
+
+  @state()
+  hasAdminPermissions = false;
 
   static override get styles() {
     return [
@@ -70,6 +83,9 @@ export class GrCheckCodeOwner extends LitElement {
         .output {
           min-width: 50em;
         }
+        .hidden {
+          display: none;
+        }
       `,
     ];
   }
@@ -84,14 +100,7 @@ export class GrCheckCodeOwner extends LitElement {
           Checks the code ownership of a user for a path in a branch, see
           <a href="${window.CANONICAL_PATH || ''}/plugins/code-owners/Documentation/rest-api.html#check-code-owner" target="_blank">documentation<a/>.
         </p>
-        <p>
-          Requires that the caller has the
-          <a href="${window.CANONICAL_PATH || ''}/plugins/code-owners/Documentation/rest-api.html#checkCodeOwner" target="_blank">Check Code Owner</a>
-          or the
-          <a href="${window.CANONICAL_PATH || ''}/Documentation/access-control.html#capability_administrateServer" target="_blank">Administrate Server</a>
-          global capability.
-        </p>
-        <p>All fields, except the 'Calling User' field, are required.</p>
+        <p>Required fields:</p>
         <fieldset>
           <section>
             <span class="title">
@@ -162,6 +171,13 @@ export class GrCheckCodeOwner extends LitElement {
               />
             </span>
           </section>
+        </fieldset>
+        <p>Admin options (usage requires having the
+          <a href="${window.CANONICAL_PATH || ''}/plugins/code-owners/Documentation/rest-api.html#checkCodeOwner" target="_blank">Check Code Owner</a>
+          or the
+          <a href="${window.CANONICAL_PATH || ''}/Documentation/access-control.html#capability_administrateServer" target="_blank">Administrate Server</a>
+          global capability):
+        <fieldset>
           <section>
             <span class="title">
               <gr-tooltip-content
@@ -175,6 +191,7 @@ export class GrCheckCodeOwner extends LitElement {
               <input
                 id="userInput"
                 type="text"
+                ?disabled=${!this.hasAdminPermissions}
                 @input=${this.validateData}
               />
             </span>
@@ -201,8 +218,35 @@ export class GrCheckCodeOwner extends LitElement {
             </iron-autogrow-textarea>
           </span>
         </section>
+        <p
+          class=${classMap({hidden: this.hasAdminPermissions})}
+        >
+          Note: The calling user doesn't have the
+          <a href="${window.CANONICAL_PATH || ''}/plugins/code-owners/Documentation/rest-api.html#checkCodeOwner" target="_blank">Check Code Owner</a>
+          or the
+          <a href="${window.CANONICAL_PATH || ''}/Documentation/access-control.html#capability_administrateServer" target="_blank">Administrate Server</a>
+          global capability, hence the returned debug information (field
+          'debug_logs') is limited. If more information is needed, please reach
+          out to a host administrator to check the code ownership.
+        </p>
       </main>
     `;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.checkAdminPermissions();
+  }
+
+  private async checkAdminPermissions() {
+    await this.plugin
+      .restApi()
+      .get<AccountCapabilityInfo>('/accounts/self/capabilities/')
+      .then(capabilities => {
+        this.hasAdminPermissions = capabilities &&
+          (capabilities['administrateServer'] ||
+            capabilities['code-owners-checkCodeOwner']);
+      });
   }
 
   private validateData() {
