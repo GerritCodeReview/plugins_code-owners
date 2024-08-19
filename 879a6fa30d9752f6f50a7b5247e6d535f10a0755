@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "353889b1_4d98ecce",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-19T10:02:06Z",
+      "side": 1,
+      "message": "nit: \"Required fields\" is more common wording",
+      "range": {
+        "startLine": 93,
+        "startChar": 11,
+        "endLine": 93,
+        "endChar": 26
+      },
+      "revId": "879a6fa30d9752f6f50a7b5247e6d535f10a0755",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bfe75865_1852cc3c",
+        "filename": "web/gr-check-code-owner.ts",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-19T10:02:06Z",
+      "side": 1,
+      "message": "Sorry for reviewing the changes in the opposite order\n\nAs I said in the other change: This feels more suitable for connectedCallback https://lit.dev/docs/components/lifecycle/#connectedcallback field. \n\nI would also suggest, that instead of specifying disabled in render and then overriding it with `disabled\u003dfalse` later, you do `disabled\u003d${hasAdminPermissions}` in `render()` and make `hasAdminPermissions` a `@state` that you calculate in `connectedCallback`",
+      "range": {
+        "startLine": 185,
+        "startChar": 16,
+        "endLine": 185,
+        "endChar": 57
+      },
+      "fixSuggestions": [
+        {
+          "fixId": "a0246761_820a2f72",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "web/gr-check-code-owner.ts",
+              "range": {
+                "startLine": 185,
+                "startChar": 0,
+                "endLine": 186,
+                "endChar": 0
+              },
+              "replacement": ""
+            },
+            {
+              "path": "web/gr-check-code-owner.ts",
+              "range": {
+                "startLine": 215,
+                "startChar": 0,
+                "endLine": 215,
+                "endChar": 0
+              },
+              "replacement": "\n  override connectedCallback() {\n    super.connectedCallback();\n    this.enableUserInputForAdmins();\n  }\n"
+            }
+          ]
+        }
+      ],
+      "revId": "879a6fa30d9752f6f50a7b5247e6d535f10a0755",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
