@@ -235,6 +235,9 @@ export class GrCheckCodeOwner extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    document.title = 'Check Code Owner';
+
     this.checkAdminPermissions();
   }
 
