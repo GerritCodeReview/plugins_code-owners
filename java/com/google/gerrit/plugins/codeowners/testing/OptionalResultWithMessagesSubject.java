@@ -21,6 +21,7 @@ import static com.google.gerrit.truth.OptionalSubject.optionals;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.plugins.codeowners.backend.DebugMessage;
 import com.google.gerrit.plugins.codeowners.backend.OptionalResultWithMessages;
 import java.util.Optional;
@@ -60,6 +61,7 @@ public class OptionalResultWithMessagesSubject extends Subject {
     check("result()").about(optionals()).that(optionalResultWithMessages().result()).isEmpty();
   }
 
+  @CanIgnoreReturnValue
   public OptionalResultWithMessagesSubject assertContainsAdminOnlyMessage(
       String expectedAdminMessage) {
     hasAdminMessagesThat().contains(expectedAdminMessage);
@@ -67,12 +69,14 @@ public class OptionalResultWithMessagesSubject extends Subject {
     return this;
   }
 
+  @CanIgnoreReturnValue
   public OptionalResultWithMessagesSubject assertContainsMessage(String expectedMessage) {
     hasAdminMessagesThat().contains(expectedMessage);
     hasUserMessagesThat().contains(expectedMessage);
     return this;
   }
 
+  @CanIgnoreReturnValue
   public OptionalResultWithMessagesSubject assertContainsMessage(
       String expectedAdminMessage, String expectedUserMessage) {
     hasAdminMessagesThat().contains(expectedAdminMessage);
@@ -80,6 +84,7 @@ public class OptionalResultWithMessagesSubject extends Subject {
     return this;
   }
 
+  @CanIgnoreReturnValue
   public OptionalResultWithMessagesSubject assertContainsExactlyMessage(String expectedMessage) {
     hasAdminMessagesThat().containsExactly(expectedMessage);
     hasUserMessagesThat().containsExactly(expectedMessage);
