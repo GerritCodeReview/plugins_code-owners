@@ -91,6 +91,7 @@ export class GrCheckCodeOwner extends LitElement {
   }
 
   override render() {
+    document.title = 'Check Code Owner Self Service';
     return html`
       <main class="gr-form-styles read-only">
         <div>
