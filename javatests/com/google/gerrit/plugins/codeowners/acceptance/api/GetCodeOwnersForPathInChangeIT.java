@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasScoring;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnersInfoSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.toList;
@@ -39,6 +40,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
@@ -908,5 +910,36 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 "filtering out %s because this code owner is annotated with %s",
                 CodeOwner.create(admin.id()),
                 CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key()));
+  }
+
+  @Test
+  public void testCodeOwnersScoringsDistance() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    Integer isReviewer = 1;
+    Integer notReviewer = 0;
+
+    // Admin is not a reviewer
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasScoring(CodeOwnerScore.IS_REVIEWER))
+        .containsExactly(notReviewer)
+        .inOrder();
+
+    // Add admin as reviewer, scoring value should change
+    gApi.changes().id(changeId).addReviewer(admin.email());
+    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasScoring(CodeOwnerScore.IS_REVIEWER))
+        .containsExactly(isReviewer)
+        .inOrder();
   }
 }
