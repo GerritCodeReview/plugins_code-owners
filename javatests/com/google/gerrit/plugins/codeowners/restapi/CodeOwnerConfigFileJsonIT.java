@@ -557,11 +557,16 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
   }
 
   private WebLinkInfo createWebLink(CodeOwnerConfig codeOwnerConfig) {
+    String path = codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfig.key()).getFilePath();
+    if (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+
     return createWebLink(
         codeOwnerConfig.key().project().get(),
         codeOwnerConfig.key().branchNameKey().branch(),
         codeOwnerConfig.revision().getName(),
-        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfig.key()).getFilePath());
+        path);
   }
 
   private WebLinkInfo createWebLink(
