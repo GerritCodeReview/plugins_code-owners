@@ -24,6 +24,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImport;
 import com.google.gerrit.plugins.codeowners.backend.UnresolvedImportFormatter;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.WebLinks;
 import com.google.inject.Inject;
 import java.util.List;
@@ -63,7 +64,10 @@ public class CodeOwnerConfigFileJson {
 
     ImmutableList<WebLinkInfo> fileLinks =
         webLinks.getFileLinks(
-            info.project, info.branch, codeOwnerConfig.revision().getName(), info.path);
+            info.project,
+            info.branch,
+            codeOwnerConfig.revision().getName(),
+            JgitPath.of(info.path).get());
     info.webLinks = !fileLinks.isEmpty() ? fileLinks : null;
 
     return info;
