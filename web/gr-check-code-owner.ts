@@ -284,7 +284,7 @@ export class GrCheckCodeOwner extends LitElement {
     var email = this.emailInput.value.trim();
     var path = this.pathInput.value.trim();
 
-    var url = `/a/projects/${encodeURIComponent(project)}/branches/${encodeURIComponent(branch)}/code_owners.check/?email=${encodeURIComponent(email)}&path=${encodeURIComponent(path)}`;
+    var url = `/projects/${encodeURIComponent(project)}/branches/${encodeURIComponent(branch)}/code_owners.check/?email=${encodeURIComponent(email)}&path=${encodeURIComponent(path)}`;
     if (this.userInput.value) {
       url = url + `&user=${encodeURIComponent(this.userInput.value.trim())}`
     }
