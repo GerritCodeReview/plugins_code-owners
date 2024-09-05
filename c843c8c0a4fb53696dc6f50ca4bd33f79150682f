@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "75abd92d_1ffed477",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-09-05T09:57:37Z",
+      "side": 1,
+      "message": "Side-note: looking at the diff the change makes sense to me. But I have a feeling that if I look at the overall implementation of this evaluation logic it can be simplified. Not saying the fix should be different (and maybe I am wrong about that it can be simplified), just an observation that the code feels quite confusing/messy",
+      "revId": "c843c8c0a4fb53696dc6f50ca4bd33f79150682f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dcb796c9_3c4f8611",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-09-05T09:57:37Z",
+      "side": 1,
+      "message": "I find the strings are confusing now, ie. you can have isGlobalImport() returns false, but format() returns \"(global import ....)\". Is it possible to improve the clarity here?",
+      "range": {
+        "startLine": 626,
+        "startChar": 4,
+        "endLine": 640,
+        "endChar": 5
+      },
+      "revId": "c843c8c0a4fb53696dc6f50ca4bd33f79150682f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
