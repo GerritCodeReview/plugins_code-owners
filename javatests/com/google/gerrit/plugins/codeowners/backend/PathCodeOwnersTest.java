@@ -2614,6 +2614,89 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
   @Test
   public void
+      perFileRuleThatIgnoresGlobalCodeOwnersCanTransitivelyImportGlobalCodeOwnersFromOtherFile()
+          throws Exception {
+    // create transitively imported config with a global code owner
+    CodeOwnerConfig.Key keyOfBarCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/bar/")
+            .fileName("OWNERS")
+            .addCodeOwnerEmail(user.email())
+            .create();
+    CodeOwnerConfigReference barCodeOwnerConfigReference =
+        createCodeOwnerConfigReference(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfBarCodeOwnerConfig);
+
+    // create imported config the imports the another config
+    CodeOwnerConfig.Key keyOfFooCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .fileName("OWNERS")
+            .addImport(barCodeOwnerConfigReference)
+            .create();
+    CodeOwnerConfigReference fooCodeOwnerConfigReference =
+        createCodeOwnerConfigReference(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfFooCodeOwnerConfig);
+
+    // create importing config that:
+    // * has a global code owner
+    // * has a per-file import for md files
+    // * ignores global and parent code owners for md files
+    CodeOwnerConfig.Key keyOfRootCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("md"))
+                    .setIgnoreGlobalAndParentCodeOwners()
+                    .addImport(fooCodeOwnerConfigReference)
+                    .build())
+            .create();
+
+    CodeOwnerConfig rootCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfRootCodeOwnerConfig).get();
+    CodeOwnerConfig fooCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfFooCodeOwnerConfig).get();
+    CodeOwnerConfig barCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfBarCodeOwnerConfig).get();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            keyOfRootCodeOwnerConfig,
+            projectOperations.project(project).getHead("master"),
+            Path.of("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global code owner from the transitively imported code owner config
+    // (since it is imported via a matching per-file rule), the global code owner from the importing
+    // code owner config is ignored (since the matching per-file rule ignores parent and global code
+    // owners)
+    PathCodeOwnersResult pathCodeOwnersResult = pathCodeOwners.get().resolveCodeOwnerConfig();
+    assertThat(pathCodeOwnersResult.getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(user.email());
+    assertThat(pathCodeOwnersResult.resolvedImports())
+        .containsExactly(
+            CodeOwnerConfigImport.createResolvedImport(
+                rootCodeOwnerConfig, fooCodeOwnerConfig, fooCodeOwnerConfigReference),
+            CodeOwnerConfigImport.createResolvedImport(
+                fooCodeOwnerConfig, barCodeOwnerConfig, barCodeOwnerConfigReference));
+    assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
+  }
+
+  @Test
+  public void
       perFileRuleThatIsImportedByAGlobalImportIsRespectedIfALocalPerFileRuleIgnoresGlobalCodeOwners()
           throws Exception {
     TestAccount user2 = accountCreator.user2();
