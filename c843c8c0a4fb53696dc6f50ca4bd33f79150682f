@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e9273579_93e75599",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-09-05T10:37:21Z",
+      "side": 1,
+      "message": "Yeah, simplifying it further would be nice, but finding time for it is difficult :/\n\nI reworked this change a bit to remove some of the duplicate methods. Hope it\u0027s a bit better now.",
+      "parentUuid": "75abd92d_1ffed477",
+      "revId": "c843c8c0a4fb53696dc6f50ca4bd33f79150682f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dcb796c9_3c4f8611",
@@ -31,6 +49,30 @@
       "writtenOn": "2024-09-05T09:57:37Z",
       "side": 1,
       "message": "I find the strings are confusing now, ie. you can have isGlobalImport() returns false, but format() returns \"(global import ....)\". Is it possible to improve the clarity here?",
+      "range": {
+        "startLine": 626,
+        "startChar": 4,
+        "endLine": 640,
+        "endChar": 5
+      },
+      "revId": "c843c8c0a4fb53696dc6f50ca4bd33f79150682f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b34ce1cf_953c95a1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-09-05T10:37:21Z",
+      "side": 1,
+      "message": "Good point. Does it look better now?",
+      "parentUuid": "dcb796c9_3c4f8611",
       "range": {
         "startLine": 626,
         "startChar": 4,
