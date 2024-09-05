@@ -255,12 +255,12 @@ public class PathCodeOwners {
       }
 
       // Resolve global imports.
-      ImmutableSet<CodeOwnerImport> globalImports = getGlobalImports(0, codeOwnerConfig);
+      ImmutableSet<CodeOwnerImport> globalImports = getGlobalImports(codeOwnerConfig);
       resolveImports(codeOwnerConfig.key(), globalImports, pathCodeOwnersResultBuilder);
 
       // Resolve per-file imports.
       ImmutableSet<CodeOwnerImport> perFileImports =
-          getPerFileImports(0, codeOwnerConfig, matchingPerFileCodeOwnerSets);
+          getPerFileImports(codeOwnerConfig, matchingPerFileCodeOwnerSets);
       resolveImports(codeOwnerConfig.key(), perFileImports, pathCodeOwnersResultBuilder);
 
       this.pathCodeOwnersResult = pathCodeOwnersResultBuilder.build();
@@ -424,12 +424,10 @@ public class PathCodeOwners {
             logger.atFine().log("resolve imports of imported code owner config");
             Set<CodeOwnerImport> transitiveImports = new HashSet<>();
             transitiveImports.addAll(
-                getGlobalImports(codeOwnerConfigImport.importLevel() + 1, importedCodeOwnerConfig));
+                getTransitiveGlobalImports(codeOwnerConfigImport, importedCodeOwnerConfig));
             transitiveImports.addAll(
-                getPerFileImports(
-                    codeOwnerConfigImport.importLevel() + 1,
-                    importedCodeOwnerConfig,
-                    matchingPerFileCodeOwnerSets));
+                getTransitivePerFileImports(
+                    codeOwnerConfigImport, importedCodeOwnerConfig, matchingPerFileCodeOwnerSets));
 
             if (importMode == CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY) {
               // If only global code owners should be imported, transitive imports should also only
@@ -443,7 +441,7 @@ public class PathCodeOwners {
                       .map(
                           codeOwnerCfgImport ->
                               CodeOwnerImport.create(
-                                  codeOwnerCfgImport.importLevel(),
+                                  codeOwnerCfgImport.prevImport(),
                                   codeOwnerCfgImport.importingCodeOwnerConfig(),
                                   CodeOwnerConfigReference.copyWithNewImportMode(
                                       codeOwnerCfgImport.referenceToImportedCodeOwnerConfig(),
@@ -467,25 +465,50 @@ public class PathCodeOwners {
     }
   }
 
-  private ImmutableSet<CodeOwnerImport> getGlobalImports(
-      int importLevel, CodeOwnerConfig codeOwnerConfig) {
+  private ImmutableSet<CodeOwnerImport> getGlobalImports(CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfig.imports().stream()
         .map(
             codeOwnerConfigReference ->
-                CodeOwnerImport.create(importLevel, codeOwnerConfig, codeOwnerConfigReference))
+                CodeOwnerImport.createGlobalImport(codeOwnerConfig, codeOwnerConfigReference))
+        .collect(toImmutableSet());
+  }
+
+  private ImmutableSet<CodeOwnerImport> getTransitiveGlobalImports(
+      CodeOwnerImport prevCodeOwnerImport, CodeOwnerConfig codeOwnerConfig) {
+    return codeOwnerConfig.imports().stream()
+        .map(
+            codeOwnerConfigReference ->
+                CodeOwnerImport.createTransitiveGlobalImport(
+                    prevCodeOwnerImport, codeOwnerConfig, codeOwnerConfigReference))
         .collect(toImmutableSet());
   }
 
   private ImmutableSet<CodeOwnerImport> getPerFileImports(
-      int importLevel, CodeOwnerConfig importingCodeOwnerConfig, Set<CodeOwnerSet> codeOwnerSets) {
+      CodeOwnerConfig importingCodeOwnerConfig, Set<CodeOwnerSet> codeOwnerSets) {
     ImmutableSet.Builder<CodeOwnerImport> codeOwnerConfigImports = ImmutableSet.builder();
     for (CodeOwnerSet codeOwnerSet : codeOwnerSets) {
       codeOwnerSet.imports().stream()
           .forEach(
               codeOwnerConfigReference ->
                   codeOwnerConfigImports.add(
-                      CodeOwnerImport.create(
-                          importLevel,
+                      CodeOwnerImport.createPerFileImport(
+                          importingCodeOwnerConfig, codeOwnerConfigReference, codeOwnerSet)));
+    }
+    return codeOwnerConfigImports.build();
+  }
+
+  private ImmutableSet<CodeOwnerImport> getTransitivePerFileImports(
+      CodeOwnerImport prevCodeOwnerImport,
+      CodeOwnerConfig importingCodeOwnerConfig,
+      Set<CodeOwnerSet> codeOwnerSets) {
+    ImmutableSet.Builder<CodeOwnerImport> codeOwnerConfigImports = ImmutableSet.builder();
+    for (CodeOwnerSet codeOwnerSet : codeOwnerSets) {
+      codeOwnerSet.imports().stream()
+          .forEach(
+              codeOwnerConfigReference ->
+                  codeOwnerConfigImports.add(
+                      CodeOwnerImport.createTransitivePerFileImport(
+                          prevCodeOwnerImport,
                           importingCodeOwnerConfig,
                           codeOwnerConfigReference,
                           codeOwnerSet)));
@@ -573,13 +596,8 @@ public class PathCodeOwners {
 
   @AutoValue
   abstract static class CodeOwnerImport {
-    /**
-     * The import level.
-     *
-     * <p>{@code 0} for direct import, {@code 1} if imported by a directly imported file, {@code 2},
-     * if imported by a file that was imported by an directly imported file, etc.
-     */
-    public abstract int importLevel();
+    /** The import that imported the {@link #importingCodeOwnerConfig()}. */
+    public abstract Optional<CodeOwnerImport> prevImport();
 
     /** The code owner config that contains the import. */
     public abstract CodeOwnerConfig importingCodeOwnerConfig();
@@ -590,12 +608,23 @@ public class PathCodeOwners {
     /** The code owner set that specified the import, empty if it is a global import. */
     public abstract Optional<CodeOwnerSet> codeOwnerSet();
 
+    /**
+     * The import level.
+     *
+     * <p>{@code 0} for direct import, {@code 1} if imported by a directly imported file, {@code 2},
+     * if imported by a file that was imported by an directly imported file, etc.
+     */
+    int importLevel() {
+      return prevImport().isPresent() ? prevImport().get().importLevel() + 1 : 0;
+    }
+
     boolean isGlobalImport() {
-      return codeOwnerSet().isEmpty();
+      return codeOwnerSet().isEmpty()
+          && (prevImport().isEmpty() || prevImport().get().isGlobalImport());
     }
 
     public String format() {
-      if (isGlobalImport()) {
+      if (codeOwnerSet().isEmpty()) {
         return getPrefix()
             + String.format(
                 "* %s (global import, import mode = %s)\n",
@@ -636,33 +665,54 @@ public class PathCodeOwners {
       return levels > 0 ? String.format("%" + (levels * 2) + "s", "") : "";
     }
 
-    public static CodeOwnerImport create(
-        int importLevel,
+    public static CodeOwnerImport createGlobalImport(
         CodeOwnerConfig importingCodeOwnerConfig,
         CodeOwnerConfigReference codeOwnerConfigReference) {
       return create(
-          importLevel, importingCodeOwnerConfig, codeOwnerConfigReference, Optional.empty());
+          Optional.empty(), importingCodeOwnerConfig, codeOwnerConfigReference, Optional.empty());
     }
 
-    public static CodeOwnerImport create(
-        int importLevel,
+    public static CodeOwnerImport createTransitiveGlobalImport(
+        CodeOwnerImport prevImport,
+        CodeOwnerConfig importingCodeOwnerConfig,
+        CodeOwnerConfigReference codeOwnerConfigReference) {
+      return create(
+          Optional.of(prevImport),
+          importingCodeOwnerConfig,
+          codeOwnerConfigReference,
+          Optional.empty());
+    }
+
+    public static CodeOwnerImport createPerFileImport(
         CodeOwnerConfig importingCodeOwnerConfig,
         CodeOwnerConfigReference codeOwnerConfigReference,
         CodeOwnerSet codeOwnerSet) {
       return create(
-          importLevel,
+          Optional.empty(),
+          importingCodeOwnerConfig,
+          codeOwnerConfigReference,
+          Optional.of(codeOwnerSet));
+    }
+
+    public static CodeOwnerImport createTransitivePerFileImport(
+        CodeOwnerImport prevImport,
+        CodeOwnerConfig importingCodeOwnerConfig,
+        CodeOwnerConfigReference codeOwnerConfigReference,
+        CodeOwnerSet codeOwnerSet) {
+      return create(
+          Optional.of(prevImport),
           importingCodeOwnerConfig,
           codeOwnerConfigReference,
           Optional.of(codeOwnerSet));
     }
 
     public static CodeOwnerImport create(
-        int importLevel,
+        Optional<CodeOwnerImport> prevImport,
         CodeOwnerConfig importingCodeOwnerConfig,
         CodeOwnerConfigReference codeOwnerConfigReference,
         Optional<CodeOwnerSet> codeOwnerSet) {
       return new AutoValue_PathCodeOwners_CodeOwnerImport(
-          importLevel, importingCodeOwnerConfig, codeOwnerConfigReference, codeOwnerSet);
+          prevImport, importingCodeOwnerConfig, codeOwnerConfigReference, codeOwnerSet);
     }
   }
 }
