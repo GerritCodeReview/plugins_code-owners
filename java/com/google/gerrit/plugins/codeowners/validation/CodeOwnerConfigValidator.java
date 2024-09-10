@@ -938,7 +938,10 @@ public class CodeOwnerConfigValidator
             codeOwnerBackend.getFilePath(codeOwnerConfig.key()),
             codeOwnerConfig),
         validateImports(
-            branchNameKey, codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig));
+            branchNameKey,
+            user,
+            codeOwnerBackend.getFilePath(codeOwnerConfig.key()),
+            codeOwnerConfig));
   }
 
   /**
@@ -1015,6 +1018,8 @@ public class CodeOwnerConfigValidator
    * Validates the imports of the given code owner config.
    *
    * @param branchNameKey the branch and the project
+   * @param user the user for which the visibility of the imported code owner config should be
+   *     checked
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner config
    * @param codeOwnerConfig the code owner config for which the imports should be validated
@@ -1022,7 +1027,10 @@ public class CodeOwnerConfigValidator
    *     if there are no issues
    */
   private Stream<CommitValidationMessage> validateImports(
-      BranchNameKey branchNameKey, Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
+      BranchNameKey branchNameKey,
+      IdentifiedUser user,
+      Path codeOwnerConfigFilePath,
+      CodeOwnerConfig codeOwnerConfig) {
     try {
       RevCommit codeOwnerConfigRevision;
       try (Repository repo = repoManager.openRepository(branchNameKey.project());
@@ -1035,6 +1043,7 @@ public class CodeOwnerConfigValidator
                       codeOwnerConfigReference ->
                           validateCodeOwnerConfigReference(
                               branchNameKey,
+                              user,
                               codeOwnerConfigFilePath,
                               codeOwnerConfig.key(),
                               codeOwnerConfigRevision,
@@ -1046,6 +1055,7 @@ public class CodeOwnerConfigValidator
                       codeOwnerConfigReference ->
                           validateCodeOwnerConfigReference(
                               branchNameKey,
+                              user,
                               codeOwnerConfigFilePath,
                               codeOwnerConfig.key(),
                               codeOwnerConfigRevision,
@@ -1063,6 +1073,8 @@ public class CodeOwnerConfigValidator
    * Validates a code owner config reference.
    *
    * @param branchNameKey the branch and the project
+   * @param user the user for which the visibility of the imported code owner config should be
+   *     checked
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner config reference
    * @param keyOfImportingCodeOwnerConfig key of the importing code owner config
@@ -1075,6 +1087,7 @@ public class CodeOwnerConfigValidator
    */
   private Optional<CommitValidationMessage> validateCodeOwnerConfigReference(
       BranchNameKey branchNameKey,
+      IdentifiedUser user,
       Path codeOwnerConfigFilePath,
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       RevCommit codeOwnerConfigRevision,
@@ -1093,7 +1106,7 @@ public class CodeOwnerConfigValidator
     }
 
     Optional<ProjectState> projectState = projectCache.get(keyOfImportedCodeOwnerConfig.project());
-    if (!projectState.isPresent() || !isProjectReadable(keyOfImportedCodeOwnerConfig)) {
+    if (!projectState.isPresent() || !isProjectReadable(keyOfImportedCodeOwnerConfig, user)) {
       // we intentionally use the same error message for non-existing and non-readable projects so
       // that uploaders cannot probe for the existence of projects (e.g. deduce from the error
       // message whether a project exists)
@@ -1122,7 +1135,7 @@ public class CodeOwnerConfigValidator
     Optional<ObjectId> revision =
         getRevision(
             keyOfImportingCodeOwnerConfig, codeOwnerConfigRevision, keyOfImportedCodeOwnerConfig);
-    if (!revision.isPresent() || !isBranchReadable(keyOfImportedCodeOwnerConfig)) {
+    if (!revision.isPresent() || !isBranchReadable(keyOfImportedCodeOwnerConfig, user)) {
       // we intentionally use the same error message for non-existing and non-readable branches so
       // that uploaders cannot probe for the existence of branches (e.g. deduce from the error
       // message whether a branch exists)
@@ -1217,10 +1230,11 @@ public class CodeOwnerConfigValidator
                     .getFilePath(keyOfImportedCodeOwnerConfig));
   }
 
-  private boolean isProjectReadable(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+  private boolean isProjectReadable(
+      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig, IdentifiedUser user) {
     try {
       return permissionBackend
-          .currentUser()
+          .user(user)
           .project(keyOfImportedCodeOwnerConfig.project())
           .test(ProjectPermission.ACCESS);
     } catch (PermissionBackendException e) {
@@ -1229,10 +1243,11 @@ public class CodeOwnerConfigValidator
     }
   }
 
-  private boolean isBranchReadable(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+  private boolean isBranchReadable(
+      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig, IdentifiedUser user) {
     try {
       return permissionBackend
-          .currentUser()
+          .user(user)
           .project(keyOfImportedCodeOwnerConfig.project())
           .ref(keyOfImportedCodeOwnerConfig.ref())
           .test(RefPermission.READ);

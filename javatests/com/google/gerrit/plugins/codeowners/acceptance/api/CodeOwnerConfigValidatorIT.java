@@ -32,8 +32,10 @@ import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
@@ -94,6 +96,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
+  @Inject private GroupOperations groupOperations;
   @Inject private DynamicItem<UrlFormatter> urlFormatter;
 
   private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
@@ -3196,6 +3199,326 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     approve(r.getChangeId());
     gApi.changes().id(r.getChangeId()).current().submit();
     assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
+  public void cannotSubmitConfigWithImportFromProjectThatIsNotVisibleToUploader() throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    setAsRootCodeOwners(admin);
+    TestAccount uploader =
+        accountCreator.create("uploader", "uploader@example.com", "Uploader", "Uploader");
+    AccountGroup.UUID blockedGroup = groupOperations.newGroup().addMember(uploader.id()).create();
+
+    // create a project that is not visible to the uploader with a code owner config file that we
+    // try to import
+    Project.NameKey nonVisibleProject =
+        projectOperations.newProject().name(name("non-visible-project")).create();
+    projectOperations
+        .project(nonVisibleProject)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/*").group(blockedGroup))
+        .update();
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(nonVisibleProject)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create a code owner config that imports a code owner config from a project that is not
+    // visible to the uploader
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonVisibleProject, "master", "/"))
+                    .getFilePath())
+            .setProject(nonVisibleProject)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig,
+            CodeOwnerConfigImportType.GLOBAL,
+            codeOwnerConfigReference);
+
+    // upload works because the validation on commitReceived is disabled
+    PushOneCommit.Result r =
+        createChange(
+            uploader,
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code owners config validation is disabled");
+
+    // Try to submit as a user that is not blocked and can see the project from which the code
+    // owner config file is imported. This fails because the visibility of the import is checked for
+    // the uploader who is blocked and cannot see the project from which the code owner config file
+    // is imported.
+    requestScopeOperations.setApiUser(admin.id());
+    approve(r.getChangeId());
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to submit 1 change due to the following problems:\n"
+                    + "Change %s: [code-owners] invalid code owner config files (see %s for help):\n"
+                    + "  ERROR: invalid %s import in '%s': project '%s' not found",
+                r.getChange().getId().toString(),
+                getHelpPage(),
+                CodeOwnerConfigImportType.GLOBAL.getType(),
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                    .getFilePath(),
+                nonVisibleProject.get()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
+  public void canSubmitConfigWithImportFromProjectThatIsNotVisibleToTheSubmitterButToTheUploader()
+      throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    setAsRootCodeOwners(admin);
+
+    TestAccount submitter =
+        accountCreator.create("submitter", "submitter@example.com", "Submitter", "Submitter");
+    AccountGroup.UUID blockedGroup = groupOperations.newGroup().addMember(submitter.id()).create();
+
+    // create a project that is not visible to the submitter with a code owner config file that we
+    // try to import
+    Project.NameKey nonVisibleProject =
+        projectOperations.newProject().name(name("non-visible-project")).create();
+    projectOperations
+        .project(nonVisibleProject)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/*").group(blockedGroup))
+        .update();
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.SUBMIT).ref("refs/*").group(REGISTERED_USERS))
+        .update();
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(nonVisibleProject)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create a code owner config that imports a code owner config from a project that is not
+    // visible to the submitter
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonVisibleProject, "master", "/"))
+                    .getFilePath())
+            .setProject(nonVisibleProject)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig,
+            CodeOwnerConfigImportType.GLOBAL,
+            codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            user,
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code owners config validation is disabled");
+
+    requestScopeOperations.setApiUser(admin.id());
+    approve(r.getChangeId());
+
+    // Submit as a user that is blocked and cannot see the project from which the code owner config
+    // file is imported. This works because the visibility of the import is checked for the uploader
+    // who is not blocked and can see the project from which the code owner config file is imported.
+    requestScopeOperations.setApiUser(submitter.id());
+    gApi.changes().id(r.getChangeId()).current().submit();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
+  public void cannotSubmitConfigWithImportFromBranchThatIsNotVisibleToUploader() throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    setAsRootCodeOwners(admin);
+    TestAccount uploader =
+        accountCreator.create("uploader", "uploader@example.com", "Uploader", "Uploader");
+    AccountGroup.UUID blockedGroup = groupOperations.newGroup().addMember(uploader.id()).create();
+
+    // create a project with a branch that is not visible to the uploader and that contains a code
+    // owner config file
+    Project.NameKey otherProject =
+        projectOperations.newProject().name(name("other-project")).create();
+    projectOperations
+        .project(otherProject)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/heads/master").group(blockedGroup))
+        .update();
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create a code owner config that imports a code owner config from a branch that is not
+    // visible to the uploader
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(otherProject, "master", "/"))
+                    .getFilePath())
+            .setProject(otherProject)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig,
+            CodeOwnerConfigImportType.GLOBAL,
+            codeOwnerConfigReference);
+
+    // upload works because the validation on commitReceived is disabled
+    PushOneCommit.Result r =
+        createChange(
+            uploader,
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code owners config validation is disabled");
+
+    // Try to submit as a user that is not blocked and can see the branch from which the code
+    // owner config file is imported. This fails because the visibility of the import is checked for
+    // the uploader who is blocked and cannot see the branch from which the code owner config file
+    // is imported.
+    requestScopeOperations.setApiUser(admin.id());
+    approve(r.getChangeId());
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to submit 1 change due to the following problems:\n"
+                    + "Change %s: [code-owners] invalid code owner config files (see %s for help):\n"
+                    + "  ERROR: invalid %s import in '%s': branch 'master' not found in project '%s'",
+                r.getChange().getId().toString(),
+                getHelpPage(),
+                CodeOwnerConfigImportType.GLOBAL.getType(),
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                    .getFilePath(),
+                otherProject.get()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
+  public void canSubmitConfigWithImportFromBranchThatIsNotVisibleToTheSubmitterButToTheUploader()
+      throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    setAsRootCodeOwners(admin);
+
+    TestAccount submitter =
+        accountCreator.create("submitter", "submitter@example.com", "Submitter", "Submitter");
+    AccountGroup.UUID blockedGroup = groupOperations.newGroup().addMember(submitter.id()).create();
+
+    // create a project with a branch that is not visible to the submitter and that contains a code
+    // owner config file
+    Project.NameKey otherProject =
+        projectOperations.newProject().name(name("pther-project")).create();
+    projectOperations
+        .project(otherProject)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/heads/master").group(blockedGroup))
+        .update();
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.SUBMIT).ref("refs/*").group(REGISTERED_USERS))
+        .update();
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create a code owner config that imports a code owner config from a project that is not
+    // visible to the submitter
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(otherProject, "master", "/"))
+                    .getFilePath())
+            .setProject(otherProject)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig,
+            CodeOwnerConfigImportType.GLOBAL,
+            codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            user,
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code owners config validation is disabled");
+
+    requestScopeOperations.setApiUser(admin.id());
+    approve(r.getChangeId());
+
+    // Submit as a user that is blocked and cannot see the branch from which the code owner config
+    // file is imported. This works because the visibility of the import is checked for the uploader
+    // who is not blocked and can see the branch from which the code owner config file is imported.
+    requestScopeOperations.setApiUser(submitter.id());
+    gApi.changes().id(r.getChangeId()).current().submit();
   }
 
   private CodeOwnerConfig createCodeOwnerConfigWithImport(
