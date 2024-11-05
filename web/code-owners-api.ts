@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {HttpMethod, RestPluginApi} from '@gerritcodereview/typescript-api/rest';
+import { HttpMethod, RestPluginApi } from '@gerritcodereview/typescript-api/rest';
 import {
   AccountDetailInfo,
   AccountInfo,
@@ -106,7 +106,7 @@ export interface CodeOwnerStatusInfo {
   patch_set_number: number;
   file_code_owner_statuses: Array<FileCodeOwnerStatusInfo>;
   more?: boolean;
-  accounts?: {[account_id: number]: AccountInfo};
+  accounts?: { [account_id: number]: AccountInfo };
 }
 
 export interface CodeOwnersStatusInfo {
@@ -159,7 +159,7 @@ function changeBaseURL(change: ChangeInfo): string {
  * @see resources/Documentation/rest-api.md
  */
 export class CodeOwnersApi {
-  constructor(readonly restApi: RestPluginApi) {}
+  constructor(readonly restApi: RestPluginApi) { }
 
   /**
    * Send a get request and provides custom response-code handling
@@ -223,7 +223,7 @@ export class CodeOwnersApi {
   ): Promise<CodeOwnersInfo> {
     return this.get(
       `${changeBaseURL(change)}/revisions/current/code_owners` +
-        `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`
+      `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS&highest-score-only`
     ) as Promise<CodeOwnersInfo>;
   }
 
@@ -236,8 +236,8 @@ export class CodeOwnersApi {
   getConfigForPath(project: string, branch: string, path: string) {
     return this.get(
       `/projects/${encodeURIComponent(project)}/` +
-        `branches/${encodeURIComponent(branch)}/` +
-        `code_owners.config/${encodeURIComponent(path)}`
+      `branches/${encodeURIComponent(branch)}/` +
+      `code_owners.config/${encodeURIComponent(path)}`
     );
   }
 
@@ -251,8 +251,8 @@ export class CodeOwnersApi {
     try {
       const config = (await this.get(
         `/projects/${encodeURIComponent(project)}/` +
-          `branches/${encodeURIComponent(branch)}/` +
-          'code_owners.branch_config'
+        `branches/${encodeURIComponent(branch)}/` +
+        'code_owners.branch_config'
       )) as CodeOwnerBranchConfigInfo;
       return config;
     } catch (err) {
@@ -260,7 +260,7 @@ export class CodeOwnersApi {
         if (err.response.status === 404) {
           // The 404 error means that the branch doesn't exist and
           // the plugin should be disabled.
-          return {disabled: true};
+          return { disabled: true };
         }
         return getErrorMessage(err.response).then(msg => {
           throw new Error(msg);
@@ -291,7 +291,7 @@ export class CodeOwnersCacheApi {
   constructor(
     private readonly codeOwnerApi: CodeOwnersApi,
     private readonly change: ChangeInfo
-  ) {}
+  ) { }
 
   private fetchOnce(
     cacheKey: string,
