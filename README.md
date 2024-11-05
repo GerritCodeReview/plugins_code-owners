@@ -20,6 +20,7 @@ rendered
 
 ## JavaScript Plugin
 
+Ensure the Code Owners plugin is cloned in the gerrit/plugins folder.
 From the root of the gerrit repository.
 
 ```
@@ -34,6 +35,13 @@ the command below builds
     bazel build //plugins/code-owners/web:code-owners
     ln -s bazel-bin/plugins/code-owners/web/code-owners.js polygerrit-ui/app/plugins/
 ```
+
+If the symlink command does not work then try copying manually
+
+```
+    cp -f bazel-bin/plugins/code-owners/ui/code-owners.js polygerrit-ui/app/plugins/
+```
+
 
 
 and let the Dev Helper redirect from
