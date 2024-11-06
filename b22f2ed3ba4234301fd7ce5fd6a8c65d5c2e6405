@@ -1,0 +1,66 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8024327c_22844b97",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-11-06T12:34:45Z",
+      "side": 1,
+      "message": "The modifications in this file looks like they should be done in a separate change?",
+      "revId": "b22f2ed3ba4234301fd7ce5fd6a8c65d5c2e6405",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c648c229_a24716a2",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-11-06T12:34:45Z",
+      "side": 1,
+      "message": "I\u0027m not sure that setting highest-score-only unconditionally is what we want, e.g. it must not be set if the user selects \"Show all owners\". IIUC selecting \"Show all owners\" leads to this method being invoked with limit\u003d1000 (from what I see when I look at the triggered request with Chrome developer tools).",
+      "fixSuggestions": [
+        {
+          "fixId": "970f1607_5c820d20",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "web/code-owners-api.ts",
+              "range": {
+                "startLine": 222,
+                "startChar": 0,
+                "endLine": 223,
+                "endChar": 0
+              },
+              "replacement": "    limit: number,\n    highestScoreOnly: boolean \u003d true\n"
+            },
+            {
+              "path": "web/code-owners-api.ts",
+              "range": {
+                "startLine": 226,
+                "startChar": 0,
+                "endLine": 227,
+                "endChar": 0
+              },
+              "replacement": "      `/${encodeURIComponent(path)}?limit\u003d${limit}\u0026o\u003dDETAILS` +\n      `${highestScoreOnly ? \u0027\u0026highest-score-only\u0027 : \u0027\u0027}`\n"
+            }
+          ]
+        }
+      ],
+      "revId": "b22f2ed3ba4234301fd7ce5fd6a8c65d5c2e6405",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
