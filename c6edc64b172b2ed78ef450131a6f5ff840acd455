@@ -22,6 +22,30 @@
       },
       "revId": "c6edc64b172b2ed78ef450131a6f5ff840acd455",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e365ea73_4b646d49",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-12-06T14:25:31Z",
+      "side": 1,
+      "message": "Yes, makes sense. I added escaping for it too now.",
+      "parentUuid": "ed1736e1_953654b7",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 18
+      },
+      "revId": "c6edc64b172b2ed78ef450131a6f5ff840acd455",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
