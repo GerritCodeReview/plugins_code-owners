@@ -61,7 +61,7 @@ See [below](#examples) for examples.
 | File type in the current folder and in all subfolders | `**.md` | `*.md` or `**.md` | `....md` |
 | All files in a subfolder | `my-folder/**` | [not possible](#findOwnersCaveatMatchingFilesInSubfolder), but you can add a `my-folder/OWNERS` file instead of using a glob | `my-folder/...` |
 | All “foo-<1-digit-number>.txt” files in all subfolders | `{**/,}foo-[0-9].txt` | `foo-[0-9].txt` |not possible |
-| All “foo-<n-digit-number>.txt” files in all subfolders | not possible | not possible | not possible
+| All “foo-\<n-digit-number\>.txt” files in all subfolders | not possible | not possible | not possible
 
 ## <a id="findOwnersCaveat">Caveat with find-owners path expressions
 
