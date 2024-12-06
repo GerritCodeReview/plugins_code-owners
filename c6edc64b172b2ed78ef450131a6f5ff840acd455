@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ed1736e1_953654b7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-12-06T14:15:52Z",
+      "side": 1,
+      "message": "I would still escape. If I understand correctly, the reasoning here is that it tries to interpret it as inline html. It doesn\u0027t work for \"\u003c1-digit-number\" is because HTML tags can\u0027t start with a number. \n\nNot escaping it just makes it confusing when reading, why one is escaped but not the other (and prone to error if edited in the future).",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 18
+      },
+      "revId": "c6edc64b172b2ed78ef450131a6f5ff840acd455",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
