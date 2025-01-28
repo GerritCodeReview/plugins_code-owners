@@ -63,7 +63,10 @@ public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
         assertThrows(
             ResourceConflictException.class,
             () -> projectCodeOwnersApiFactory.project(project).branch("master").getConfig());
-    assertThat(exception).hasMessageThat().isEqualTo("project state HIDDEN does not permit read");
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format("project %s has state HIDDEN does not permit read", project.get()));
   }
 
   @Test
