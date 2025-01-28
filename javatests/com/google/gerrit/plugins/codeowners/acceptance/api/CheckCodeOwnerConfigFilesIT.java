@@ -15,6 +15,8 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -38,6 +40,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
+import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFilesCapability;
 import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
@@ -66,11 +69,49 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void requiresCallerToBeProjectOwner() throws Exception {
+  public void requiresCallerToBeProjectOwnerOrHaveTheCheckCodeOwnerConfigFilesCapability()
+      throws Exception {
     requestScopeOperations.setApiUser(user.id());
     AuthException authException =
         assertThrows(AuthException.class, () -> checkCodeOwnerConfigFilesIn(project));
-    assertThat(authException).hasMessageThat().isEqualTo("write refs/meta/config not permitted");
+    assertThat(authException)
+        .hasMessageThat()
+        .isEqualTo(
+            "cannot check code owner config files, must be project owner or have the Check Code"
+                + " Owner Config Files global capability");
+  }
+
+  @Test
+  public void projectOwnerCanCheckCodeOwnerConfigFiles() throws Exception {
+    requestScopeOperations.setApiUser(user.id());
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.OWNER).ref("refs/*").group(REGISTERED_USERS))
+        .update();
+
+    requestScopeOperations.setApiUser(user.id());
+    checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
+  }
+
+  @Test
+  public void adminCanCheckCodeOwnerConfigFiles() throws Exception {
+    requestScopeOperations.setApiUser(admin.id());
+    checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
+  }
+
+  @Test
+  public void userThatHasTheCheckCodeOwnerConfigFilesCapabilityCanCheckCodeOwnerConfigFiles()
+      throws Exception {
+    projectOperations
+        .allProjectsForUpdate()
+        .add(
+            allowCapability("code-owners-" + CheckCodeOwnerConfigFilesCapability.ID)
+                .group(REGISTERED_USERS))
+        .update();
+
+    requestScopeOperations.setApiUser(user.id());
+    checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
   }
 
   @Test

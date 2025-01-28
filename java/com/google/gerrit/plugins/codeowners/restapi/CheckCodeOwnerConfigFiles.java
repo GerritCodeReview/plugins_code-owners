@@ -73,6 +73,7 @@ public class CheckCodeOwnerConfigFiles
   private final Provider<CurrentUser> currentUser;
   private final PermissionBackend permissionBackend;
   private final Provider<ListBranches> listBranches;
+  private final CheckCodeOwnerConfigFilesCapability checkCodeOwnerConfigFilesCapability;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
   private final CodeOwnerConfigValidator codeOwnerConfigValidator;
@@ -82,12 +83,14 @@ public class CheckCodeOwnerConfigFiles
       Provider<CurrentUser> currentUser,
       PermissionBackend permissionBackend,
       Provider<ListBranches> listBranches,
+      CheckCodeOwnerConfigFilesCapability checkCodeOwnerConfigFilesCapability,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory,
       CodeOwnerConfigValidator codeOwnerConfigValidator) {
     this.currentUser = currentUser;
     this.permissionBackend = permissionBackend;
     this.listBranches = listBranches;
+    this.checkCodeOwnerConfigFilesCapability = checkCodeOwnerConfigFilesCapability;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerConfigScannerFactory = codeOwnerConfigScannerFactory;
     this.codeOwnerConfigValidator = codeOwnerConfigValidator;
@@ -101,11 +104,21 @@ public class CheckCodeOwnerConfigFiles
       throw new AuthException("Authentication required");
     }
 
-    // This REST endpoint requires the caller to be a project owner.
-    permissionBackend
-        .currentUser()
-        .project(projectResource.getNameKey())
-        .check(ProjectPermission.WRITE_CONFIG);
+    // This REST endpoint requires the caller to be a project owner or have the
+    // checkCodeOwnerConfigFilesCapability.
+    if (!permissionBackend
+            .currentUser()
+            .project(projectResource.getNameKey())
+            .test(ProjectPermission.WRITE_CONFIG)
+        && !permissionBackend
+            .currentUser()
+            .test(checkCodeOwnerConfigFilesCapability.getPermission())) {
+      throw new AuthException(
+          String.format(
+              "cannot check code owner config files, must be project owner or have the %s global"
+                  + " capability",
+              checkCodeOwnerConfigFilesCapability.getDescription()));
+    }
 
     logger.atFine().log(
         "checking code owner config files for project %s"
