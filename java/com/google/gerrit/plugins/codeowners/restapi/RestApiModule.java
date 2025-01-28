@@ -56,6 +56,10 @@ public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiM
 
     get(PROJECT_KIND, "code_owners.project_config").to(GetCodeOwnerProjectConfig.class);
     put(PROJECT_KIND, "code_owners.project_config").to(PutCodeOwnerProjectConfig.class);
+
+    bind(CapabilityDefinition.class)
+        .annotatedWith(Exports.named(CheckCodeOwnerConfigFilesCapability.ID))
+        .to(CheckCodeOwnerConfigFilesCapability.class);
     post(PROJECT_KIND, "code_owners.check_config").to(CheckCodeOwnerConfigFiles.class);
   }
 }
