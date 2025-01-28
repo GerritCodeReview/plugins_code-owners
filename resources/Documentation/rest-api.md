@@ -106,7 +106,8 @@ _'POST /projects/[\{project-name\}](../../../Documentation/rest-api-projects.htm
 
 Checks/validates the code owner config files in a project.
 
-Requires that the caller is an owner of the project.
+Requires that the caller is an owner of the project or has the
+link:checkCodeOwnerConfigFiles[Check Code Owner Config Files] global capability.
 
 Input options can be set in the request body as a
 [CheckCodeOwnerConfigFilesInput](#check-code-owner-config-files-input) entity.
@@ -1249,6 +1250,13 @@ Administrators have this capability implicitly assigned.
 The same as all global capabilities, the `Check Code Owner` global capability is
 assigned on the `All-Projects` project in the `Global Capabilities` access
 section.
+
+### <a id="checkCodeOwnerConfigFiles">Check Code Owner Config Files
+
+Global capability that allows a user to call the [Check Code Owner Config
+Files](#check-code-owner-config-files) REST endpoint.
+
+Administrators have this capability implicitly assigned.
 
 ---
 
