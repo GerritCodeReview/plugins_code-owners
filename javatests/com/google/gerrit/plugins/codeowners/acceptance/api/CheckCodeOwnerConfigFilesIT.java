@@ -91,13 +91,17 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
         .update();
 
     requestScopeOperations.setApiUser(user.id());
-    checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
+
+    @SuppressWarnings("unused")
+    var unused = checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
   }
 
   @Test
   public void adminCanCheckCodeOwnerConfigFiles() throws Exception {
     requestScopeOperations.setApiUser(admin.id());
-    checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
+
+    @SuppressWarnings("unused")
+    var unused = checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
   }
 
   @Test
@@ -111,7 +115,9 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
         .update();
 
     requestScopeOperations.setApiUser(user.id());
-    checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
+
+    @SuppressWarnings("unused")
+    var unused = checkCodeOwnerConfigFilesIn(project); // shouldn't throw an AuthException
   }
 
   @Test
