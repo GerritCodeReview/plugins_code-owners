@@ -16,7 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.gerrit.common.Nullable;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
@@ -56,7 +56,7 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
   }
 
   @Override
-  public ImmutableList<String> getUserMessages(Throwable throwable, @Nullable String traceId) {
+  public ImmutableList<String> getUserMessages(Throwable throwable, ImmutableSet<String> traceId) {
     Optional<InvalidPluginConfigurationException> invalidPluginConfigurationException =
         getInvalidPluginConfigurationCause(throwable);
     if (invalidPluginConfigurationException.isPresent()) {
