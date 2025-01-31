@@ -18,8 +18,10 @@ import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalSer
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.gerrit.entities.Change;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.AuthException;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.git.receive.PluginPushOption;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -30,21 +32,23 @@ import com.google.inject.Singleton;
 @Singleton
 public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption {
   public static final String NAME = "skip-validation";
-
-  private static final String DESCRIPTION = "skips the code owner config validation";
+  public static final String DESCRIPTION = "skips the code owner config validation";
 
   private final String pluginName;
   private final PermissionBackend permissionBackend;
   private final SkipCodeOwnerConfigValidationCapability skipCodeOwnerConfigValidationCapability;
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
 
   @Inject
   SkipCodeOwnerConfigValidationPushOption(
       @PluginName String pluginName,
       PermissionBackend permissionBackend,
-      SkipCodeOwnerConfigValidationCapability skipCodeOwnerConfigValidationCapability) {
+      SkipCodeOwnerConfigValidationCapability skipCodeOwnerConfigValidationCapability,
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
     this.pluginName = pluginName;
     this.permissionBackend = permissionBackend;
     this.skipCodeOwnerConfigValidationCapability = skipCodeOwnerConfigValidationCapability;
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
   }
 
   @Override
@@ -55,6 +59,14 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
   @Override
   public String getDescription() {
     return DESCRIPTION;
+  }
+
+  @Override
+  public boolean isOptionEnabled(Change change) {
+    return !codeOwnersPluginConfiguration
+            .getProjectConfig(change.getProject())
+            .isDisabled(change.getDest().branch())
+        && canSkipCodeOwnerConfigValidation();
   }
 
   /**
@@ -86,7 +98,7 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
 
     String value = values.get(0);
     if (Boolean.parseBoolean(value) || value.isEmpty()) {
-      canSkipCodeOwnerConfigValidation();
+      checkCanSkipCodeOwnerConfigValidation();
       return true;
     }
 
@@ -98,11 +110,25 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
     throw new InvalidValueException(values);
   }
 
-  private void canSkipCodeOwnerConfigValidation() throws AuthException {
+  private void checkCanSkipCodeOwnerConfigValidation() throws AuthException {
     try {
       permissionBackend
           .currentUser()
           .check(skipCodeOwnerConfigValidationCapability.getPermission());
+    } catch (PermissionBackendException e) {
+      throw newInternalServerError(
+          String.format(
+              "Failed to check %s~%s capability",
+              pluginName, SkipCodeOwnerConfigValidationCapability.ID),
+          e);
+    }
+  }
+
+  private boolean canSkipCodeOwnerConfigValidation() {
+    try {
+      return permissionBackend
+          .currentUser()
+          .test(skipCodeOwnerConfigValidationCapability.getPermission());
     } catch (PermissionBackendException e) {
       throw newInternalServerError(
           String.format(
