@@ -20,6 +20,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "13c7b85d_4ac31f39",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2025-01-31T16:27:59Z",
+      "side": 1,
+      "message": "Maybe link a bug?",
+      "revId": "90a6353fc185dde8dbb4f9e3f05842f687bae6ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "7390726a_5bbe9d52",
         "filename": "java/com/google/gerrit/plugins/codeowners/validation/SkipCodeOwnerConfigValidationPushOption.java",
         "patchSetId": 1
