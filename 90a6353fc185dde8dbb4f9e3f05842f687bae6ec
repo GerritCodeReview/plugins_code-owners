@@ -35,6 +35,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9533d69f_de132022",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-02-03T07:03:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "13c7b85d_4ac31f39",
+      "revId": "90a6353fc185dde8dbb4f9e3f05842f687bae6ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7390726a_5bbe9d52",
@@ -48,6 +66,30 @@
       "writtenOn": "2025-01-31T16:27:40Z",
       "side": 1,
       "message": "just for my own understanding\n\nWill this cause the entire GET request to fail if this check fails?",
+      "range": {
+        "startLine": 133,
+        "startChar": 6,
+        "endLine": 138,
+        "endChar": 5
+      },
+      "revId": "90a6353fc185dde8dbb4f9e3f05842f687bae6ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3f03894e_310eb1e9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/SkipCodeOwnerConfigValidationPushOption.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-02-03T07:03:39Z",
+      "side": 1,
+      "message": "Yes, exactly. Any exception that is not a RestApiException will cause the request to fail with \"500 internal server error\".",
+      "parentUuid": "7390726a_5bbe9d52",
       "range": {
         "startLine": 133,
         "startChar": 6,
