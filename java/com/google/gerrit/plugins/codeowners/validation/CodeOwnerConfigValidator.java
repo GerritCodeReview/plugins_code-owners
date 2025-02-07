@@ -306,15 +306,15 @@ public class CodeOwnerConfigValidator
       } else {
         try (InMemoryInserter ins = new InMemoryInserter(repository);
             ObjectReader reader = ins.newReader();
-            RevWalk rw = new RevWalk(reader)) {
+            RevWalk rw = new RevWalk(reader);
+            RepoView repoView = new RepoView(repository, rw, ins)) {
           ChangeNotes changeNotes =
               changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
           PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
           IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
           validationResult =
               validateCodeOwnerConfig(
-                  diffOperationsForCommitValidationFactory.create(
-                      new RepoView(repository, rw, ins), ins),
+                  diffOperationsForCommitValidationFactory.create(repoView, ins),
                   branchNameKey,
                   commit,
                   patchSetUploader,
