@@ -79,7 +79,6 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
                     SkipCodeOwnerConfigValidationPushOption.DESCRIPTION)));
   }
 
-  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/heads/master")
   @Test
   public void codeOwnersSkipOptionIsOmittedIfUserCannotSkipTheCodeOwnersValidation()
       throws Exception {
@@ -87,7 +86,7 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     // capability.
     requestScopeOperations.setApiUser(user.id());
 
-    Change.Id changeId = changeOperations.newChange().project(project).branch("master").create();
+    Change.Id changeId = changeOperations.newChange().project(project).create();
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions).isEmpty();
