@@ -18,11 +18,11 @@ import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalSer
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.gerrit.entities.Change;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.git.receive.PluginPushOption;
+import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
@@ -62,10 +62,10 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
   }
 
   @Override
-  public boolean isOptionEnabled(Change change) {
+  public boolean isOptionEnabled(ChangeNotes changeNotes) {
     return !codeOwnersPluginConfiguration
-            .getProjectConfig(change.getProject())
-            .isDisabled(change.getDest().branch())
+            .getProjectConfig(changeNotes.getProjectName())
+            .isDisabled(changeNotes.getChange().getDest().branch())
         && canSkipCodeOwnerConfigValidation();
   }
 
