@@ -75,18 +75,21 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
               .add("project.config", "INVALID")
               .create();
 
-      CommitReceivedEvent receiveEvent = new CommitReceivedEvent();
-      receiveEvent.project =
-          projectCache.get(project).orElseThrow(illegalState(project)).getProject();
-      receiveEvent.refName = RefNames.REFS_CONFIG;
-      receiveEvent.commit = commit;
-      receiveEvent.revWalk = testRepo.getRevWalk();
-      receiveEvent.repoConfig = new Config();
-      receiveEvent.diffOperations = diffOperationsForCommitValidationFactory.create(repoView, ins);
-      CommitValidationException exception =
-          assertThrows(
-              CommitValidationException.class,
-              () -> codeOwnersPluginConfigValidator.onCommitReceived(receiveEvent));
+      CommitValidationException exception;
+      try (CommitReceivedEvent receiveEvent = new CommitReceivedEvent()) {
+        receiveEvent.project =
+            projectCache.get(project).orElseThrow(illegalState(project)).getProject();
+        receiveEvent.refName = RefNames.REFS_CONFIG;
+        receiveEvent.commit = commit;
+        receiveEvent.revWalk = testRepo.getRevWalk();
+        receiveEvent.repoConfig = new Config();
+        receiveEvent.diffOperations =
+            diffOperationsForCommitValidationFactory.create(repoView, ins);
+        exception =
+            assertThrows(
+                CommitValidationException.class,
+                () -> codeOwnersPluginConfigValidator.onCommitReceived(receiveEvent));
+      }
       assertThat(exception)
           .hasMessageThat()
           .isEqualTo(
