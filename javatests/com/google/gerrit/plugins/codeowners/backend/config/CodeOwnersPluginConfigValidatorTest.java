@@ -66,7 +66,8 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
             new TestRepository<>(repoManager.openRepository(project));
         ObjectInserter ins = testRepo.getRepository().newObjectInserter();
         ObjectReader reader = ins.newReader();
-        RevWalk revWalk = new RevWalk(reader)) {
+        RevWalk revWalk = new RevWalk(reader);
+        RepoView repoView = new RepoView(testRepo.getRepository(), revWalk, ins)) {
       RevCommit commit =
           testRepo
               .commit()
@@ -81,9 +82,7 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
       receiveEvent.commit = commit;
       receiveEvent.revWalk = testRepo.getRevWalk();
       receiveEvent.repoConfig = new Config();
-      receiveEvent.diffOperations =
-          diffOperationsForCommitValidationFactory.create(
-              new RepoView(testRepo.getRepository(), revWalk, ins), ins);
+      receiveEvent.diffOperations = diffOperationsForCommitValidationFactory.create(repoView, ins);
       CommitValidationException exception =
           assertThrows(
               CommitValidationException.class,
