@@ -21,21 +21,48 @@ import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.change.ChangeOperations;
+import com.google.gerrit.acceptance.testsuite.change.TestChangeCreation;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.common.ValidationOptionInfo;
 import com.google.gerrit.extensions.common.ValidationOptionInfos;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
+import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationCapability;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationPushOption;
 import com.google.inject.Inject;
+import org.eclipse.jgit.lib.ObjectId;
+import org.junit.Before;
 import org.junit.Test;
 
 public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwnersIT {
+  private static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
   @Inject private ChangeOperations changeOperations;
   @Inject private ProjectOperations projectOperations;
   @Inject private RequestScopeOperations requestScopeOperations;
+
+  private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
+  private ProtoCodeOwnerConfigParser protoCodeOwnerConfigParser;
+
+  @Before
+  public void setUpCodeOwnersPlugin() throws Exception {
+    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
+    findOwnersCodeOwnerConfigParser =
+        plugin.getSysInjector().getInstance(FindOwnersCodeOwnerConfigParser.class);
+    protoCodeOwnerConfigParser =
+        plugin.getSysInjector().getInstance(ProtoCodeOwnerConfigParser.class);
+  }
 
   @Test
   public void getCodeOwnersSkipOptionAsAdmin() throws Exception {
@@ -43,8 +70,7 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     // implicitly assigned.
     requestScopeOperations.setApiUser(admin.id());
 
-    Change.Id changeId = changeOperations.newChange().project(project).create();
-
+    Change.Id changeId = createChangeWithCodeOwnerConfigFile(project);
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions)
@@ -66,9 +92,7 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
         .update();
 
     requestScopeOperations.setApiUser(user.id());
-
-    Change.Id changeId = changeOperations.newChange().project(project).create();
-
+    Change.Id changeId = createChangeWithCodeOwnerConfigFile(project);
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions)
@@ -86,7 +110,7 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     // capability.
     requestScopeOperations.setApiUser(user.id());
 
-    Change.Id changeId = changeOperations.newChange().project(project).create();
+    Change.Id changeId = createChangeWithCodeOwnerConfigFile(project);
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions).isEmpty();
@@ -96,7 +120,7 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
   @Test
   public void codeOwnersSkipOptionIsOmittedIfCodeOwnersFunctionalityIsDisabledForProject()
       throws Exception {
-    Change.Id changeId = changeOperations.newChange().project(project).create();
+    Change.Id changeId = createChangeWithCodeOwnerConfigFile(project);
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions).isEmpty();
@@ -106,9 +130,57 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
   @Test
   public void codeOwnersSkipOptionIsOmittedIfCodeOwnersFunctionalityIsDisabledForBranch()
       throws Exception {
-    Change.Id changeId = changeOperations.newChange().project(project).branch("master").create();
+    Change.Id changeId = createChangeWithCodeOwnerConfigFile(project, "master");
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions).isEmpty();
+  }
+
+  @Test
+  public void codeOwnersSkipOptionIsOmittedIfChangeDoesNotTouchCodeOwnerConfigs() throws Exception {
+    requestScopeOperations.setApiUser(admin.id());
+    Change.Id changeId = changeOperations.newChange().project(project).create();
+    ValidationOptionInfos validationOptionsInfos =
+        gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
+    assertThat(validationOptionsInfos.validationOptions).isEmpty();
+  }
+
+  private Change.Id createChangeWithCodeOwnerConfigFile(Project.NameKey project) throws Exception {
+    return createChangeWithCodeOwnerConfigFile(project, /* branch= */ null);
+  }
+
+  private Change.Id createChangeWithCodeOwnerConfigFile(
+      Project.NameKey project, @Nullable String branch) throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    String codeOwnerConfigFile =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath();
+
+    TestChangeCreation.Builder testChangeCreationBuilder =
+        changeOperations.newChange().project(project);
+    if (branch != null) {
+      testChangeCreationBuilder.branch(branch);
+    }
+
+    return testChangeCreationBuilder
+        .file(codeOwnerConfigFile)
+        .content(
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()))
+        .create();
+  }
+
+  private String format(CodeOwnerConfig codeOwnerConfig) throws Exception {
+    if (backendConfig.getDefaultBackend() instanceof FindOwnersBackend) {
+      return findOwnersCodeOwnerConfigParser.formatAsString(codeOwnerConfig);
+    } else if (backendConfig.getDefaultBackend() instanceof ProtoBackend) {
+      return protoCodeOwnerConfigParser.formatAsString(codeOwnerConfig);
+    }
+
+    throw new IllegalStateException(
+        String.format(
+            "unknown code owner backend: %s",
+            backendConfig.getDefaultBackend().getClass().getName()));
   }
 }

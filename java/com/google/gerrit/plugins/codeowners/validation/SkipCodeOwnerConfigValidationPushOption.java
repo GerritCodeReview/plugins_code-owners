@@ -20,13 +20,19 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.AuthException;
+import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.PluginPushOption;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
+import java.nio.file.Path;
 
 /** Push option that allows to skip the code owner config validation. */
 @Singleton
@@ -38,17 +44,20 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
   private final PermissionBackend permissionBackend;
   private final SkipCodeOwnerConfigValidationCapability skipCodeOwnerConfigValidationCapability;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final ChangedFiles changedFiles;
 
   @Inject
   SkipCodeOwnerConfigValidationPushOption(
       @PluginName String pluginName,
       PermissionBackend permissionBackend,
       SkipCodeOwnerConfigValidationCapability skipCodeOwnerConfigValidationCapability,
-      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      ChangedFiles changedFiles) {
     this.pluginName = pluginName;
     this.permissionBackend = permissionBackend;
     this.skipCodeOwnerConfigValidationCapability = skipCodeOwnerConfigValidationCapability;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.changedFiles = changedFiles;
   }
 
   @Override
@@ -66,7 +75,39 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
     return !codeOwnersPluginConfiguration
             .getProjectConfig(changeNotes.getProjectName())
             .isDisabled(changeNotes.getChange().getDest().branch())
-        && canSkipCodeOwnerConfigValidation();
+        && canSkipCodeOwnerConfigValidation()
+        && hasModifiedCodeOwnerConfigFiles(changeNotes);
+  }
+
+  private boolean hasModifiedCodeOwnerConfigFiles(ChangeNotes changeNotes) {
+    CodeOwnerBackend codeOwnerBackend =
+        codeOwnersPluginConfiguration
+            .getProjectConfig(changeNotes.getProjectName())
+            .getBackend(changeNotes.getChange().getDest().branch());
+
+    // For merge commits, always do the comparison against the destination branch
+    // (MergeCommitStrategy.ALL_CHANGED_FILES) as this is what CodeOwnerConfigValidator does.
+    try {
+      return changedFiles
+          .getFromDiffCache(
+              changeNotes.getProjectName(),
+              changeNotes.getCurrentPatchSet().commitId(),
+              MergeCommitStrategy.ALL_CHANGED_FILES)
+          .stream()
+          // filter out deletions (files without new path)
+          .filter(changedFile -> changedFile.newPath().isPresent())
+          .anyMatch(
+              changedFile ->
+                  codeOwnerBackend.isCodeOwnerConfigFile(
+                      changeNotes.getProjectName(),
+                      Path.of(changedFile.newPath().get().toString()).getFileName().toString()));
+    } catch (IOException | DiffNotAvailableException e) {
+      throw newInternalServerError(
+          String.format(
+              "Failed to check changed files of change %s in project %s",
+              changeNotes.getChangeId(), changeNotes.getProjectName()),
+          e);
+    }
   }
 
   /**
