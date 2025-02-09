@@ -391,11 +391,11 @@ public class CodeOwnerConfigValidator
               InMemoryInserter ins = new InMemoryInserter(repo);
               ObjectReader reader = ins.newReader();
               RevWalk rw = new RevWalk(reader);
-              RevWalk revWalk = new RevWalk(reader)) {
+              RevWalk revWalk = new RevWalk(reader);
+              RepoView repoView = new RepoView(repo, rw, ins)) {
             validationResult =
                 validateCodeOwnerConfig(
-                    diffOperationsForCommitValidationFactory.create(
-                        new RepoView(repo, rw, ins), ins),
+                    diffOperationsForCommitValidationFactory.create(repoView, ins),
                     refReceivedEvent.getBranchNameKey(),
                     revWalk.parseCommit(refReceivedEvent.command.getNewId()),
                     refReceivedEvent.user,
