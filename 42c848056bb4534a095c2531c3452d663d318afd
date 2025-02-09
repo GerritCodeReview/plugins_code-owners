@@ -22,6 +22,30 @@
       },
       "revId": "42c848056bb4534a095c2531c3452d663d318afd",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "12d0c56e_5de7631d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1006192
+      },
+      "writtenOn": "2025-02-09T10:19:13Z",
+      "side": 1,
+      "message": "Fixed with I096453aed2 @ekempin@google.com could you double-check 🙏 ?",
+      "parentUuid": "d303b616_72a9c667",
+      "range": {
+        "startLine": 398,
+        "startChar": 24,
+        "endLine": 398,
+        "endChar": 51
+      },
+      "revId": "42c848056bb4534a095c2531c3452d663d318afd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
