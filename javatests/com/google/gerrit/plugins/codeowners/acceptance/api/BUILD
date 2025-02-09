@@ -8,6 +8,7 @@ package(
 [acceptance_tests(
     srcs = [f],
     group = f[:f.index(".")],
+    vm_args = ["-Xmx512m"],
     deps = [
         "testbases",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
