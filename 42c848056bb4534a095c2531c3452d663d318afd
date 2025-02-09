@@ -1,5 +1,29 @@
 {
-  "comments": [],
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d303b616_72a9c667",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1006192
+      },
+      "writtenOn": "2025-02-09T10:11:11Z",
+      "side": 1,
+      "message": "This is also leaked: `RepoView` should be in the try-with-resource enclosure.",
+      "range": {
+        "startLine": 398,
+        "startChar": 24,
+        "endLine": 398,
+        "endChar": 51
+      },
+      "revId": "42c848056bb4534a095c2531c3452d663d318afd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ],
   "submitRequirementResults": [
     {
       "submitRequirement": {
