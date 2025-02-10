@@ -16,6 +16,23 @@
       "message": "I\u0027ve verified this change with VisualVM and, after the heap increase, the JVM heap does not struggle anymore.",
       "revId": "bdbf672812b88f4d03d00c53b438e559efad36c3",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d2c296e0_985a79ae",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-02-10T07:29:11Z",
+      "side": 1,
+      "message": "Thanks!",
+      "revId": "bdbf672812b88f4d03d00c53b438e559efad36c3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
