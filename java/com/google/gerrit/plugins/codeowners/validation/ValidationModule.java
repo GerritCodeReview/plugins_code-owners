@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.validation;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.CapabilityDefinition;
 import com.google.gerrit.extensions.registration.DynamicSet;
-import com.google.gerrit.server.git.receive.PluginPushOption;
+import com.google.gerrit.server.PluginPushOption;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.MergeValidationListener;
 import com.google.gerrit.server.git.validators.RefOperationValidationListener;
