@@ -18,6 +18,8 @@ import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalSer
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
@@ -77,6 +79,14 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
             .isDisabled(changeNotes.getChange().getDest().branch())
         && canSkipCodeOwnerConfigValidation()
         && hasModifiedCodeOwnerConfigFiles(changeNotes);
+  }
+
+  // TODO: Extend check to contain hasModifiedCodeOwnerConfigFiles as well
+  // Callers would need to specify the list of files for that.
+  @Override
+  public boolean isOptionEnabled(Project.NameKey project, BranchNameKey branch) {
+    return !codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled(branch.branch())
+        && canSkipCodeOwnerConfigValidation();
   }
 
   private boolean hasModifiedCodeOwnerConfigFiles(ChangeNotes changeNotes) {

@@ -73,7 +73,16 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     Change.Id changeId = createChangeWithCodeOwnerConfigFile(project);
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
+    ValidationOptionInfos branchValidationOptionInfos =
+        gApi.projects().name(project.get()).branch("refs/heads/master").getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions)
+        .isEqualTo(
+            ImmutableList.of(
+                new ValidationOptionInfo(
+                    "code-owners~" + SkipCodeOwnerConfigValidationPushOption.NAME,
+                    SkipCodeOwnerConfigValidationPushOption.DESCRIPTION)));
+
+    assertThat(branchValidationOptionInfos.validationOptions)
         .isEqualTo(
             ImmutableList.of(
                 new ValidationOptionInfo(
@@ -95,7 +104,16 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     Change.Id changeId = createChangeWithCodeOwnerConfigFile(project);
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
+    ValidationOptionInfos branchValidationOptionInfos =
+        gApi.projects().name(project.get()).branch("refs/heads/master").getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions)
+        .isEqualTo(
+            ImmutableList.of(
+                new ValidationOptionInfo(
+                    "code-owners~" + SkipCodeOwnerConfigValidationPushOption.NAME,
+                    SkipCodeOwnerConfigValidationPushOption.DESCRIPTION)));
+
+    assertThat(branchValidationOptionInfos.validationOptions)
         .isEqualTo(
             ImmutableList.of(
                 new ValidationOptionInfo(
@@ -113,7 +131,10 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     Change.Id changeId = createChangeWithCodeOwnerConfigFile(project);
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
+    ValidationOptionInfos branchValidationOptionInfos =
+        gApi.projects().name(project.get()).branch("refs/heads/master").getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions).isEmpty();
+    assertThat(branchValidationOptionInfos.validationOptions).isEmpty();
   }
 
   @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
@@ -123,7 +144,10 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     Change.Id changeId = createChangeWithCodeOwnerConfigFile(project);
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
+    ValidationOptionInfos branchValidationOptionInfos =
+        gApi.projects().name(project.get()).branch("refs/heads/master").getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions).isEmpty();
+    assertThat(branchValidationOptionInfos.validationOptions).isEmpty();
   }
 
   @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/heads/master")
@@ -133,7 +157,10 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     Change.Id changeId = createChangeWithCodeOwnerConfigFile(project, "master");
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
+    ValidationOptionInfos branchValidationOptionInfos =
+        gApi.projects().name(project.get()).branch("refs/heads/master").getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions).isEmpty();
+    assertThat(branchValidationOptionInfos.validationOptions).isEmpty();
   }
 
   @Test
@@ -142,7 +169,15 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
     Change.Id changeId = changeOperations.newChange().project(project).create();
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
+    ValidationOptionInfos branchValidationOptionInfos =
+        gApi.projects().name(project.get()).branch("refs/heads/master").getValidationOptions();
     assertThat(validationOptionsInfos.validationOptions).isEmpty();
+    assertThat(branchValidationOptionInfos.validationOptions)
+        .isEqualTo(
+            ImmutableList.of(
+                new ValidationOptionInfo(
+                    "code-owners~" + SkipCodeOwnerConfigValidationPushOption.NAME,
+                    SkipCodeOwnerConfigValidationPushOption.DESCRIPTION)));
   }
 
   private Change.Id createChangeWithCodeOwnerConfigFile(Project.NameKey project) throws Exception {
