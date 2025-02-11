@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "54caed66_8cc8778e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/SkipCodeOwnerConfigValidationPushOption.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-02-11T07:42:34Z",
+      "side": 1,
+      "message": "Implementing this is not possible, since there is no change available. Maybe just turn this TODO into a comment, saying that we cannot check if code owner config files are modified, because there is no change yet.",
+      "revId": "f4632d9a6fa6df748d46c4503fa68763c195cbde",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9c1a8587_939190d1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/SkipCodeOwnerConfigValidationPushOption.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-02-11T07:42:34Z",
+      "side": 1,
+      "message": "Please cover this method by a test in SkipCodeOwnerConfigValidationPushOptionIT.",
+      "revId": "f4632d9a6fa6df748d46c4503fa68763c195cbde",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
