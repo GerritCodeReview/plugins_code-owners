@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "575813c1_83cb1d1d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/SkipCodeOwnerConfigValidationPushOption.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-02-11T10:53:22Z",
+      "side": 1,
+      "message": "nit: contain",
+      "range": {
+        "startLine": 84,
+        "startChar": 27,
+        "endLine": 84,
+        "endChar": 35
+      },
+      "revId": "03bad7c68aae8dfd04d81b669560211ee0ab4edf",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
