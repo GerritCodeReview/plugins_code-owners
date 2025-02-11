@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1f73fede_178b1c29",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/SkipCodeOwnerConfigValidationPushOption.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2025-02-11T10:32:44Z",
+      "side": 1,
+      "message": "Updated the TODO as discussed.",
+      "parentUuid": "54caed66_8cc8778e",
+      "revId": "f4632d9a6fa6df748d46c4503fa68763c195cbde",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9c1a8587_939190d1",
@@ -31,6 +49,24 @@
       "writtenOn": "2025-02-11T07:42:34Z",
       "side": 1,
       "message": "Please cover this method by a test in SkipCodeOwnerConfigValidationPushOptionIT.",
+      "revId": "f4632d9a6fa6df748d46c4503fa68763c195cbde",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4856c2af_4ae73e99",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/SkipCodeOwnerConfigValidationPushOption.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2025-02-11T10:32:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c1a8587_939190d1",
       "revId": "f4632d9a6fa6df748d46c4503fa68763c195cbde",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
