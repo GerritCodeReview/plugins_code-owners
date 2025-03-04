@@ -130,6 +130,13 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void nonVisibleBranchesAreSkipped() throws Exception {
+    projectOperations
+        .allProjectsForUpdate()
+        .add(
+            allowCapability("code-owners-" + CheckCodeOwnerConfigFilesCapability.ID)
+                .group(REGISTERED_USERS))
+        .update();
+
     String branchName = "non-visible";
     createBranch(BranchNameKey.create(project, branchName));
 
@@ -139,9 +146,10 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
         .add(block(Permission.READ).ref(RefNames.fullName(branchName)).group(REGISTERED_USERS))
         .update();
 
+    // Use a non-admin user, since admins can always see all refs.
+    requestScopeOperations.setApiUser(user.id());
     assertThat(checkCodeOwnerConfigFilesIn(project))
-        .containsExactly(
-            "refs/heads/master", ImmutableMap.of(), "refs/meta/config", ImmutableMap.of());
+        .containsExactly("refs/heads/master", ImmutableMap.of());
   }
 
   @Test
@@ -368,11 +376,20 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   @Test
   public void cannotValidateNonVisibleBranch() throws Exception {
     projectOperations
-        .project(project)
-        .forUpdate()
-        .add(block(Permission.READ).ref("refs/*").group(REGISTERED_USERS))
+        .allProjectsForUpdate()
+        .add(
+            allowCapability("code-owners-" + CheckCodeOwnerConfigFilesCapability.ID)
+                .group(REGISTERED_USERS))
         .update();
 
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/heads/master").group(REGISTERED_USERS))
+        .update();
+
+    // Use a non-admin user, since admins can always see all refs.
+    requestScopeOperations.setApiUser(user.id());
     UnprocessableEntityException exception =
         assertThrows(
             UnprocessableEntityException.class,

@@ -22,6 +22,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
@@ -54,6 +55,7 @@ import org.junit.Test;
  */
 public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   @Inject private ProjectOperations projectOperations;
+  @Inject private RequestScopeOperations requestScopeOperations;
 
   @Before
   public void setup() throws Exception {
@@ -220,6 +222,9 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         .forUpdate()
         .add(block(Permission.READ).ref("refs/heads/master").group(REGISTERED_USERS))
         .update();
+
+    // Use a non-admin user, since admins can always see all refs.
+    requestScopeOperations.setApiUser(user.id());
 
     String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefaultBackend());
     configureBackend(project, "master", otherBackendId);
