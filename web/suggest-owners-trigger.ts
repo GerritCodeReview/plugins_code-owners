@@ -16,7 +16,7 @@
  */
 import {CodeOwnersModelMixin} from './code-owners-model-mixin';
 import {css, html, LitElement, nothing} from 'lit';
-import {customElement} from 'lit/decorators';
+import {customElement} from 'lit/decorators.js';
 
 const base = CodeOwnersModelMixin(LitElement);
 
