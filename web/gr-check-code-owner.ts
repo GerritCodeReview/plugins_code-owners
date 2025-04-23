@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {customElement, query, property, state} from 'lit/decorators';
+import {customElement, query, property, state} from 'lit/decorators.js';
 import {css, CSSResult, html, LitElement} from 'lit';
 import {classMap} from 'lit/directives/class-map.js';
 import {PluginApi} from '@gerritcodereview/typescript-api/plugin';
@@ -69,8 +69,8 @@ export class GrCheckCodeOwner extends LitElement {
 
   static override get styles() {
     return [
-      window.Gerrit.styles.font as CSSResult,
-      window.Gerrit.styles.form as CSSResult,
+      window.Gerrit?.styles.font as CSSResult,
+      window.Gerrit?.styles.form as CSSResult,
       css`
         main {
           margin: 2em auto;
