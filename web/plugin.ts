@@ -30,7 +30,7 @@ import {
 import {CodeOwnersModelMixinInterface} from './code-owners-model-mixin';
 import './gr-check-code-owner';
 
-window.Gerrit.install(plugin => {
+window.Gerrit?.install(plugin => {
   const restApi = plugin.restApi();
   const reporting = plugin.reporting();
 

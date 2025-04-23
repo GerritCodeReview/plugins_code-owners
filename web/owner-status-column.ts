@@ -21,7 +21,7 @@ import {
   RevisionPatchSetNum,
 } from '@gerritcodereview/typescript-api/rest-api';
 import {css, html, LitElement, nothing, PropertyValues} from 'lit';
-import {customElement, property} from 'lit/decorators';
+import {customElement, property} from 'lit/decorators.js';
 import {OwnerStatus} from './code-owners-api';
 import {FileStatus, PluginState} from './code-owners-model';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin';

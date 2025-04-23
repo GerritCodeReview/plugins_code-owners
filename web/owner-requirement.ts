@@ -19,8 +19,8 @@ import {CodeOwnersModelMixin} from './code-owners-model-mixin';
 import {showPluginFailedMessage} from './code-owners-banner';
 import {isPluginErrorState, UserRole} from './code-owners-model';
 import {css, html, LitElement} from 'lit';
-import {customElement} from 'lit/decorators';
-import {when} from 'lit/directives/when';
+import {customElement} from 'lit/decorators.js';
+import {when} from 'lit/directives/when.js';
 import {
   ApprovalInfo,
   DetailedLabelInfo,

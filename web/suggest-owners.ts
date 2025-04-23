@@ -17,10 +17,10 @@
 import {CodeOwnersModelMixin} from './code-owners-model-mixin';
 import {SuggestionsState, SuggestionsType} from './code-owners-model';
 import {getDisplayOwnersGroups, GroupedFiles} from './suggest-owners-util';
-import {customElement, property, state} from 'lit/decorators';
+import {customElement, property, state} from 'lit/decorators.js';
 import {css, html, LitElement, nothing, PropertyValues} from 'lit';
-import {when} from 'lit/directives/when';
-import {ifDefined} from 'lit/directives/if-defined';
+import {when} from 'lit/directives/when.js';
+import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeOwnerInfo, CodeOwnersInfo, FetchedFile} from './code-owners-api';
 import {
   AccountId,
