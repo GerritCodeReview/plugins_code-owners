@@ -27,7 +27,7 @@ import {
   UserRole,
 } from './code-owners-model';
 import {LitElement, PropertyValues} from 'lit';
-import {property, state} from 'lit/decorators';
+import {property, state} from 'lit/decorators.js';
 import {ChangeInfo} from '@gerritcodereview/typescript-api/rest-api';
 import {ReportingPluginApi} from '@gerritcodereview/typescript-api/reporting';
 import {RestPluginApi} from '@gerritcodereview/typescript-api/rest';

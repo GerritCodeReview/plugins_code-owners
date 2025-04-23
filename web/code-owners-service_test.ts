@@ -9,6 +9,7 @@ import {
 } from '@gerritcodereview/typescript-api/rest-api.js';
 import {SuggestionsType} from './code-owners-model.js';
 import {assert} from '@open-wc/testing';
+import sinon from 'sinon';
 
 function flush() {
   return new Promise((resolve, _reject) => {

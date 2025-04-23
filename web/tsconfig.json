@@ -3,9 +3,9 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     /* outDir for IDE (overridden by Bazel rule arg) */
-    "outDir": "../../../.ts-out/plugins/code-owners/ui",
+    "outDir": "../../../.ts-out/plugins/code-owners/ui"
   },
   "include": [
-    "**/*",
-  ],
+    "**/*"
+  ]
 }
