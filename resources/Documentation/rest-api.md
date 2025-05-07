@@ -107,7 +107,7 @@ _'POST /projects/[\{project-name\}](../../../Documentation/rest-api-projects.htm
 Checks/validates the code owner config files in a project.
 
 Requires that the caller is an owner of the project or has the
-link:checkCodeOwnerConfigFiles[Check Code Owner Config Files] global capability.
+[Check Code Owner Config Files](#checkCodeOwnerConfigFiles) global capability.
 
 Input options can be set in the request body as a
 [CheckCodeOwnerConfigFilesInput](#check-code-owner-config-files-input) entity.
@@ -277,7 +277,7 @@ not work as intended. The response contains debug logs that may point out issues
 with the code owner configuration.
 
 This REST endpoint is available as a
-[Self Service](@URL@/x/code-owners/check-code-owner) so that users can easily
+[Self Service](@URL@x/code-owners/check-code-owner) so that users can easily
 inspect issues with code ownerships.
 
 #### Request
