@@ -410,19 +410,6 @@ require code-owner approvals, but noone can provide nor override them).
 define default code owners in the `refs/meta/config` branch, that then apply to
 all branches (also see [config guide](config-guide.html#codeOwners)).
 
-### <a id="disableFindOwnersPlugin">11. Disable/uninstall the find-owners plugin
-
-If the `find-owners` plugin has been used so far, you likely want to
-disable/uninstall it after the `code-owners` plugin has been set up. Before
-doing this it is important to remove all usages of the [find-owners Prolog
-predicates](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/resources/Documentation/config.md#submit-rules-and-filters)
-from all Prolog submit rules and filters. If the find-owners Prolog predicates
-are still used when the `find-owners` plugin is disabled/uninstalled, they can
-no longer be resolved which breaks the submit rules using them. If submit rules
-are broken, changes cannot be submitted, which most users would consider an
-outage. Hence before disabling/uninstalling the `find-owners` plugin you want
-to be sure that the find-owners Prolog predicates are no longer used.
-
 ---
 
 Back to [@PLUGIN@ documentation index](index.html)
