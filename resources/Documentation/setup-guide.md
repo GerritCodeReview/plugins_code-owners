@@ -171,8 +171,13 @@ should be opted-out (requires to be a project owner).
 `code-owners.config`:
 ```
   [codeOwners]
+    disabledBranch = refs/meta/config
     disabledBranch = ^refs/heads/stable-.*
 ```
+
+**TIP:** Consider disabling the code owners functionality for `refs/meta/config`
+branches, so that changes to the project configuration do not require code owner
+approvals.
 
 ### <a id="configureCodeOwnerApproval">4. Configure the label vote that should count as code owner approval
 
