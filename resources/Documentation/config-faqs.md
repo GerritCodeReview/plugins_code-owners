@@ -30,8 +30,9 @@ To update the `code-owners.config` file do (requires to be a project owner):
   refs/meta/config && git checkout FETCH_HEAD`)
 * create or edit the `code-owners.config` file
 * commit the changes
-* push the newly created commit back to the `refs/meta/config` branch (e.g. `git
-  push origin HEAD:refs/meta/config`)
+* push the newly created commit for review to the `refs/meta/config` branch
+  (e.g. `git push origin HEAD:refs/for/refs/meta/config`)
+* get the change approved and submit it
 
 Some of the configuration parameters can also be set via the [Update Code Owner
 Project Config REST endpoint](rest-api.html#update-code-owner-project-config).
