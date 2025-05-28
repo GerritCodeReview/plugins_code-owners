@@ -16,6 +16,24 @@
       "message": "https://gerrit-review.git.corp.google.com/plugins/code-owners/Documentation/setup-guide.html#configureCodeOwnerOverridesAndFallbackCodeOwners\n\nMaybe in a follow up CL but would be nice to have this mentioned here as well, that there are certain branches for which Code Owners should not be checked at all.",
       "revId": "c78a5203f9c94e435206e0849fe61345db21e16c",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ed9e466d_ce380a21",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-05-28T07:55:30Z",
+      "side": 1,
+      "message": "That\u0027s the same guide. People should read this step (3.) before they get to step 6.",
+      "parentUuid": "ec968b23_10f98f92",
+      "revId": "c78a5203f9c94e435206e0849fe61345db21e16c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
