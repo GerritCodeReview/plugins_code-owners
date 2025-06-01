@@ -322,13 +322,15 @@ export class CodeOwnerService {
       info: FetchedOwner;
     }>
   ): Array<FetchedFile> {
-    return files.map(file => {
-      return {
-        path: file.path,
-        info: file.info,
-        status: this.computeFileStatus(codeOwnerStatusMap, file.path),
-      };
-    });
+    return files
+      .map(file => {
+        return {
+          path: file.path,
+          info: file.info,
+          status: this.computeFileStatus(codeOwnerStatusMap, file.path),
+        };
+      })
+      .sort((a, b) => CodeOwnerService.specialFilePathCompare(a.path, b.path));
   }
 
   private isOnNewerPatchset(patchsetId: number) {
@@ -391,5 +393,31 @@ export class CodeOwnerService {
     if (!ownerService) return;
     ownerService.reset();
     ownerService = undefined;
+  }
+
+  // Copied from https://cs.opensource.google/gerrit/gerrit/gerrit/+/master:polygerrit-ui/app/utils/path-list-util.ts;l=10;drc=57014d5ba3e0b48e3372e3aa3c67463cb6e56bca
+  static specialFilePathCompare(a: string, b: string) {
+    const aLastDotIndex = a.lastIndexOf('.');
+    const aExt = a.substr(aLastDotIndex + 1);
+    const aFile = a.substr(0, aLastDotIndex) || a;
+  
+    const bLastDotIndex = b.lastIndexOf('.');
+    const bExt = b.substr(bLastDotIndex + 1);
+    const bFile = b.substr(0, bLastDotIndex) || b;
+  
+    // Sort header files above others with the same base name.
+    const headerExts = ['h', 'hh', 'hxx', 'hpp'];
+    if (aFile.length > 0 && aFile === bFile) {
+      if (headerExts.includes(aExt) && headerExts.includes(bExt)) {
+        return a.localeCompare(b);
+      }
+      if (headerExts.includes(aExt)) {
+        return -1;
+      }
+      if (headerExts.includes(bExt)) {
+        return 1;
+      }
+    }
+    return aFile.localeCompare(bFile) || a.localeCompare(b);
   }
 }
