@@ -268,7 +268,7 @@ public class CodeOwnerResolver {
    * Resolves the given {@link CodeOwnerReference}s to {@link CodeOwner}s.
    *
    * <p>The accounts for the given {@link CodeOwnerReference}s are loaded from the account cache in
-   * parallel (via {@link AccountCache#get(Set)}.
+   * parallel (via {@link AccountCache#get(Collection)}.
    *
    * @param codeOwnerReferences the code owner references that should be resolved
    * @param annotationsByCodeOwnerReference annotations by code owner reference
