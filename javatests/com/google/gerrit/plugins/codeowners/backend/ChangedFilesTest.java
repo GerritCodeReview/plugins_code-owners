@@ -31,6 +31,7 @@ import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.change.ChangeOperations;
+import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.extensions.api.changes.ChangeIdentifier;
 import com.google.gerrit.extensions.api.projects.BranchInput;
@@ -162,12 +163,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   @Test
   public void getFromDiffCacheForChangeThatDeletedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
-    String changeId = createChangeWithFileDeletion(path);
+    TestChange change = createChangeWithFileDeletion(path);
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
             project,
-            getRevisionResource(ChangeIdentifier.byChangeId(changeId)).getPatchSet().commitId(),
+            getRevisionResource(change.id()).getPatchSet().commitId(),
             MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
@@ -181,14 +182,14 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   public void getFromDiffCacheForChangeThatRenamedAFile() throws Exception {
     String oldPath = "/foo/bar/old.txt";
     String newPath = "/foo/bar/new.txt";
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
-    gApi.changes().id(changeId).current().files();
+    gApi.changes().id(change.id()).current().files();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
             project,
-            getRevisionResource(ChangeIdentifier.byChangeId(changeId)).getPatchSet().commitId(),
+            getRevisionResource(change.id()).getPatchSet().commitId(),
             MergeCommitStrategy.ALL_CHANGED_FILES);
     ChangedFileSubject changedFile = assertThatCollection(changedFilesSet).onlyElement();
     changedFile.hasNewPath().value().isEqualTo(Path.of(newPath));

@@ -23,17 +23,17 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
-import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.acceptance.testsuite.change.ChangeOperations;
+import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.extensions.api.changes.PublishChangeEditInput;
+import com.google.gerrit.extensions.api.changes.ChangeIdentifier;
 import com.google.gerrit.extensions.common.ChangeInfo;
-import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
@@ -101,6 +101,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   }
 
   @Inject private ProjectOperations projectOperations;
+  @Inject private ChangeOperations changeOperations;
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
   private BackendConfig backendConfig;
@@ -112,50 +113,56 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
   }
 
-  protected String createChangeWithFileDeletion(Path filePath) throws Exception {
+  protected TestChange createChangeWithFileDeletion(Path filePath) throws Exception {
     return createChangeWithFileDeletion(filePath.toString());
   }
 
-  protected String createChangeWithFileDeletion(String filePath) throws Exception {
-    createChange("Change Adding A File", JgitPath.of(filePath).get(), "file content").getChangeId();
+  protected TestChange createChangeWithFileDeletion(String filePath) throws Exception {
+    ChangeIdentifier baseChangeIdentifier =
+        changeOperations
+            .newChange()
+            .project(project)
+            .commitMessage("Change Adding A File")
+            .file(JgitPath.of(filePath).get())
+            .content("file content")
+            .create();
 
-    PushOneCommit push =
-        pushFactory.create(
-            admin.newIdent(),
-            testRepo,
-            "Change Deleting A File",
-            JgitPath.of(filePath).get(),
-            "file content");
-    Result r = push.rm("refs/for/master");
-    r.assertOkStatus();
-    return r.getChangeId();
+    return changeOperations
+        .newChange()
+        .project(project)
+        .commitMessage("Change Deleting A File")
+        .childOf()
+        .change(baseChangeIdentifier)
+        .file(JgitPath.of(filePath).get())
+        .delete()
+        .createAndGet();
   }
 
-  protected String createChangeWithFileRename(Path oldFilePath, Path newFilePath) throws Exception {
+  protected TestChange createChangeWithFileRename(Path oldFilePath, Path newFilePath)
+      throws Exception {
     return createChangeWithFileRename(oldFilePath.toString(), newFilePath.toString());
   }
 
-  protected String createChangeWithFileRename(String oldFilePath, String newFilePath)
+  protected TestChange createChangeWithFileRename(String oldFilePath, String newFilePath)
       throws Exception {
-    String changeId1 =
-        createChange("Change Adding A File", JgitPath.of(oldFilePath).get(), "file content")
-            .getChangeId();
+    ChangeIdentifier baseChangeIdentifier =
+        changeOperations
+            .newChange()
+            .project(project)
+            .commitMessage("Change Adding A File")
+            .file(JgitPath.of(oldFilePath).get())
+            .content("file content")
+            .create();
 
-    // The PushOneCommit test API doesn't support renaming files in a change. Use the change edit
-    // Java API instead.
-    ChangeInput changeInput = new ChangeInput();
-    changeInput.project = project.get();
-    changeInput.branch = "master";
-    changeInput.subject = "Change Renaming A File";
-    changeInput.baseChange = changeId1;
-    String changeId2 = gApi.changes().create(changeInput).get().changeId;
-    gApi.changes().id(changeId2).edit().create();
-    gApi.changes()
-        .id(changeId2)
-        .edit()
-        .renameFile(JgitPath.of(oldFilePath).get(), JgitPath.of(newFilePath).get());
-    gApi.changes().id(changeId2).edit().publish(new PublishChangeEditInput());
-    return changeId2;
+    return changeOperations
+        .newChange()
+        .project(project)
+        .commitMessage("Change Deleting A File")
+        .childOf()
+        .change(baseChangeIdentifier)
+        .file(JgitPath.of(oldFilePath).get())
+        .renameTo(JgitPath.of(newFilePath).get())
+        .createAndGet();
   }
 
   protected void amendChange(TestAccount testAccount, String changeId) throws Exception {

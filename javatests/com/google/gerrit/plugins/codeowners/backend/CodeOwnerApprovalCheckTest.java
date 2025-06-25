@@ -28,6 +28,7 @@ import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
@@ -137,16 +138,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     TestAccount user2 = accountCreator.user2();
 
     Path path = Path.of("/foo/bar.baz");
-    String changeId = createChangeWithFileDeletion(path);
+    TestChange change = createChangeWithFileDeletion(path);
 
     // Add a reviewer that is not a code owner.
-    gApi.changes().id(changeId).addReviewer(user.email());
+    gApi.changes().id(change.id()).addReviewer(user.email());
 
     // Add a Code-Review+1 (= code owner approval) from a user that is not a code owner.
     requestScopeOperations.setApiUser(user2.id());
-    recommend(changeId);
+    recommend(change.changeId());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -158,16 +160,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     Path oldPath = Path.of("/foo/old.bar");
     Path newPath = Path.of("/foo/new.bar");
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     // Add a reviewer that is not a code owner.
-    gApi.changes().id(changeId).addReviewer(user.email());
+    gApi.changes().id(change.id()).addReviewer(user.email());
 
     // Add a Code-Review+1 (= code owner approval) from a user that is not a code owner.
     requestScopeOperations.setApiUser(user2.id());
-    recommend(changeId);
+    recommend(change.changeId());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -242,16 +245,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsRootCodeOwners(user);
 
     Path path = Path.of("/foo/bar.baz");
-    String changeId = createChangeWithFileDeletion(path);
+    TestChange change = createChangeWithFileDeletion(path);
 
     // Add a reviewer that is a code owner.
-    gApi.changes().id(changeId).addReviewer(user.email());
+    gApi.changes().id(change.id()).addReviewer(user.email());
 
     // Add a Code-Review+1 (= code owner approval) from a user that is not a code owner.
     requestScopeOperations.setApiUser(user2.id());
-    recommend(changeId);
+    recommend(change.changeId());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.deletion(
@@ -270,16 +274,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     Path oldPath = Path.of("/foo/bar/abc.txt");
     Path newPath = Path.of("/foo/baz/abc.txt");
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     // Add a reviewer that is a code owner old path.
-    gApi.changes().id(changeId).addReviewer(user.email());
+    gApi.changes().id(change.id()).addReviewer(user.email());
 
     // Add a Code-Review+1 (= code owner approval) from a user that is not a code owner.
     requestScopeOperations.setApiUser(user2.id());
-    recommend(changeId);
+    recommend(change.changeId());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -301,16 +306,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     Path oldPath = Path.of("/foo/bar/abc.txt");
     Path newPath = Path.of("/foo/baz/abc.txt");
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     // Add a reviewer that is a code owner of the new path.
-    gApi.changes().id(changeId).addReviewer(user.email());
+    gApi.changes().id(change.id()).addReviewer(user.email());
 
     // Add a Code-Review+1 (= code owner approval) from a user that is not a code owner.
     requestScopeOperations.setApiUser(user2.id());
-    recommend(changeId);
+    recommend(change.changeId());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -377,13 +383,14 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsRootCodeOwners(user);
 
     Path path = Path.of("/foo/bar.baz");
-    String changeId = createChangeWithFileDeletion(path);
+    TestChange change = createChangeWithFileDeletion(path);
 
     // Add a Code-Review+1 from a code owner (by default this counts as code owner approval).
     requestScopeOperations.setApiUser(user.id());
-    recommend(changeId);
+    recommend(change.changeId());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.deletion(
@@ -400,14 +407,15 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     Path oldPath = Path.of("/foo/bar/abc.txt");
     Path newPath = Path.of("/foo/baz/abc.txt");
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     // Add a Code-Review+1 from a code owner of the old path (by default this counts as code owner
     // approval).
     requestScopeOperations.setApiUser(user.id());
-    recommend(changeId);
+    recommend(change.changeId());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -427,14 +435,15 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     Path oldPath = Path.of("/foo/bar/abc.txt");
     Path newPath = Path.of("/foo/baz/abc.txt");
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     // Add a Code-Review+1 from a code owner of the new path (by default this counts as code owner
     // approval).
     requestScopeOperations.setApiUser(user.id());
-    recommend(changeId);
+    recommend(change.changeId());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -597,12 +606,12 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsRootCodeOwners(changeOwner, otherCodeOwner);
 
     Path path = Path.of("/foo/bar.baz");
-    String changeId = createChangeWithFileDeletion(path);
+    TestChange change = createChangeWithFileDeletion(path);
 
     if (uploaderMatchesChangeOwner) {
-      amendChange(changeOwner, changeId);
+      amendChange(changeOwner, change.changeId());
     } else {
-      amendChange(otherCodeOwner, changeId);
+      amendChange(otherCodeOwner, change.changeId());
     }
 
     FileCodeOwnerStatus expectedFileCodeOwnerStatus;
@@ -619,7 +628,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
           FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     }
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
@@ -655,15 +665,16 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     Path oldPath = Path.of("/foo/bar/abc.txt");
     Path newPath = Path.of("/foo/baz/abc.txt");
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     if (uploaderMatchesChangeOwner) {
-      amendChange(changeOwner, changeId);
+      amendChange(changeOwner, change.changeId());
     } else {
-      amendChange(otherCodeOwner, changeId);
+      amendChange(otherCodeOwner, change.changeId());
     }
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     FileCodeOwnerStatus expectedFileCodeOwnerStatus;
     if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
       expectedFileCodeOwnerStatus =
@@ -720,15 +731,16 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     Path oldPath = Path.of("/foo/bar/abc.txt");
     Path newPath = Path.of("/foo/baz/abc.txt");
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     if (uploaderMatchesChangeOwner) {
-      amendChange(changeOwner, changeId);
+      amendChange(changeOwner, change.changeId());
     } else {
-      amendChange(otherCodeOwner, changeId);
+      amendChange(otherCodeOwner, change.changeId());
     }
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        getFileCodeOwnerStatuses(change.changeId());
     FileCodeOwnerStatus expectedFileCodeOwnerStatus;
     if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
       expectedFileCodeOwnerStatus =

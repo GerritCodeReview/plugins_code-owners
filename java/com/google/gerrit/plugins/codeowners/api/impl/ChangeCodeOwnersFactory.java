@@ -62,7 +62,7 @@ public class ChangeCodeOwnersFactory {
    */
   private ChangeResource getChangeResource(String changeId) throws RestApiException {
     try {
-      return changesCollection.parse(TopLevelResource.INSTANCE, IdString.fromDecoded(changeId));
+      return changesCollection.parse(TopLevelResource.INSTANCE, IdString.fromUrl(changeId));
     } catch (Exception e) {
       throw asRestApiException("Cannot retrieve change", e);
     }

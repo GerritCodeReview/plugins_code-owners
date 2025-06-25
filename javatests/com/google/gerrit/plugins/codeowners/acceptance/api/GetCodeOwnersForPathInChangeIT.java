@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
@@ -176,10 +177,10 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .create();
 
     String path = "/foo/bar/baz.txt";
-    String changeId = createChangeWithFileDeletion(path);
+    TestChange change = createChangeWithFileDeletion(path);
 
     CodeOwnersInfo codeOwnersInfo =
-        codeOwnersApiFactory.change(changeId, "current").query().get(path);
+        codeOwnersApiFactory.change(change.changeId(), "current").query().get(path);
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -208,17 +209,18 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
 
     String oldPath = "/foo/old/bar.txt";
     String newPath = "/foo/new/bar.txt";
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     CodeOwnersInfo codeOwnersInfoNewPath =
-        codeOwnersApiFactory.change(changeId, "current").query().get(newPath);
+        codeOwnersApiFactory.change(change.changeId(), "current").query().get(newPath);
     assertThat(codeOwnersInfoNewPath)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
 
     CodeOwnersInfo codeOwnersInfoOldPath =
-        codeOwnersApiFactory.change(changeId, "current").query().get(oldPath);
+        codeOwnersApiFactory.change(change.changeId(), "current").query().get(oldPath);
     assertThat(codeOwnersInfoOldPath)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())

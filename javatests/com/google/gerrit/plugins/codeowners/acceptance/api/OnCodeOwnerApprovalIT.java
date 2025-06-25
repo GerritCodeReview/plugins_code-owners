@@ -27,6 +27,8 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.change.ChangeOperations;
+import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
@@ -61,6 +63,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
+  @Inject private ChangeOperations changeOperations;
 
   @Test
   @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
@@ -528,19 +531,21 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     String oldPath = "foo/bar.baz";
     String oldPathEscaped = "`foo/bar.baz`";
     String newPath = "bar/baz.bar";
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
-    recommend(changeId);
+    recommend(change.changeId());
 
-    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(change.id()).get().messages;
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
-                "Patch Set 2: Code-Review+1\n\n"
+                "Patch Set %s: Code-Review+1\n\n"
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), oldPathEscaped));
+                changeOperations.change(change.id()).currentPatchset().get().patchsetId().get(),
+                AccountTemplateUtil.getAccountTemplate(admin.id()),
+                oldPathEscaped));
   }
 
   @Test
