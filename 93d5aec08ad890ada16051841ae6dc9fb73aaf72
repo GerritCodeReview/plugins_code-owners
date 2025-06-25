@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dc8ec426_09e9c1ae",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-06-25T07:25:40Z",
+      "side": 1,
+      "message": "Verifying this change requires a change in Gerrit core [1], which is part of the same topic. The CI failure is because Zuul cannot verify changes that rely on a change in Gerrit core via a topic. Hence I verified this manually.\n\n[1] https://gerrit-review.git.corp.google.com/c/gerrit/+/486622",
+      "revId": "93d5aec08ad890ada16051841ae6dc9fb73aaf72",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
