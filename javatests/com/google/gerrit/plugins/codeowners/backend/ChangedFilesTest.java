@@ -238,7 +238,13 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
     // Create a base change.
     Change.Id baseChange =
-        changeOperations.newChange().branch("master").file(file1).content("base content").create();
+        changeOperations
+            .newChange()
+            .project(project)
+            .branch("master")
+            .file(file1)
+            .content("base content")
+            .create();
     approveAndSubmit(baseChange);
 
     // Create another branch
@@ -252,6 +258,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     Change.Id changeInMaster =
         changeOperations
             .newChange()
+            .project(project)
             .branch("master")
             .file(file1)
             .content("master content")
@@ -262,6 +269,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     Change.Id changeInOtherBranch =
         changeOperations
             .newChange()
+            .project(project)
             .branch(branchName)
             .file(file1)
             .content("other content")
@@ -275,6 +283,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     Change.Id mergeChange =
         changeOperations
             .newChange()
+            .project(project)
             .branch("master")
             .mergeOfButBaseOnFirst()
             .tipOfBranch("master")
@@ -329,7 +338,13 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
     // Create a base change.
     Change.Id baseChange =
-        changeOperations.newChange().branch("master").file(file).content("base content").create();
+        changeOperations
+            .newChange()
+            .project(project)
+            .branch("master")
+            .file(file)
+            .content("base content")
+            .create();
     approveAndSubmit(baseChange);
 
     // Create another branch
@@ -341,7 +356,13 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
     // Create a change in master that touches file1.
     Change.Id changeInMaster =
-        changeOperations.newChange().branch("master").file(file).content("master content").create();
+        changeOperations
+            .newChange()
+            .project(project)
+            .branch("master")
+            .file(file)
+            .content("master content")
+            .create();
     approveAndSubmit(changeInMaster);
 
     // Create a change in the other branch and that deleted file1.
@@ -356,6 +377,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     Change.Id mergeChange =
         changeOperations
             .newChange()
+            .project(project)
             .branch("master")
             .mergeOf()
             .tipOfBranch("master")
@@ -440,6 +462,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     Change.Id baseChange =
         changeOperations
             .newChange()
+            .project(project)
             .branch("master")
             .file(file1)
             .content("base content")
@@ -461,6 +484,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     Change.Id changeInMaster =
         changeOperations
             .newChange()
+            .project(project)
             .branch("master")
             .file(file1)
             .content("master content")
@@ -476,6 +500,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     Change.Id changeInOtherBranch =
         changeOperations
             .newChange()
+            .project(project)
             .branch(branchName)
             .file(file1)
             .content("other content")
@@ -495,6 +520,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     Change.Id mergeChange =
         changeOperations
             .newChange()
+            .project(project)
             .branch("master")
             .mergeOfButBaseOnFirst()
             .tipOfBranch("master")
