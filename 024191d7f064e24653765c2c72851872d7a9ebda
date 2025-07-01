@@ -33,6 +33,23 @@
       "message": "485461: Edit Repo Config | https://gerrit-review.googlesource.com/c/plugins/code-owners/+/485461",
       "revId": "024191d7f064e24653765c2c72851872d7a9ebda",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d5c7fcb_98fd2c5e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1124821
+      },
+      "writtenOn": "2025-07-01T12:51:20Z",
+      "side": 1,
+      "message": "Marked as unresolved.",
+      "revId": "024191d7f064e24653765c2c72851872d7a9ebda",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
