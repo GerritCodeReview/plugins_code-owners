@@ -166,7 +166,7 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
   @Test
   public void codeOwnersSkipOptionIsOmittedIfChangeDoesNotTouchCodeOwnerConfigs() throws Exception {
     requestScopeOperations.setApiUser(admin.id());
-    Change.Id changeId = changeOperations.newChange().project(project).create();
+    Change.Id changeId = changeOperations.newChange().project(project).createV1();
     ValidationOptionInfos validationOptionsInfos =
         gApi.changes().id(project.get(), changeId.get()).getValidationOptions();
     ValidationOptionInfos branchValidationOptionInfos =
@@ -203,7 +203,7 @@ public class SkipCodeOwnerConfigValidationPushOptionIT extends AbstractCodeOwner
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
                     .build()))
-        .create();
+        .createV1();
   }
 
   private String format(CodeOwnerConfig codeOwnerConfig) throws Exception {

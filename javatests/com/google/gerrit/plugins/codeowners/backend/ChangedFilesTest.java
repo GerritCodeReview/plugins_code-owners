@@ -244,7 +244,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .branch("master")
             .file(file1)
             .content("base content")
-            .create();
+            .createV1();
     approveAndSubmit(baseChange);
 
     // Create another branch
@@ -262,7 +262,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .branch("master")
             .file(file1)
             .content("master content")
-            .create();
+            .createV1();
     approveAndSubmit(changeInMaster);
 
     // Create a change in the other branch and that touches file1 and creates file2.
@@ -275,7 +275,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("other content")
             .file(file2)
             .content("content")
-            .create();
+            .createV1();
     approveAndSubmit(changeInOtherBranch);
 
     // Create a merge change with a conflict resolution for file1 and file2 with the same content as
@@ -293,7 +293,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("merged content")
             .file(file2)
             .content("content")
-            .create();
+            .createV1();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
@@ -344,7 +344,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .branch("master")
             .file(file)
             .content("base content")
-            .create();
+            .createV1();
     approveAndSubmit(baseChange);
 
     // Create another branch
@@ -362,7 +362,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .branch("master")
             .file(file)
             .content("master content")
-            .create();
+            .createV1();
     approveAndSubmit(changeInMaster);
 
     // Create a change in the other branch and that deleted file1.
@@ -385,7 +385,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .tipOfBranch(branchName)
             .file(file)
             .delete()
-            .create();
+            .createV1();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
@@ -470,7 +470,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("base content")
             .file(file5)
             .content("base content")
-            .create();
+            .createV1();
     approveAndSubmit(baseChange);
 
     // Create another branch
@@ -492,7 +492,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("master content")
             .file(file5)
             .content("master content")
-            .create();
+            .createV1();
     approveAndSubmit(changeInMaster);
 
     // Create a change in the other branch and that touches file1, file3, file5 and creates file2,
@@ -512,7 +512,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("content")
             .file(file5)
             .content("other content")
-            .create();
+            .createV1();
     approveAndSubmit(changeInOtherBranch);
 
     // Create a merge change with a conflict resolution for file1 and file2 with the same content as
@@ -536,7 +536,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("content")
             .file(file5)
             .content("merged content")
-            .create();
+            .createV1();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
