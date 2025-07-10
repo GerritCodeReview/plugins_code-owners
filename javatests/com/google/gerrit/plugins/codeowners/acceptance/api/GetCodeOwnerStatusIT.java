@@ -22,6 +22,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -348,13 +349,17 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
     Path oldPath = Path.of("/foo/old.bar");
     Path newPath = Path.of("/bar/new.bar");
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     // Add a reviewer that is a code owner of the old path.
-    gApi.changes().id(changeId).addReviewer(user.email());
+    gApi.changes().id(change.id()).addReviewer(user.email());
 
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withLimit(1).get();
+        changeCodeOwnersApiFactory
+            .change(change.changeId())
+            .getCodeOwnerStatus()
+            .withLimit(1)
+            .get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
@@ -484,10 +489,10 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
     String oldPath = "foo/bar/abc.txt";
     String newPath = "foo/baz/abc.txt";
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
+        changeCodeOwnersApiFactory.change(change.changeId()).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
@@ -499,9 +504,10 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add a reviewer that is a code owner of the old path.
-    gApi.changes().id(changeId).addReviewer(user.email());
+    gApi.changes().id(change.id()).addReviewer(user.email());
 
-    codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(change.changeId()).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
@@ -518,9 +524,10 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerStatus).hasAccounts(user);
 
     // Add a reviewer that is a code owner of the new path.
-    gApi.changes().id(changeId).addReviewer(user2.email());
+    gApi.changes().id(change.id()).addReviewer(user2.email());
 
-    codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(change.changeId()).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())

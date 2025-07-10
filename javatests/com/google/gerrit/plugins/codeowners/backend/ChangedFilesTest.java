@@ -31,8 +31,9 @@ import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.change.ChangeOperations;
+import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
-import com.google.gerrit.entities.Change;
+import com.google.gerrit.extensions.api.changes.ChangeIdentifier;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.TopLevelResource;
@@ -162,12 +163,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   @Test
   public void getFromDiffCacheForChangeThatDeletedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
-    String changeId = createChangeWithFileDeletion(path);
+    TestChange change = createChangeWithFileDeletion(path);
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
             project,
-            getRevisionResource(changeId).getPatchSet().commitId(),
+            getRevisionResource(change.id()).getPatchSet().commitId(),
             MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
@@ -181,14 +182,14 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   public void getFromDiffCacheForChangeThatRenamedAFile() throws Exception {
     String oldPath = "/foo/bar/old.txt";
     String newPath = "/foo/bar/new.txt";
-    String changeId = createChangeWithFileRename(oldPath, newPath);
+    TestChange change = createChangeWithFileRename(oldPath, newPath);
 
-    gApi.changes().id(changeId).current().files();
+    gApi.changes().id(change.id()).current().files();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
             project,
-            getRevisionResource(changeId).getPatchSet().commitId(),
+            getRevisionResource(change.id()).getPatchSet().commitId(),
             MergeCommitStrategy.ALL_CHANGED_FILES);
     ChangedFileSubject changedFile = assertThatCollection(changedFilesSet).onlyElement();
     changedFile.hasNewPath().value().isEqualTo(Path.of(newPath));
@@ -237,14 +238,14 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     String file2 = "bar/b.txt";
 
     // Create a base change.
-    Change.Id baseChange =
+    ChangeIdentifier baseChange =
         changeOperations
             .newChange()
             .project(project)
             .branch("master")
             .file(file1)
             .content("base content")
-            .createV1();
+            .create();
     approveAndSubmit(baseChange);
 
     // Create another branch
@@ -255,18 +256,18 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
 
     // Create a change in master that touches file1.
-    Change.Id changeInMaster =
+    ChangeIdentifier changeInMaster =
         changeOperations
             .newChange()
             .project(project)
             .branch("master")
             .file(file1)
             .content("master content")
-            .createV1();
+            .create();
     approveAndSubmit(changeInMaster);
 
     // Create a change in the other branch and that touches file1 and creates file2.
-    Change.Id changeInOtherBranch =
+    ChangeIdentifier changeInOtherBranch =
         changeOperations
             .newChange()
             .project(project)
@@ -275,12 +276,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("other content")
             .file(file2)
             .content("content")
-            .createV1();
+            .create();
     approveAndSubmit(changeInOtherBranch);
 
     // Create a merge change with a conflict resolution for file1 and file2 with the same content as
     // in the other branch (no conflict on file2).
-    Change.Id mergeChange =
+    ChangeIdentifier mergeChange =
         changeOperations
             .newChange()
             .project(project)
@@ -293,12 +294,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("merged content")
             .file(file2)
             .content("content")
-            .createV1();
+            .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
             project,
-            getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId(),
+            getRevisionResource(mergeChange).getPatchSet().commitId(),
             mergeCommitStrategy);
 
     if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
@@ -337,14 +338,14 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     String file = "foo/a.txt";
 
     // Create a base change.
-    Change.Id baseChange =
+    ChangeIdentifier baseChange =
         changeOperations
             .newChange()
             .project(project)
             .branch("master")
             .file(file)
             .content("base content")
-            .createV1();
+            .create();
     approveAndSubmit(baseChange);
 
     // Create another branch
@@ -355,14 +356,14 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
 
     // Create a change in master that touches file1.
-    Change.Id changeInMaster =
+    ChangeIdentifier changeInMaster =
         changeOperations
             .newChange()
             .project(project)
             .branch("master")
             .file(file)
             .content("master content")
-            .createV1();
+            .create();
     approveAndSubmit(changeInMaster);
 
     // Create a change in the other branch and that deleted file1.
@@ -370,11 +371,11 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         pushFactory.create(admin.newIdent(), testRepo, "Change Deleting A File", file, "");
     Result r = push.rm("refs/for/master");
     r.assertOkStatus();
-    approveAndSubmit(r.getChange().getId());
+    approveAndSubmit(ChangeIdentifier.byNumericChangeId(r.getChange().getId().get()));
 
     // Create a merge change with resolving the conflict on file between the edit in master and the
     // deletion in the other branch by deleting the file.
-    Change.Id mergeChange =
+    ChangeIdentifier mergeChange =
         changeOperations
             .newChange()
             .project(project)
@@ -385,12 +386,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .tipOfBranch(branchName)
             .file(file)
             .delete()
-            .createV1();
+            .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
             project,
-            getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId(),
+            getRevisionResource(mergeChange).getPatchSet().commitId(),
             mergeCommitStrategy);
     ImmutableSet<String> oldPaths =
         changedFilesSet.stream()
@@ -459,7 +460,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     String file5 = "baz/foo.bar";
 
     // Create a base change.
-    Change.Id baseChange =
+    ChangeIdentifier baseChange =
         changeOperations
             .newChange()
             .project(project)
@@ -470,7 +471,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("base content")
             .file(file5)
             .content("base content")
-            .createV1();
+            .create();
     approveAndSubmit(baseChange);
 
     // Create another branch
@@ -481,7 +482,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
 
     // Create a change in master that touches file1, file3 and file5
-    Change.Id changeInMaster =
+    ChangeIdentifier changeInMaster =
         changeOperations
             .newChange()
             .project(project)
@@ -492,12 +493,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("master content")
             .file(file5)
             .content("master content")
-            .createV1();
+            .create();
     approveAndSubmit(changeInMaster);
 
     // Create a change in the other branch and that touches file1, file3, file5 and creates file2,
     // file4.
-    Change.Id changeInOtherBranch =
+    ChangeIdentifier changeInOtherBranch =
         changeOperations
             .newChange()
             .project(project)
@@ -512,12 +513,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("content")
             .file(file5)
             .content("other content")
-            .createV1();
+            .create();
     approveAndSubmit(changeInOtherBranch);
 
     // Create a merge change with a conflict resolution for file1 and file2 with the same content as
     // in the other branch (no conflict on file2).
-    Change.Id mergeChange =
+    ChangeIdentifier mergeChange =
         changeOperations
             .newChange()
             .project(project)
@@ -536,12 +537,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("content")
             .file(file5)
             .content("merged content")
-            .createV1();
+            .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.getFromDiffCache(
             project,
-            getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId(),
+            getRevisionResource(mergeChange).getPatchSet().commitId(),
             mergeCommitStrategy);
 
     if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
@@ -558,14 +559,14 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     }
   }
 
-  private void approveAndSubmit(Change.Id changeId) throws Exception {
-    approve(Integer.toString(changeId.get()));
-    gApi.changes().id(changeId.get()).current().submit();
+  private void approveAndSubmit(ChangeIdentifier changeIdentifier) throws Exception {
+    approve(changeIdentifier.id());
+    gApi.changes().id(changeIdentifier).current().submit();
   }
 
-  private RevisionResource getRevisionResource(String changeId) throws Exception {
+  private RevisionResource getRevisionResource(ChangeIdentifier changeIdentifier) throws Exception {
     ChangeResource changeResource =
-        changesCollection.parse(TopLevelResource.INSTANCE, IdString.fromDecoded(changeId));
+        changesCollection.parse(TopLevelResource.INSTANCE, IdString.fromUrl(changeIdentifier.id()));
     return revisions.parse(changeResource, IdString.fromDecoded("current"));
   }
 }

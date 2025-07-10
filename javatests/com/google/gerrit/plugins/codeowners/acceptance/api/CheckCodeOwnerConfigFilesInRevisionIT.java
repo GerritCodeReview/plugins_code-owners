@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -127,7 +128,8 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
             ImmutableList.of(
                 fatal(
                     String.format(
-                        "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
+                        "invalid code owner config file '%s' (project = %s, branch = master):\n"
+                            + "  %s",
                         codeOwnerConfigPath,
                         project,
                         getParsingErrorMessage(
@@ -276,9 +278,9 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
     String codeOwnerConfigPath =
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath();
     disableCodeOwnersForProject(project);
-    String changeId = createChangeWithFileDeletion(codeOwnerConfigPath);
+    TestChange change = createChangeWithFileDeletion(codeOwnerConfigPath);
     enableCodeOwnersForProject(project);
-    assertThat(checkCodeOwnerConfigFilesIn(changeId)).isEmpty();
+    assertThat(checkCodeOwnerConfigFilesIn(change.changeId())).isEmpty();
   }
 
   @Test
