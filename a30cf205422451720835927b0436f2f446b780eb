@@ -1,12 +1,12 @@
 {
   "checks": {
     "zuul-check:plugins_code-owners": {
-      "state": "SCHEDULED",
-      "message": "Change has been enqueued in check",
+      "state": "RUNNING",
+      "message": "Jobs have started running",
       "url": "https://ci.gerritcodereview.com/t/gerrit/status/change/489662,3",
       "started": "2025-07-11T01:02:08Z",
       "created": "2025-07-11T01:02:08Z",
-      "updated": "2025-07-11T01:02:08Z"
+      "updated": "2025-07-11T01:02:13Z"
     }
   }
 }
