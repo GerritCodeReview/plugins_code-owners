@@ -48,7 +48,7 @@ public class PathCodeOwnerStatusSubject extends Subject {
 
   /** Returns a {@link ComparableSubject} for the path. */
   public PathSubject hasPathThat() {
-    return check("path").about(paths()).that(pathCodeOwnerStatus().path());
+    return check("path").that(pathCodeOwnerStatus().path());
   }
 
   /** Returns a {@link ComparableSubject} for the code owner status. */

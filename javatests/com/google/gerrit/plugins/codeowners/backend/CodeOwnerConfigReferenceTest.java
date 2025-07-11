@@ -55,7 +55,7 @@ public class CodeOwnerConfigReferenceTest extends AbstractCodeOwnersTest {
     for (String inputPath : new String[] {"/foo/OWNERS", "//foo/OWNERS"}) {
       Path path =
           CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, inputPath).filePath();
-      assertWithMessage(inputPath).about(paths()).that(path).isEqualTo(expectedPath);
+      assertWithMessage(inputPath).that(path).isEqualTo(expectedPath);
       assertThat(path.isAbsolute()).isTrue();
     }
   }
