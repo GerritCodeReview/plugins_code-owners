@@ -58,7 +58,7 @@ public class CodeOwnerConfigReferenceSubject extends Subject {
 
   /** Returns a subject for the file path. */
   public PathSubject hasFilePathThat() {
-    return check("filePath()").about(paths()).that(codeOwnerConfigReference().filePath());
+    return check("filePath()").that(codeOwnerConfigReference().filePath());
   }
 
   private CodeOwnerConfigReference codeOwnerConfigReference() {
