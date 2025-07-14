@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
-import static com.google.common.truth.PathSubject.paths;
 import static com.google.gerrit.truth.OptionalSubject.optionals;
 
 import com.google.common.truth.FailureMetadata;

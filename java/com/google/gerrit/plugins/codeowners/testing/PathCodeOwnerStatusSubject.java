@@ -14,8 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
-import static com.google.common.truth.PathSubject.paths;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;

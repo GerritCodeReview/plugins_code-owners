@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.common.truth.PathSubject.paths;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
