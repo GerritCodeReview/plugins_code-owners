@@ -564,7 +564,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         r,
         "invalid push option",
         String.format(
-            "--code-owners~%s push option can be specified only once, received multiple values: [, false]",
+            "--code-owners~%s push option can be specified only once, received multiple values: [,"
+                + " false]",
             SkipCodeOwnerConfigValidationPushOption.NAME));
   }
 
@@ -1124,7 +1125,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     // the pre-existing issue is returned as warning
     r.assertMessage(
         String.format(
-            "warning: commit %s: [code-owners] code owner email '%s' in '%s' cannot be resolved for %s",
+            "warning: commit %s: [code-owners] code owner email '%s' in '%s' cannot be resolved for"
+                + " %s",
             abbreviatedCommit,
             unknownEmail1,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
@@ -2231,7 +2233,13 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         assertThrows(MergeConflictException.class, () -> gApi.changes().create(changeInput));
     assertThat(mergeConflictException)
         .hasMessageThat()
-        .isEqualTo(String.format("merge conflict(s):\n%s", getCodeOwnerConfigFileName()));
+        .isEqualTo(
+            String.format(
+                """
+                merge conflict(s):
+                * %s
+                """,
+                getCodeOwnerConfigFileName()));
 
     // Try creating the merge change with conflicts. Fails because the code owner config file
     // contains conflict markers which fails the code owner config file validation.
@@ -3275,7 +3283,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: [code-owners] invalid code owner config files (see %s for help):\n"
+                    + "Change %s: [code-owners] invalid code owner config files (see %s for"
+                    + " help):\n"
                     + "  ERROR: invalid %s import in '%s': project '%s' not found",
                 r.getChange().getId().toString(),
                 getHelpPage(),
@@ -3435,8 +3444,10 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: [code-owners] invalid code owner config files (see %s for help):\n"
-                    + "  ERROR: invalid %s import in '%s': branch 'master' not found in project '%s'",
+                    + "Change %s: [code-owners] invalid code owner config files (see %s for"
+                    + " help):\n"
+                    + "  ERROR: invalid %s import in '%s': branch 'master' not found in project"
+                    + " '%s'",
                 r.getChange().getId().toString(),
                 getHelpPage(),
                 CodeOwnerConfigImportType.GLOBAL.getType(),
