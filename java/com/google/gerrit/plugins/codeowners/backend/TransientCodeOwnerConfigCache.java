@@ -106,8 +106,8 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
       cache.put(cacheKey, codeOwnerConfig);
     } else if (maxCacheSize.isPresent()) {
       logger.atWarning().atMostEvery(1, TimeUnit.DAYS).log(
-          "exceeded limit of %s (project = %s)",
-          getClass().getSimpleName(), cacheKey.codeOwnerConfigKey().project());
+          "exceeded limit of %s (project = %s, limit = %s)",
+          getClass().getSimpleName(), cacheKey.codeOwnerConfigKey().project(), maxCacheSize.get());
     }
     return codeOwnerConfig;
   }

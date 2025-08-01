@@ -78,7 +78,7 @@ public class TransientCodeOwnerCache {
       cache.put(email, codeOwner);
     } else if (maxCacheSize.isPresent()) {
       logger.atWarning().atMostEvery(1, TimeUnit.DAYS).log(
-          "exceeded limit of %s", getClass().getSimpleName());
+          "exceeded limit of %s (limit = %s)", getClass().getSimpleName(), maxCacheSize.get());
     }
   }
 
