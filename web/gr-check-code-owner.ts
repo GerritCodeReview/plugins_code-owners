@@ -50,7 +50,7 @@ export class GrCheckCodeOwner extends LitElement {
   userInput!: HTMLInputElement;
 
   @query('#resultOutput')
-  resultOutput!: HTMLInputElement;
+  resultOutput!: HTMLTextAreaElement;
 
   @query('#noteAboutLimitedDebugInformation')
   noteAboutLimitedDebugInformation!: HTMLInputElement;
@@ -210,12 +210,12 @@ export class GrCheckCodeOwner extends LitElement {
         </p>
         <section>
           <span class="value">
-            <iron-autogrow-textarea
+            <textarea
               class="output"
               id="resultOutput"
               readonly
             >
-            </iron-autogrow-textarea>
+            </textarea>
           </span>
         </section>
         <p
