@@ -213,6 +213,7 @@ export class GrCheckCodeOwner extends LitElement {
             <textarea
               class="output"
               id="resultOutput"
+              rows="20"
               readonly
             >
             </textarea>
