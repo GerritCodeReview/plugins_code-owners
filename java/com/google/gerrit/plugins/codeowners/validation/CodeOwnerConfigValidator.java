@@ -18,7 +18,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidCodeOwnerConfigCause;
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
@@ -30,6 +29,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.extensions.restapi.AuthException;
@@ -40,7 +40,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportType;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.InvalidCodeOwnerConfigException;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -403,7 +402,7 @@ public class CodeOwnerConfigValidator
                     /* isBranchCreation= */ true,
                     refReceivedEvent.pushOptions);
           } catch (IOException e) {
-            throw newInternalServerError(
+            throw new StorageException(
                 String.format(
                     "failed to validate code owner config files in revision %s"
                         + " (project = %s, branch = %s)",
@@ -482,7 +481,8 @@ public class CodeOwnerConfigValidator
     logger.atFine().log("force = %s", force);
     if (!force && codeOwnersConfig.isDisabled(branchNameKey.branch())) {
       logger.atFine().log(
-          "skipping validation of code owner config files due to code-owners functionality is disabled");
+          "skipping validation of code owner config files due to code-owners functionality is"
+              + " disabled");
       return Optional.empty();
     }
 
@@ -575,7 +575,7 @@ public class CodeOwnerConfigValidator
               "failed to validate code owner config files in revision %s"
                   + " (project = %s, branch = %s)",
               revCommit.getName(), branchNameKey.project(), branchNameKey.branch());
-      throw newInternalServerError(errorMessage, e);
+      throw new StorageException(errorMessage, e);
     }
   }
 
@@ -677,13 +677,13 @@ public class CodeOwnerConfigValidator
                           String.format(
                               "code owner config %s not found in revision %s",
                               codeOwnerConfigKey, revCommit.name())));
-    } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
+    } catch (RuntimeException e) {
       // Loading the code owner config has failed.
       Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
-          getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException);
+          getInvalidCodeOwnerConfigCause(e);
       if (!invalidCodeOwnerConfigException.isPresent()) {
         // Propagate any failure that is not related to the contents of the code owner config.
-        throw codeOwnersInternalServerErrorException;
+        throw e;
       }
 
       // The exception was caused by a ConfigInvalidException. This means loading the code owner
@@ -707,8 +707,8 @@ public class CodeOwnerConfigValidator
     try {
       baseCodeOwnerConfig =
           getBaseCodeOwnerConfig(codeOwnerBackend, branchNameKey, changedFile, revCommit);
-    } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
-      if (getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
+    } catch (RuntimeException e) {
+      if (getInvalidCodeOwnerConfigCause(e).isPresent()) {
         // The base code owner config is non-parseable. Since the update makes the code owner
         // config parseable, it is a good update even if the code owner config still contains
         // issues. Hence in this case we downgrade all validation errors in the new version to
@@ -718,7 +718,7 @@ public class CodeOwnerConfigValidator
       }
 
       // Propagate any exception that was not caused by the content of the code owner config.
-      throw codeOwnersInternalServerErrorException;
+      throw e;
     }
 
     // Validate the parsed code owner config.
@@ -748,9 +748,8 @@ public class CodeOwnerConfigValidator
   /**
    * Loads and returns the base code owner config if it exists.
    *
-   * <p>Throws a {@link ConfigInvalidException} (wrapped in a {@link
-   * CodeOwnersInternalServerErrorException} if the base code owner config exists, but is not
-   * parseable.
+   * <p>Throws a {@link ConfigInvalidException} (wrapped in a {@link StorageException} if the base
+   * code owner config exists, but is not parseable.
    *
    * @param codeOwnerBackend the code owner backend from which the base code owner config can be
    *     loaded
@@ -829,16 +828,16 @@ public class CodeOwnerConfigValidator
         // is introduced by the new commit and we should block uploading it, which we achieve by
         // setting the validation message type to fatal.
         return ValidationMessage.Type.FATAL;
-      } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
+      } catch (RuntimeException e) {
         // Loading the base code owner config has failed.
-        if (getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
+        if (getInvalidCodeOwnerConfigCause(e).isPresent()) {
           // The code owner config was already non-parseable before, hence we do not need to
           // block the upload if the code owner config is still non-parseable.
           // Using warning as type means that uploads are not blocked.
           return ValidationMessage.Type.WARNING;
         }
         // Propagate any failure that is not related to the contents of the code owner config.
-        throw codeOwnersInternalServerErrorException;
+        throw e;
       }
     }
 
@@ -1064,7 +1063,7 @@ public class CodeOwnerConfigValidator
           .filter(Optional::isPresent)
           .map(Optional::get);
     } catch (IOException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format("Failed to validate imports for %s in ", codeOwnerConfig.key()), e);
     }
   }
@@ -1189,8 +1188,8 @@ public class CodeOwnerConfigValidator
                 keyOfImportedCodeOwnerConfig.branchNameKey().shortName(),
                 revision.get().name()));
       }
-    } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
-      if (getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
+    } catch (RuntimeException e) {
+      if (getInvalidCodeOwnerConfigCause(e).isPresent()) {
         // The imported code owner config is non-parseable.
         return nonResolvableImport(
             codeOwnerConfigRevision,
@@ -1206,7 +1205,7 @@ public class CodeOwnerConfigValidator
       }
 
       // Propagate any exception that was not caused by the content of the code owner config.
-      throw codeOwnersInternalServerErrorException;
+      throw e;
     }
 
     // no issue found
@@ -1238,7 +1237,7 @@ public class CodeOwnerConfigValidator
           .project(keyOfImportedCodeOwnerConfig.project())
           .test(ProjectPermission.ACCESS);
     } catch (PermissionBackendException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           "failed to check read permission for project of imported code owner config", e);
     }
   }
@@ -1252,7 +1251,7 @@ public class CodeOwnerConfigValidator
           .ref(keyOfImportedCodeOwnerConfig.ref())
           .test(RefPermission.READ);
     } catch (PermissionBackendException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           "failed to check read permission for branch of imported code owner config", e);
     }
   }
@@ -1273,7 +1272,7 @@ public class CodeOwnerConfigValidator
       return Optional.ofNullable(repo.exactRef(keyOfImportedCodeOwnerConfig.ref()))
           .map(Ref::getObjectId);
     } catch (IOException e) {
-      throw newInternalServerError("failed to read revision of import code owner config", e);
+      throw new StorageException("failed to read revision of import code owner config", e);
     }
   }
 

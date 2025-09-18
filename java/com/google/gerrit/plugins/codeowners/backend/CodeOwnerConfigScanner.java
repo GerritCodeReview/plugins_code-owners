@@ -15,13 +15,13 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidCodeOwnerConfigCause;
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
@@ -143,12 +143,12 @@ public class CodeOwnerConfigScanner {
         CodeOwnerConfig codeOwnerConfig;
         try {
           codeOwnerConfig = treeWalk.getCodeOwnerConfig();
-        } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
+        } catch (RuntimeException e) {
           Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
-              getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException);
+              getInvalidCodeOwnerConfigCause(e);
           if (!invalidCodeOwnerConfigException.isPresent()) {
             // Propagate any failure that is not related to the contents of the code owner config.
-            throw codeOwnersInternalServerErrorException;
+            throw e;
           }
 
           // The code owner config is invalid and cannot be parsed.
@@ -163,7 +163,7 @@ public class CodeOwnerConfigScanner {
         }
       }
     } catch (IOException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "Failed to scan for code owner configs in branch %s of project %s",
               branchNameKey.branch(), branchNameKey.project()),

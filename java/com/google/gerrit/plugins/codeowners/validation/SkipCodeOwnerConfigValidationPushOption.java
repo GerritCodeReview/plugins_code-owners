@@ -14,12 +14,11 @@
 
 package com.google.gerrit.plugins.codeowners.validation;
 
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
@@ -112,7 +111,7 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
                       changeNotes.getProjectName(),
                       Path.of(changedFile.newPath().get().toString()).getFileName().toString()));
     } catch (IOException | DiffNotAvailableException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "Failed to check changed files of change %s in project %s",
               changeNotes.getChangeId(), changeNotes.getProjectName()),
@@ -167,7 +166,7 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
           .currentUser()
           .check(skipCodeOwnerConfigValidationCapability.getPermission());
     } catch (PermissionBackendException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "Failed to check %s~%s capability",
               pluginName, SkipCodeOwnerConfigValidationCapability.ID),
@@ -181,7 +180,7 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
           .currentUser()
           .test(skipCodeOwnerConfigValidationCapability.getPermission());
     } catch (PermissionBackendException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "Failed to check %s~%s capability",
               pluginName, SkipCodeOwnerConfigValidationCapability.ID),

@@ -14,13 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.LegacySubmitRequirement;
 import com.google.gerrit.entities.SubmitRecord;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -151,7 +151,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
         logger.atWarning().log("%s", errorMessage);
         return Optional.of(ruleError(errorMessage));
       }
-      throw newInternalServerError(errorMessage, e);
+      throw new StorageException(errorMessage, e);
     }
   }
 

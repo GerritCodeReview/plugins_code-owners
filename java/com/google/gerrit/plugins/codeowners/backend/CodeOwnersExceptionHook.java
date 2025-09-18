@@ -87,14 +87,6 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
       return ImmutableList.of(invalidPathException.get().getMessage());
     }
 
-    // This must be done last since some of the exceptions we handle above may be wrapped in a
-    // CodeOwnersInternalServerErrorException.
-    Optional<CodeOwnersInternalServerErrorException> codeOwnersInternalServerErrorException =
-        getCodeOwnersInternalServerErrorException(throwable);
-    if (codeOwnersInternalServerErrorException.isPresent()) {
-      return ImmutableList.of(codeOwnersInternalServerErrorException.get().getUserVisibleMessage());
-    }
-
     return ImmutableList.of();
   }
 
@@ -104,11 +96,6 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
       return Optional.of(Status.create(409, "Conflict"));
     }
     return Optional.empty();
-  }
-
-  private static Optional<CodeOwnersInternalServerErrorException>
-      getCodeOwnersInternalServerErrorException(Throwable throwable) {
-    return getCause(CodeOwnersInternalServerErrorException.class, throwable);
   }
 
   public static boolean isCausedByConfigurationError(Throwable throwable) {
