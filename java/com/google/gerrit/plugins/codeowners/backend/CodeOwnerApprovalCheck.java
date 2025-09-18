@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -33,6 +32,7 @@ import com.google.gerrit.entities.LabelValue;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.metrics.Timer1;
@@ -194,7 +194,7 @@ public class CodeOwnerApprovalCheck {
                           .orElse(null)))
           .collect(toImmutableList());
     } catch (IOException | DiffNotAvailableException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "failed to compute owned paths of patch set %s for account %d",
               patchSet.id(), accountId.get()),
@@ -438,7 +438,8 @@ public class CodeOwnerApprovalCheck {
               codeOwnersConfig, codeOwnerResolver, changeNotes, accountIds);
       ChangedFilesByPatchSetCache changedFilesByPatchSetCache =
           changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes);
-      return changedFiles.getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId())
+      return changedFiles
+          .getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId())
           .stream()
           .map(
               changedFile ->
@@ -459,7 +460,7 @@ public class CodeOwnerApprovalCheck {
       return changeNotes.getChange().getRevertOf() != null
           && pureRevertCache.isPureRevert(changeNotes);
     } catch (BadRequestException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "failed to check if change %s in project %s is a pure revert",
               changeNotes.getChangeId(), changeNotes.getProjectName()),
@@ -775,7 +776,7 @@ public class CodeOwnerApprovalCheck {
             implicitApprover, reviewerAccountIds, approverAccountIds, absolutePath, reason);
     }
 
-    throw newInternalServerError(
+    throw new StorageException(
         String.format("unknown fallback code owners configured: %s", fallbackCodeOwners));
   }
 

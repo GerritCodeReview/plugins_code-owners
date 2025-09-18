@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.VERSIONED_META_DATA_CHANGE;
 import static java.util.Objects.requireNonNull;
@@ -25,6 +24,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.server.GerritPersonIdent;
@@ -121,10 +121,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
             fileName, codeOwnerConfigParser, revWalk, revision, codeOwnerConfigKey);
       }
     } catch (IOException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
     } catch (ConfigInvalidException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "invalid code owner config file %s (project = %s, branch = %s)",
               codeOwnerConfigKey.filePath(defaultFileName),
@@ -221,7 +221,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
           .call();
     } catch (Exception e) {
       Throwables.throwIfUnchecked(e);
-      throw newInternalServerError(
+      throw new StorageException(
           String.format("failed to upsert code owner config %s", codeOwnerConfigKey), e);
     }
   }
@@ -271,7 +271,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
       return codeOwnerConfigFile.getLoadedCodeOwnerConfig();
     } catch (IOException | ConfigInvalidException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format("failed to upsert code owner config %s", codeOwnerConfigKey), e);
     }
   }
@@ -293,7 +293,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       }
       return metaDataUpdate;
     } catch (Exception e) {
-      throw newInternalServerError("Failed to create MetaDataUpdate", e);
+      throw new StorageException("Failed to create MetaDataUpdate", e);
     } finally {
       metaDataUpdate.close();
     }

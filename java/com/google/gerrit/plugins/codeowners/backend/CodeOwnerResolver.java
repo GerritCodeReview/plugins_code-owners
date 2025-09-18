@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -30,6 +29,7 @@ import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
@@ -604,8 +604,7 @@ public class CodeOwnerResolver {
               });
       return extIdsByEmail;
     } catch (IOException e) {
-      throw newInternalServerError(
-          String.format("cannot resolve code owner emails: %s", emails), e);
+      throw new StorageException(String.format("cannot resolve code owner emails: %s", emails), e);
     }
   }
 
@@ -643,8 +642,8 @@ public class CodeOwnerResolver {
                                     createDebugMessageForNonResolvableEmail(
                                         e.getKey(),
                                         String.format(
-                                            "cannot resolve account %s for email %s: account does not"
-                                                + " exists",
+                                            "cannot resolve account %s for email %s: account does"
+                                                + " not exists",
                                             accountId, e.getKey())));
                               }
                               return accountState;
@@ -837,8 +836,8 @@ public class CodeOwnerResolver {
           messages.add(
               DebugMessage.createAdminOnlyMessage(
                   String.format(
-                      "email %s is visible to user %s: email is a secondary email that is owned by this"
-                          + " user",
+                      "email %s is visible to user %s: email is a secondary email that is owned by"
+                          + " this user",
                       email, user.getLoggableName())));
           return true;
         }
@@ -882,8 +881,8 @@ public class CodeOwnerResolver {
               createDebugMessageForNonResolvableEmail(
                   email,
                   String.format(
-                      "cannot resolve code owner email %s: account %s is referenced by secondary email"
-                          + " but the calling user %s cannot see secondary emails",
+                      "cannot resolve code owner email %s: account %s is referenced by secondary"
+                          + " email but the calling user %s cannot see secondary emails",
                       email, accountState.account().id(), currentUser.get().getLoggableName())));
           return false;
         } else {
@@ -896,7 +895,7 @@ public class CodeOwnerResolver {
           return true;
         }
       } catch (PermissionBackendException ex) {
-        throw newInternalServerError(
+        throw new StorageException(
             String.format(
                 "failed to test the %s global capability", GlobalPermission.VIEW_SECONDARY_EMAILS),
             ex);

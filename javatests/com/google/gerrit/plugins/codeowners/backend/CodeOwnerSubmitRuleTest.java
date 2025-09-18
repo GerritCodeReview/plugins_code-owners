@@ -24,6 +24,7 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
@@ -131,9 +132,9 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     when(changeDataWithoutChangeNotes.change()).thenReturn(changeData.change());
     when(changeDataWithoutChangeNotes.currentPatchSet()).thenReturn(changeData.currentPatchSet());
 
-    CodeOwnersInternalServerErrorException exception =
+    StorageException exception =
         assertThrows(
-            CodeOwnersInternalServerErrorException.class,
+            StorageException.class,
             () -> codeOwnerSubmitRule.evaluate(changeDataWithoutChangeNotes));
     assertThat(exception)
         .hasMessageThat()
@@ -145,10 +146,9 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
 
   @Test
   public void internalServerError_changeDataIsNull() throws Exception {
-    CodeOwnersInternalServerErrorException exception =
+    StorageException exception =
         assertThrows(
-            CodeOwnersInternalServerErrorException.class,
-            () -> codeOwnerSubmitRule.evaluate(/* changeData= */ null));
+            StorageException.class, () -> codeOwnerSubmitRule.evaluate(/* changeData= */ null));
     assertThat(exception).hasMessageThat().isEqualTo("Failed to evaluate code owner statuses.");
   }
 
@@ -178,8 +178,8 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
         .hasErrorMessageThat()
         .isEqualTo(
             String.format(
-                "Failed to evaluate code owner statuses for patch set %d of change %d"
-                    + " (cause: invalid code owner config file '%s' (project = %s, branch = master):\n"
+                "Failed to evaluate code owner statuses for patch set %d of change %d (cause:"
+                    + " invalid code owner config file '%s' (project = %s, branch = master):\n"
                     + "  %s).%s",
                 changeData.change().currentPatchSetId().get(),
                 changeData.change().getId().get(),
@@ -209,8 +209,8 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
         .hasErrorMessageThat()
         .isEqualTo(
             String.format(
-                "Failed to evaluate code owner statuses for patch set %d of change %d"
-                    + " (cause: invalid code owner config file '%s' (project = %s, branch = master):\n"
+                "Failed to evaluate code owner statuses for patch set %d of change %d (cause:"
+                    + " invalid code owner config file '%s' (project = %s, branch = master):\n"
                     + "  %s).",
                 changeData.change().currentPatchSetId().get(),
                 changeData.change().getId().get(),

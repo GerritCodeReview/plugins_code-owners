@@ -14,13 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.git.RefUpdateUtil;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
@@ -148,7 +148,7 @@ public class CodeOwnerConfigFileUpdateScanner {
       updateBranch(repository, branchNameKey, revision, commitId);
       return Optional.of(rw.parseCommit(commitId));
     } catch (IOException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "Failed to scan for code owner configs in branch %s of project %s",
               branchNameKey.branch(), branchNameKey.project()),

@@ -34,6 +34,7 @@ import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.SubmitRequirement;
 import com.google.gerrit.entities.SubmitRequirementExpression;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.api.changes.Changes.QueryRequest;
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
@@ -43,7 +44,6 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalHasOperand;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.gerrit.server.query.change.ChangeQueryBuilder;
 import com.google.inject.Inject;
@@ -158,9 +158,9 @@ public class CodeOwnerHasOperandsIT extends AbstractCodeOwnersIT {
     when(changeDataWithoutChangeNotes.change()).thenReturn(changeData.change());
     when(changeDataWithoutChangeNotes.currentPatchSet()).thenReturn(changeData.currentPatchSet());
 
-    CodeOwnersInternalServerErrorException exception =
+    StorageException exception =
         assertThrows(
-            CodeOwnersInternalServerErrorException.class,
+            StorageException.class,
             () ->
                 codeOwnerApprovalHasOperand
                     .create(changeQueryBuilder)

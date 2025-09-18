@@ -49,16 +49,6 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
     assertThat(skipRetryWithTrace(newInvalidPathException())).isTrue();
     assertThat(skipRetryWithTrace(newExceptionWithCause(newInvalidPathException()))).isTrue();
 
-    assertThat(
-            skipRetryWithTrace(
-                CodeOwnersInternalServerErrorException.newInternalServerError("msg")))
-        .isFalse();
-    assertThat(
-            skipRetryWithTrace(
-                newExceptionWithCause(
-                    CodeOwnersInternalServerErrorException.newInternalServerError("msg"))))
-        .isFalse();
-
     assertThat(skipRetryWithTrace(new Exception())).isFalse();
     assertThat(skipRetryWithTrace(newExceptionWithCause(new Exception()))).isFalse();
   }
@@ -84,13 +74,6 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
         .containsExactly(invalidPathException.getMessage());
     assertThat(getUserMessages(newExceptionWithCause(invalidPathException)))
         .containsExactly(invalidPathException.getMessage());
-
-    CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException =
-        CodeOwnersInternalServerErrorException.newInternalServerError("msg");
-    assertThat(getUserMessages(codeOwnersInternalServerErrorException))
-        .containsExactly(codeOwnersInternalServerErrorException.getUserVisibleMessage());
-    assertThat(getUserMessages(newExceptionWithCause(codeOwnersInternalServerErrorException)))
-        .containsExactly(codeOwnersInternalServerErrorException.getUserVisibleMessage());
 
     assertThat(getUserMessages(new Exception())).isEmpty();
     assertThat(getUserMessages(newExceptionWithCause(new Exception()))).isEmpty();
@@ -139,15 +122,6 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
 
     OptionalSubject.assertThat(getStatus(new Exception())).isEmpty();
     OptionalSubject.assertThat(getStatus(newExceptionWithCause(new Exception()))).isEmpty();
-
-    OptionalSubject.assertThat(
-            getStatus(CodeOwnersInternalServerErrorException.newInternalServerError("msg")))
-        .isEmpty();
-    OptionalSubject.assertThat(
-            getStatus(
-                newExceptionWithCause(
-                    CodeOwnersInternalServerErrorException.newInternalServerError("msg"))))
-        .isEmpty();
   }
 
   private boolean skipRetryWithTrace(Exception exception) {

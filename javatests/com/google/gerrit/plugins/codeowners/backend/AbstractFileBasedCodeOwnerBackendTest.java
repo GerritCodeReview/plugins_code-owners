@@ -21,6 +21,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -193,9 +194,9 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   @Test
   public void cannotGetCodeOwnerConfigFromNonExistingRevision() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnersInternalServerErrorException exception =
+    StorageException exception =
         assertThrows(
-            CodeOwnersInternalServerErrorException.class,
+            StorageException.class,
             () ->
                 codeOwnerBackend.getCodeOwnerConfig(
                     codeOwnerConfigKey,
@@ -427,9 +428,9 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
     }
 
     // Try to update the code owner config.
-    CodeOwnersInternalServerErrorException exception =
+    StorageException exception =
         assertThrows(
-            CodeOwnersInternalServerErrorException.class,
+            StorageException.class,
             () ->
                 codeOwnerBackend.upsertCodeOwnerConfig(
                     codeOwnerConfigKey,

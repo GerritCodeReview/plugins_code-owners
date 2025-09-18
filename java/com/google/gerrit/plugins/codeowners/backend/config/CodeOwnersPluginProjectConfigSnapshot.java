@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.backend.config;
 
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static java.util.Objects.requireNonNull;
 
@@ -29,6 +28,7 @@ import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.EnableImplicitApprovals;
@@ -379,7 +379,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
 
       return ImmutableSet.copyOf(exemptedAccounts.values());
     } catch (IOException e) {
-      throw newInternalServerError(
+      throw new StorageException(
           String.format(
               "Failed to resolve exempted users %s on project %s", exemptedUsers, projectName),
           e);
@@ -615,8 +615,8 @@ public class CodeOwnersPluginProjectConfigSnapshot {
         LabelType requiredLabel = getRequiredApproval().labelType();
         if (requiredLabel.isIgnoreSelfApproval()) {
           logger.atFine().log(
-              "ignoring implicit approval configuration on project %s since the label of the required"
-                  + " approval (%s) is configured to ignore self approvals",
+              "ignoring implicit approval configuration on project %s since the label of the"
+                  + " required approval (%s) is configured to ignore self approvals",
               projectName, requiredLabel);
           return false;
         }
