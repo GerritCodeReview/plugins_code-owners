@@ -59,9 +59,9 @@ import org.junit.Test;
 
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule}. */
 public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
+  private final TestMetricMaker testMetricMaker = TestMetricMaker.getInstance();
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
-  @Inject private TestMetricMaker testMetricMaker;
 
   @Test
   public void changeIsSubmittableIfCodeOwnersFuctionalityIsDisabled() throws Exception {

@@ -48,11 +48,12 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   private static final ObjectId TEST_REVISION =
       ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
 
+  private final TestMetricMaker testMetricMaker = TestMetricMaker.getInstance();
+
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private AccountOperations accountOperations;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
-  @Inject private TestMetricMaker testMetricMaker;
   @Inject private ExternalIdFactory externalIdFactory;
 
   private Provider<CodeOwnerResolver> codeOwnerResolverProvider;
