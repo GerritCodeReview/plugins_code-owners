@@ -32,12 +32,12 @@ import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.patch.DiffOperations;
 import com.google.gerrit.server.patch.DiffOperationsForCommitValidation;
-import com.google.gerrit.server.patch.DiffOptions;
-import com.google.gerrit.server.patch.filediff.FileDiffOutput;
 import com.google.gerrit.server.patch.gitdiff.ModifiedFile;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.eclipse.jgit.lib.ObjectId;
@@ -91,7 +91,7 @@ public class ChangedFiles {
     requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
 
     try (Timer0.Context ctx = codeOwnerMetrics.getChangedFiles.start()) {
-      Map<String, FileDiffOutput> fileDiffOutputs;
+      List<ModifiedFile> modifiedFiles;
       if (mergeCommitStrategy.equals(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION)
           || isInitialCommit(project, revision)) {
         // Use parentNum=0 to do the comparison against the default base.
@@ -99,9 +99,9 @@ public class ChangedFiles {
         // Initial commits are supported when using parentNum=0.
         // For merge commits the default base is the auto-merge commit which should be used as base
         // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
-        fileDiffOutputs =
-            diffOperations.listModifiedFilesAgainstParent(
-                project, revision, /* parentNum= */ 0, DiffOptions.DEFAULTS);
+        modifiedFiles =
+            diffOperations.getModifiedFiles(
+                project, revision, /* parentNum= */ 0, /* enableRenameDetection= */ true);
       } else {
         checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
         // Always use parent 1 to do the comparison.
@@ -109,13 +109,12 @@ public class ChangedFiles {
         // handled above).
         // For merge commits also the first parent should be used if the merge commit strategy is
         // ALL_CHANGED_FILES.
-        fileDiffOutputs =
-            diffOperations.listModifiedFilesAgainstParent(
-                project, revision, 1, DiffOptions.DEFAULTS);
+        modifiedFiles =
+            diffOperations.getModifiedFiles(
+                project, revision, /* parentNum= */ 1, /* enableRenameDetection= */ true);
       }
 
-      return fileDiffOutputToChangedFiles(
-              filterOutMagicFilesFromFileDiffOutputAndSort(fileDiffOutputs))
+      return modifiedFilesToChangedFiles(filterOutMagicFilesFromModifiedFilesAndSort(modifiedFiles))
           .collect(toImmutableList());
     }
   }
@@ -209,7 +208,8 @@ public class ChangedFiles {
                 project, revision, 1, /* enableRenameDetection= */ true);
       }
 
-      return modifiedFilesToChangedFiles(filterOutMagicFilesFromModifiedFilesAndSort(modifiedFiles))
+      return modifiedFilesToChangedFiles(
+              filterOutMagicFilesFromModifiedFilesAndSort(modifiedFiles.values()))
           .collect(toImmutableList());
     }
   }
@@ -221,27 +221,14 @@ public class ChangedFiles {
     }
   }
 
-  private Stream<Map.Entry<String, FileDiffOutput>> filterOutMagicFilesFromFileDiffOutputAndSort(
-      Map<String, FileDiffOutput> fileDiffOutputs) {
-    return fileDiffOutputs.entrySet().stream()
-        .filter(e -> !Patch.isMagic(e.getKey()))
-        .sorted(comparing(Map.Entry::getKey));
+  private Stream<ModifiedFile> filterOutMagicFilesFromModifiedFilesAndSort(
+      Collection<ModifiedFile> modifiedFiles) {
+    return modifiedFiles.stream()
+        .filter(modifiedFile -> !Patch.isMagic(modifiedFile.getDefaultPath()))
+        .sorted(comparing(ModifiedFile::getDefaultPath));
   }
 
-  private Stream<ChangedFile> fileDiffOutputToChangedFiles(
-      Stream<Map.Entry<String, FileDiffOutput>> fileDiffOutputs) {
-    return fileDiffOutputs.map(Map.Entry::getValue).map(ChangedFile::create);
-  }
-
-  private Stream<Map.Entry<String, ModifiedFile>> filterOutMagicFilesFromModifiedFilesAndSort(
-      Map<String, ModifiedFile> modifiedFiles) {
-    return modifiedFiles.entrySet().stream()
-        .filter(e -> !Patch.isMagic(e.getKey()))
-        .sorted(comparing(Map.Entry::getKey));
-  }
-
-  private Stream<ChangedFile> modifiedFilesToChangedFiles(
-      Stream<Map.Entry<String, ModifiedFile>> modifiedFiles) {
-    return modifiedFiles.map(Map.Entry::getValue).map(ChangedFile::create);
+  private Stream<ChangedFile> modifiedFilesToChangedFiles(Stream<ModifiedFile> modifiedFiles) {
+    return modifiedFiles.map(ChangedFile::create);
   }
 }
