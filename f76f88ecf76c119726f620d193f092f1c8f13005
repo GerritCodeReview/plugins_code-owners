@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6507b8f3_11bdc5b7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2025-12-03T15:58:37Z",
+      "side": 1,
+      "message": "Does detecting renames work without calculating diffs?",
+      "range": {
+        "startLine": 19,
+        "startChar": 21,
+        "endLine": 19,
+        "endChar": 51
+      },
+      "revId": "f76f88ecf76c119726f620d193f092f1c8f13005",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
