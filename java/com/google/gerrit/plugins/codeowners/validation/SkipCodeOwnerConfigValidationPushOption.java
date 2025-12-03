@@ -98,7 +98,7 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
     // (MergeCommitStrategy.ALL_CHANGED_FILES) as this is what CodeOwnerConfigValidator does.
     try {
       return changedFiles
-          .getFromDiffCache(
+          .get(
               changeNotes.getProjectName(),
               changeNotes.getCurrentPatchSet().commitId(),
               MergeCommitStrategy.ALL_CHANGED_FILES)

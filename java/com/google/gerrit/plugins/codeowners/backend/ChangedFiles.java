@@ -47,8 +47,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
 /**
  * Class to get the files that have been changed in a revision.
  *
- * <p>The {@link #getFromDiffCache(Project.NameKey, ObjectId, MergeCommitStrategy)} method is
- * retrieving the file diff from the diff cache and has rename detection enabled.
+ * <p>The {@link #get(Project.NameKey, ObjectId, MergeCommitStrategy)} method is retrieving the file
+ * diff from the diff cache and has rename detection enabled.
  *
  * <p>The {@link com.google.gerrit.server.patch.PatchListCache} is deprecated, and hence it not
  * being used here.
@@ -73,7 +73,7 @@ public class ChangedFiles {
   }
 
   /**
-   * Gets the changed files from the diff cache.
+   * Gets the changed files.
    *
    * <p>Rename detection is enabled.
    *
@@ -83,7 +83,7 @@ public class ChangedFiles {
    *     files for merge commits
    * @return the files that have been changed in the given revision, sorted alphabetically by path
    */
-  public ImmutableList<ChangedFile> getFromDiffCache(
+  public ImmutableList<ChangedFile> get(
       Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
       throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
@@ -101,7 +101,7 @@ public class ChangedFiles {
         // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
         fileDiffOutputs =
             diffOperations.listModifiedFilesAgainstParent(
-                project, revision, /* parentNum=*/ 0, DiffOptions.DEFAULTS);
+                project, revision, /* parentNum= */ 0, DiffOptions.DEFAULTS);
       } else {
         checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
         // Always use parent 1 to do the comparison.
@@ -121,7 +121,7 @@ public class ChangedFiles {
   }
 
   /**
-   * Gets the changed files from the diff cache.
+   * Gets the changed files.
    *
    * <p>Rename detection is enabled.
    *
@@ -132,18 +132,18 @@ public class ChangedFiles {
    * @return the files that have been changed in the given revision, sorted alphabetically by path
    * @throws IOException thrown if the computation fails due to an I/O error
    */
-  public ImmutableList<ChangedFile> getFromDiffCache(Project.NameKey project, ObjectId revision)
+  public ImmutableList<ChangedFile> get(Project.NameKey project, ObjectId revision)
       throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
-    return getFromDiffCache(
+    return get(
         project,
         revision,
         codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
   }
 
   /**
-   * Gets the changed files from the diff cache.
+   * Gets the changed files.
    *
    * <p>Rename detection is enabled.
    *
@@ -152,13 +152,12 @@ public class ChangedFiles {
    * @param revisionResource the revision resource for which the changed files should be retrieved
    * @return the files that have been changed in the given revision, sorted alphabetically by path
    * @throws IOException thrown if the computation fails due to an I/O error
-   * @see #getFromDiffCache(Project.NameKey, ObjectId, MergeCommitStrategy)
+   * @see #get(Project.NameKey, ObjectId, MergeCommitStrategy)
    */
-  public ImmutableList<ChangedFile> getFromDiffCache(RevisionResource revisionResource)
+  public ImmutableList<ChangedFile> get(RevisionResource revisionResource)
       throws IOException, DiffNotAvailableException {
     requireNonNull(revisionResource, "revisionResource");
-    return getFromDiffCache(
-        revisionResource.getProject(), revisionResource.getPatchSet().commitId());
+    return get(revisionResource.getProject(), revisionResource.getPatchSet().commitId());
   }
 
   /**
@@ -197,7 +196,7 @@ public class ChangedFiles {
         // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
         modifiedFiles =
             diffOperationsForCommitValidation.loadModifiedFilesAgainstParentIfNecessary(
-                project, revision, /* parentNum=*/ 0, /* enableRenameDetection= */ true);
+                project, revision, /* parentNum= */ 0, /* enableRenameDetection= */ true);
       } else {
         checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
         // Always use parent 1 to do the comparison.

@@ -363,8 +363,7 @@ public class CodeOwnerApprovalCheck {
       ChangedFilesByPatchSetCache changedFilesByPatchSetCache =
           changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes);
       return changedFiles
-          .getFromDiffCache(
-              changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
+          .get(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
           .stream()
           .map(
               changedFile ->
@@ -438,9 +437,7 @@ public class CodeOwnerApprovalCheck {
               codeOwnersConfig, codeOwnerResolver, changeNotes, accountIds);
       ChangedFilesByPatchSetCache changedFilesByPatchSetCache =
           changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes);
-      return changedFiles
-          .getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId())
-          .stream()
+      return changedFiles.get(changeNotes.getProjectName(), patchSet.commitId()).stream()
           .map(
               changedFile ->
                   getFileStatus(
@@ -472,7 +469,7 @@ public class CodeOwnerApprovalCheck {
       ChangeNotes changeNotes, PatchSet patchSet, String reason)
       throws IOException, DiffNotAvailableException {
     logger.atFine().log("all paths are approved (reason = %s)", reason);
-    return changedFiles.getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId()).stream()
+    return changedFiles.get(changeNotes.getProjectName(), patchSet.commitId()).stream()
         .map(
             changedFile ->
                 FileCodeOwnerStatus.create(

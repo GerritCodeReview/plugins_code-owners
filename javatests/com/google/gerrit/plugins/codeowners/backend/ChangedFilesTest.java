@@ -69,8 +69,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   public void cannotGetFromDiffCacheForNullRevisionResource() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class,
-            () -> changedFiles.getFromDiffCache(/* revisionResource= */ null));
+            NullPointerException.class, () -> changedFiles.get(/* revisionResource= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("revisionResource");
   }
 
@@ -79,7 +78,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> changedFiles.getFromDiffCache(/* project= */ null, ObjectId.zeroId()));
+            () -> changedFiles.get(/* project= */ null, ObjectId.zeroId()));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -87,8 +86,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   public void cannotGetFromDiffCacheForNullRevision_v1() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class,
-            () -> changedFiles.getFromDiffCache(project, /* revision= */ null));
+            NullPointerException.class, () -> changedFiles.get(project, /* revision= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
@@ -98,7 +96,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                changedFiles.getFromDiffCache(
+                changedFiles.get(
                     /* project= */ null, ObjectId.zeroId(), MergeCommitStrategy.ALL_CHANGED_FILES));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
@@ -109,7 +107,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                changedFiles.getFromDiffCache(
+                changedFiles.get(
                     project, /* revision= */ null, MergeCommitStrategy.ALL_CHANGED_FILES));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
@@ -119,9 +117,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                changedFiles.getFromDiffCache(
-                    project, ObjectId.zeroId(), /* mergeCommitStrategy= */ null));
+            () -> changedFiles.get(project, ObjectId.zeroId(), /* mergeCommitStrategy= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("mergeCommitStrategy");
   }
 
@@ -132,7 +128,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
+        changedFiles.get(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
@@ -151,7 +147,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .getCommit();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
+        changedFiles.get(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
@@ -166,7 +162,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     TestChange change = createChangeWithFileDeletion(path);
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.get(
             project,
             getRevisionResource(change.id()).getPatchSet().commitId(),
             MergeCommitStrategy.ALL_CHANGED_FILES);
@@ -187,7 +183,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     gApi.changes().id(change.id()).current().files();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.get(
             project,
             getRevisionResource(change.id()).getPatchSet().commitId(),
             MergeCommitStrategy.ALL_CHANGED_FILES);
@@ -207,7 +203,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     assertThat(commit.getParents()).isEmpty();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
+        changedFiles.get(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
@@ -297,7 +293,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.get(
             project,
             getRevisionResource(mergeChange).getPatchSet().commitId(),
             mergeCommitStrategy);
@@ -389,7 +385,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.get(
             project,
             getRevisionResource(mergeChange).getPatchSet().commitId(),
             mergeCommitStrategy);
@@ -424,7 +420,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .getCommit();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
+        changedFiles.get(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet)
         .comparingElementsUsing(hasPath())
         .containsExactly(file4, file3, file5, file1, file2)
@@ -540,7 +536,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.get(
             project,
             getRevisionResource(mergeChange).getPatchSet().commitId(),
             mergeCommitStrategy);

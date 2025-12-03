@@ -71,7 +71,7 @@ public class ChangedFilesByPatchSetCache {
         changeNotes.getChange().getId().get());
     PatchSet patchSet = getPatchSet(patchSetId);
     try {
-      return changedFiles.getFromDiffCache(
+      return changedFiles.get(
           changeNotes.getProjectName(),
           patchSet.commitId(),
           codeOwnersConfig.getMergeCommitStrategy());
