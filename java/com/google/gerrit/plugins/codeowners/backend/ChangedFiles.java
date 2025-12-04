@@ -170,6 +170,28 @@ public class ChangedFiles {
   /**
    * Gets the changed files.
    *
+   * <p>Rename detection is disabled.
+   *
+   * <p>Uses the configured merge commit strategy.
+   *
+   * @param project the project
+   * @param revision the revision for which the changed files should be retrieved
+   * @return the files that have been changed in the given revision, sorted alphabetically by path
+   * @throws IOException thrown if the computation fails due to an I/O error
+   */
+  public ImmutableList<ChangedFile> getWithoutRenameDetection(
+      Project.NameKey project, ObjectId revision) throws IOException, DiffNotAvailableException {
+    requireNonNull(project, "project");
+    requireNonNull(revision, "revision");
+    return getWithoutRenameDetection(
+        project,
+        revision,
+        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
+  }
+
+  /**
+   * Gets the changed files.
+   *
    * <p>Rename detection is enabled.
    *
    * <p>Uses the configured merge commit strategy.
