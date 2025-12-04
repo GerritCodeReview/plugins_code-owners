@@ -79,7 +79,9 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> changedFiles.get(/* project= */ null, ObjectId.zeroId()));
+            () ->
+                changedFiles.get(
+                    /* project= */ null, ObjectId.zeroId(), /* enableRenameDetection= */ false));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -87,7 +89,10 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   public void cannotGetForNullRevision_v1() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> changedFiles.get(project, /* revision= */ null));
+            NullPointerException.class,
+            () ->
+                changedFiles.get(
+                    project, /* revision= */ null, /* enableRenameDetection= */ false));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
@@ -98,7 +103,10 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 changedFiles.get(
-                    /* project= */ null, ObjectId.zeroId(), MergeCommitStrategy.ALL_CHANGED_FILES));
+                    /* project= */ null,
+                    ObjectId.zeroId(),
+                    MergeCommitStrategy.ALL_CHANGED_FILES,
+                    /* enableRenameDetection= */ false));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -109,7 +117,10 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 changedFiles.get(
-                    project, /* revision= */ null, MergeCommitStrategy.ALL_CHANGED_FILES));
+                    project,
+                    /* revision= */ null,
+                    MergeCommitStrategy.ALL_CHANGED_FILES,
+                    /* enableRenameDetection= */ false));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
@@ -118,7 +129,12 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> changedFiles.get(project, ObjectId.zeroId(), /* mergeCommitStrategy= */ null));
+            () ->
+                changedFiles.get(
+                    project,
+                    ObjectId.zeroId(),
+                    /* mergeCommitStrategy= */ null,
+                    /* enableRenameDetection= */ false));
     assertThat(npe).hasMessageThat().isEqualTo("mergeCommitStrategy");
   }
 
@@ -129,7 +145,11 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.get(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
+        changedFiles.get(
+            project,
+            commit,
+            MergeCommitStrategy.ALL_CHANGED_FILES,
+            /* enableRenameDetection= */ false);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
@@ -148,7 +168,11 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .getCommit();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.get(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
+        changedFiles.get(
+            project,
+            commit,
+            MergeCommitStrategy.ALL_CHANGED_FILES,
+            /* enableRenameDetection= */ false);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
@@ -166,7 +190,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         changedFiles.get(
             project,
             getRevisionResource(change.id()).getPatchSet().commitId(),
-            MergeCommitStrategy.ALL_CHANGED_FILES);
+            MergeCommitStrategy.ALL_CHANGED_FILES,
+            /* enableRenameDetection= */ false);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().isEmpty();
@@ -187,7 +212,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         changedFiles.get(
             project,
             getRevisionResource(change.id()).getPatchSet().commitId(),
-            MergeCommitStrategy.ALL_CHANGED_FILES);
+            MergeCommitStrategy.ALL_CHANGED_FILES,
+            /* enableRenameDetection= */ true);
     ChangedFileSubject changedFile = assertThatCollection(changedFilesSet).onlyElement();
     changedFile.hasNewPath().value().isEqualTo(Path.of(newPath));
     changedFile.hasOldPath().value().isEqualTo(Path.of(oldPath));
@@ -221,7 +247,11 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     assertThat(commit.getParents()).isEmpty();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.get(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
+        changedFiles.get(
+            project,
+            commit,
+            MergeCommitStrategy.ALL_CHANGED_FILES,
+            /* enableRenameDetection= */ false);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
@@ -314,7 +344,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         changedFiles.get(
             project,
             getRevisionResource(mergeChange).getPatchSet().commitId(),
-            mergeCommitStrategy);
+            mergeCommitStrategy,
+            /* enableRenameDetection= */ false);
 
     if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
       assertThat(changedFilesSet).comparingElementsUsing(hasPath()).containsExactly(file1, file2);
@@ -406,7 +437,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         changedFiles.get(
             project,
             getRevisionResource(mergeChange).getPatchSet().commitId(),
-            mergeCommitStrategy);
+            mergeCommitStrategy,
+            /* enableRenameDetection= */ false);
     ImmutableSet<String> oldPaths =
         changedFilesSet.stream()
             .map(changedFile -> JgitPath.of(changedFile.oldPath().get()).get())
@@ -438,7 +470,11 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .getCommit();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.get(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
+        changedFiles.get(
+            project,
+            commit,
+            MergeCommitStrategy.ALL_CHANGED_FILES,
+            /* enableRenameDetection= */ false);
     assertThat(changedFilesSet)
         .comparingElementsUsing(hasPath())
         .containsExactly(file4, file3, file5, file1, file2)
@@ -554,7 +590,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         changedFiles.get(
             project,
             getRevisionResource(mergeChange).getPatchSet().commitId(),
-            mergeCommitStrategy);
+            mergeCommitStrategy,
+            /* enableRenameDetection= */ false);
 
     if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
       assertThat(changedFilesSet)

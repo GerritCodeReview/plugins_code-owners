@@ -47,8 +47,10 @@ import org.eclipse.jgit.revwalk.RevWalk;
 /**
  * Class to get the files that have been changed in a revision.
  *
- * <p>The {@link #get(Project.NameKey, ObjectId, MergeCommitStrategy)} method is retrieving the file
- * diff from the diff cache and has rename detection enabled.
+ * <p>If possible changed files should be retrieved without rename detection, since rename detection
+ * may be expensive.
+ *
+ * <p>The changed files are retrieved from {@link DiffOperations}.
  *
  * <p>The {@link com.google.gerrit.server.patch.PatchListCache} is deprecated, and hence it not
  * being used here.
@@ -121,7 +123,7 @@ public class ChangedFiles {
    * @param revisionResource the revision resource for which the changed files should be retrieved
    * @return the files that have been changed in the given revision, sorted alphabetically by path
    * @throws IOException thrown if the computation fails due to an I/O error
-   * @see #get(Project.NameKey, ObjectId, MergeCommitStrategy)
+   * @see #get(Project.NameKey, ObjectId, MergeCommitStrategy, boolean)
    */
   public ImmutableList<ChangedFile> getWithoutRenameDetection(RevisionResource revisionResource)
       throws IOException, DiffNotAvailableException {
@@ -133,43 +135,37 @@ public class ChangedFiles {
   /**
    * Gets the changed files.
    *
-   * <p>Rename detection is enabled.
-   *
    * <p>Uses the configured merge commit strategy.
    *
    * @param project the project
    * @param revision the revision for which the changed files should be retrieved
+   * @param enableRenameDetection whether the rename detection is enabled
    * @return the files that have been changed in the given revision, sorted alphabetically by path
    * @throws IOException thrown if the computation fails due to an I/O error
    */
-  public ImmutableList<ChangedFile> get(Project.NameKey project, ObjectId revision)
+  public ImmutableList<ChangedFile> get(
+      Project.NameKey project, ObjectId revision, boolean enableRenameDetection)
       throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
     return get(
         project,
         revision,
-        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
+        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy(),
+        enableRenameDetection);
   }
 
   /**
    * Gets the changed files.
    *
-   * <p>Rename detection is enabled.
-   *
    * @param project the project
    * @param revision the revision for which the changed files should be retrieved
    * @param mergeCommitStrategy the merge commit strategy that should be used to compute the changed
    *     files for merge commits
+   * @param enableRenameDetection whether the rename detection is enabled
    * @return the files that have been changed in the given revision, sorted alphabetically by path
    */
   public ImmutableList<ChangedFile> get(
-      Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
-      throws IOException, DiffNotAvailableException {
-    return get(project, revision, mergeCommitStrategy, /* enableRenameDetection= */ true);
-  }
-
-  private ImmutableList<ChangedFile> get(
       Project.NameKey project,
       ObjectId revision,
       MergeCommitStrategy mergeCommitStrategy,

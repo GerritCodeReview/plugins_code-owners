@@ -22,8 +22,12 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.change.ChangeOperations;
 import com.google.gerrit.acceptance.testsuite.change.TestChange;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.extensions.api.changes.ChangeIdentifier;
+import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
@@ -45,6 +49,7 @@ import org.junit.Test;
  */
 public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
+  @Inject private ChangeOperations changeOperations;
 
   @Test
   public void getStatus() throws Exception {
@@ -544,6 +549,125 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                     "reviewer %s is a code owner",
                     AccountTemplateUtil.getAccountTemplate(user2.id()))));
     assertThat(codeOwnerStatus).hasAccounts(user, user2);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptedUser", value = "exempted-user@example.com")
+  public void getStatusForRenamedFile_exemptedAccount() throws Exception {
+    TestAccount exemptedUser =
+        accountCreator.create(
+            "exemptedUser", "exempted-user@example.com", "Exempted User", /* displayName= */ null);
+
+    String oldPath = "foo/bar/abc.txt";
+    String newPath = "foo/baz/abc.txt";
+
+    TestChange baseChange =
+        changeOperations
+            .newChange()
+            .project(project)
+            .commitMessage("Change Adding A File")
+            .file(JgitPath.of(oldPath).get())
+            .content("file content")
+            .createAndGet();
+
+    TestChange changeWithRename =
+        changeOperations
+            .newChange()
+            .owner(exemptedUser.id())
+            .project(project)
+            .commitMessage("Change Renaming A File")
+            .childOf()
+            .change(baseChange.id())
+            .file(JgitPath.of(oldPath).get())
+            .renameTo(JgitPath.of(newPath).get())
+            .createAndGet();
+
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeWithRename.id().id()).getCodeOwnerStatus().get();
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "patch set uploader %s is exempted from requiring code owner approvals",
+                    AccountTemplateUtil.getAccountTemplate(exemptedUser.id())),
+                newPath,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "patch set uploader %s is exempted from requiring code owner approvals",
+                    AccountTemplateUtil.getAccountTemplate(exemptedUser.id()))));
+  }
+
+  @GerritConfig(name = "plugin.code-owners.exemptPureReverts", value = "true")
+  @Test
+  public void getStatusForRenamedFile_exemptedPureRevert() throws Exception {
+    setAsRootCodeOwners(admin);
+
+    String oldPath = "foo/bar/abc.txt";
+    String newPath = "foo/baz/abc.txt";
+
+    TestChange baseChange =
+        changeOperations
+            .newChange()
+            .project(project)
+            .commitMessage("Change Adding A File")
+            .file(JgitPath.of(oldPath).get())
+            .content("file content")
+            .createAndGet();
+
+    TestChange changeWithRename =
+        changeOperations
+            .newChange()
+            .project(project)
+            .commitMessage("Change Renaming A File")
+            .childOf()
+            .change(baseChange.id())
+            .file(JgitPath.of(oldPath).get())
+            .renameTo(JgitPath.of(newPath).get())
+            .createAndGet();
+
+    // Approve and submit both changes, since a revert change can only be created for a submitted
+    // change.
+    changeOperations
+        .change(baseChange.id())
+        .newVote()
+        .codeReviewApproval()
+        .user(admin.id())
+        .create();
+    changeOperations.change(changeWithRename.id()).newVote().codeReviewApproval().create();
+    changeOperations
+        .change(changeWithRename.id())
+        .newVote()
+        .codeReviewApproval()
+        .user(admin.id())
+        .create();
+    gApi.changes().id(changeWithRename.id()).current().submit();
+
+    // Revert the change
+    ChangeInfo changeInfoOfRevert = gApi.changes().id(changeWithRename.id()).revert().get();
+    TestChange revertChange =
+        changeOperations
+            .change(
+                ChangeIdentifier.byProjectAndNumericChangeId(
+                    changeInfoOfRevert.project, changeInfoOfRevert._number))
+            .get();
+
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(revertChange.id().id()).getCodeOwnerStatus().get();
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                newPath,
+                CodeOwnerStatus.APPROVED,
+                "change is a pure revert and is exempted from requiring code owner approvals",
+                oldPath,
+                CodeOwnerStatus.APPROVED,
+                "change is a pure revert and is exempted from requiring code owner approvals"));
   }
 
   @Test

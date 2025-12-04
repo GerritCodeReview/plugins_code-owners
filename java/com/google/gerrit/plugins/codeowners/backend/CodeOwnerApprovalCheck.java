@@ -221,7 +221,14 @@ public class CodeOwnerApprovalCheck {
     try {
       boolean isSubmittable =
           !getFileStatuses(
-                  codeOwnersConfig, codeOwnerConfigHierarchy, codeOwnerResolver, changeNotes)
+                  codeOwnersConfig,
+                  codeOwnerConfigHierarchy,
+                  codeOwnerResolver,
+                  changeNotes,
+                  // We only need to know if all new and old paths are approved. For this it's OK if
+                  // for renamed files 2 FileCodeOwnerStatus'es are returned (one for the new path
+                  // and one for the old path), hence rename detection can be disabled here.
+                  /* enabledRenameDetection= */ false)
               .anyMatch(
                   fileStatus ->
                       (fileStatus.newPathStatus().isPresent()
@@ -255,7 +262,7 @@ public class CodeOwnerApprovalCheck {
    * @param start number of file statuses to skip
    * @param limit the max number of file statuses that should be returned (0 = unlimited)
    * @see #getFileStatuses(CodeOwnersPluginProjectConfigSnapshot, CodeOwnerConfigHierarchy,
-   *     CodeOwnerResolver, ChangeNotes)
+   *     CodeOwnerResolver, ChangeNotes, boolean)
    */
   public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(
       ChangeNotes changeNotes, int start, int limit) throws IOException, DiffNotAvailableException {
@@ -272,7 +279,12 @@ public class CodeOwnerApprovalCheck {
               codeOwnersConfig,
               codeOwnerConfigHierarchyProvider.get(),
               codeOwnerResolverProvider.get().enforceVisibility(false),
-              changeNotes);
+              changeNotes,
+              // The FileCodeOwnerStatus'es that are computed here are returned in the response of
+              // GetCodeOwnerStatus REST endpoint. Since the GetCodeOwnerStatus REST endpoint is
+              // documented to return a single FileCodeOwnerStatus for renamed files we need to get
+              // the changed files with rename detection enabled.
+              /* enableRenameDetection= */ true);
       if (start > 0) {
         fileStatuses = fileStatuses.skip(start);
       }
@@ -315,7 +327,8 @@ public class CodeOwnerApprovalCheck {
       CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       CodeOwnerResolver codeOwnerResolver,
-      ChangeNotes changeNotes)
+      ChangeNotes changeNotes,
+      boolean enableRenameDetection)
       throws IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.prepareFileStatusComputation.start()) {
@@ -335,7 +348,8 @@ public class CodeOwnerApprovalCheck {
             changeNotes.getCurrentPatchSet(),
             String.format(
                 "patch set uploader %s is exempted from requiring code owner approvals",
-                AccountTemplateUtil.getAccountTemplate(patchSetUploader)));
+                AccountTemplateUtil.getAccountTemplate(patchSetUploader)),
+            enableRenameDetection);
       }
 
       boolean arePureRevertsExempted = codeOwnersConfig.arePureRevertsExempted();
@@ -346,7 +360,8 @@ public class CodeOwnerApprovalCheck {
         return getAllPathsAsApproved(
             changeNotes,
             changeNotes.getCurrentPatchSet(),
-            "change is a pure revert and is exempted from requiring code owner approvals");
+            "change is a pure revert and is exempted from requiring code owner approvals",
+            enableRenameDetection);
       }
 
       BranchNameKey branch = changeNotes.getChange().getDest();
@@ -363,7 +378,10 @@ public class CodeOwnerApprovalCheck {
       ChangedFilesByPatchSetCache changedFilesByPatchSetCache =
           changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes);
       return changedFiles
-          .get(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
+          .get(
+              changeNotes.getProjectName(),
+              changeNotes.getCurrentPatchSet().commitId(),
+              enableRenameDetection)
           .stream()
           .map(
               changedFile ->
@@ -437,7 +455,10 @@ public class CodeOwnerApprovalCheck {
               codeOwnersConfig, codeOwnerResolver, changeNotes, accountIds);
       ChangedFilesByPatchSetCache changedFilesByPatchSetCache =
           changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes);
-      return changedFiles.get(changeNotes.getProjectName(), patchSet.commitId()).stream()
+      // TODO: check if rename detection can be disabled here
+      return changedFiles
+          .get(changeNotes.getProjectName(), patchSet.commitId(), /* enableRenameDetection= */ true)
+          .stream()
           .map(
               changedFile ->
                   getFileStatus(
@@ -466,10 +487,12 @@ public class CodeOwnerApprovalCheck {
   }
 
   private Stream<FileCodeOwnerStatus> getAllPathsAsApproved(
-      ChangeNotes changeNotes, PatchSet patchSet, String reason)
+      ChangeNotes changeNotes, PatchSet patchSet, String reason, boolean enableRenameDetection)
       throws IOException, DiffNotAvailableException {
     logger.atFine().log("all paths are approved (reason = %s)", reason);
-    return changedFiles.get(changeNotes.getProjectName(), patchSet.commitId()).stream()
+    return changedFiles
+        .get(changeNotes.getProjectName(), patchSet.commitId(), enableRenameDetection)
+        .stream()
         .map(
             changedFile ->
                 FileCodeOwnerStatus.create(
