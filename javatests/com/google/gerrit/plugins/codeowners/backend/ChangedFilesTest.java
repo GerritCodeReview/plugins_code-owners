@@ -69,7 +69,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   public void cannotGetForNullRevisionResource() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> changedFiles.get(/* revisionResource= */ null));
+            NullPointerException.class,
+            () -> changedFiles.getWithoutRenameDetection(/* revisionResource= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("revisionResource");
   }
 

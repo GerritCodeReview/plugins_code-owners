@@ -105,19 +105,26 @@ public class CodeOwnersInChangeCollection
   private void checkThatFileExists(
       RevisionResource revisionResource, PathResource pathResource, IdString id)
       throws RestApiException, IOException, DiffNotAvailableException {
-    if (!changedFiles.get(revisionResource).stream()
+    // We only need to check whether the path exists as a new path or as an old path of a rename or
+    // deletion. Since old paths of deletions and renames are handled the same way we do not need to
+    // detect renames. If we get the changed files without rename detection, renames are returned as
+    // 2 changed files, one with the new path for the addition and one with the old path for the
+    // deletion.
+    if (!changedFiles.getWithoutRenameDetection(revisionResource).stream()
         .anyMatch(
             changedFile ->
                 // Check whether the path matches any file in the change.
                 changedFile.hasNewPath(pathResource.getPath())
-                    // For renamed and deleted files we also accept requests for the old path.
-                    // Listing code owners for the old path of renamed/deleted files should be
+                    // Since the rename detection is disabled renamed files are returned as addition
+                    // + deletion.
+                    // For deleted files (includes renamed files) we accept requests for the old
+                    // path. Listing code owners for the old path of deleted/renamed files should be
                     // possible because these files require a code owner approval on the old path
                     // for submit and users need to know whom they need to add as reviewer for this.
                     // For copied files the old path is not modified and hence no code owner
                     // approval for the old path is required. This is why users do not need to get
                     // code owners for the old path in case of copy.
-                    || ((changedFile.isRename() || changedFile.isDeletion())
+                    || (changedFile.isDeletion()
                         && changedFile.hasOldPath(pathResource.getPath())))) {
       // Throw the exception with the path we got as input.
       throw new ResourceNotFoundException(id);
