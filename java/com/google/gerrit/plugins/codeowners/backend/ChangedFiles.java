@@ -86,6 +86,32 @@ public class ChangedFiles {
   public ImmutableList<ChangedFile> get(
       Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
       throws IOException, DiffNotAvailableException {
+    return get(project, revision, mergeCommitStrategy, /* enableRenameDetection= */ true);
+  }
+
+  /**
+   * Gets the changed files.
+   *
+   * <p>Rename detection is disabled.
+   *
+   * @param project the project
+   * @param revision the revision for which the changed files should be retrieved
+   * @param mergeCommitStrategy the merge commit strategy that should be used to compute the changed
+   *     files for merge commits
+   * @return the files that have been changed in the given revision, sorted alphabetically by path
+   */
+  public ImmutableList<ChangedFile> getWithoutRenameDetection(
+      Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
+      throws IOException, DiffNotAvailableException {
+    return get(project, revision, mergeCommitStrategy, /* enableRenameDetection= */ false);
+  }
+
+  private ImmutableList<ChangedFile> get(
+      Project.NameKey project,
+      ObjectId revision,
+      MergeCommitStrategy mergeCommitStrategy,
+      boolean enableRenameDetection)
+      throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
     requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
@@ -101,7 +127,7 @@ public class ChangedFiles {
         // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
         modifiedFiles =
             diffOperations.getModifiedFiles(
-                project, revision, /* parentNum= */ 0, /* enableRenameDetection= */ true);
+                project, revision, /* parentNum= */ 0, enableRenameDetection);
       } else {
         checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
         // Always use parent 1 to do the comparison.
@@ -111,7 +137,7 @@ public class ChangedFiles {
         // ALL_CHANGED_FILES.
         modifiedFiles =
             diffOperations.getModifiedFiles(
-                project, revision, /* parentNum= */ 1, /* enableRenameDetection= */ true);
+                project, revision, /* parentNum= */ 1, enableRenameDetection);
       }
 
       return modifiedFilesToChangedFiles(filterOutMagicFilesFromModifiedFilesAndSort(modifiedFiles))

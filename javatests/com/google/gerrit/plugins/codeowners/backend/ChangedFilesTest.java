@@ -192,6 +192,23 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     changedFile.hasOldPath().value().isEqualTo(Path.of(oldPath));
     changedFile.isRename();
     changedFile.isNoDeletion();
+
+    ImmutableList<ChangedFile> changedFilesSetWithoutRenameDetection =
+        changedFiles.getWithoutRenameDetection(
+            project,
+            getRevisionResource(change.id()).getPatchSet().commitId(),
+            MergeCommitStrategy.ALL_CHANGED_FILES);
+    assertThatCollection(changedFilesSetWithoutRenameDetection).hasSize(2);
+    ChangedFileSubject addition = assertThat(changedFilesSetWithoutRenameDetection.get(0));
+    addition.hasNewPath().value().isEqualTo(Path.of(newPath));
+    addition.hasOldPath().isEmpty();
+    addition.isNoRename();
+    addition.isNoDeletion();
+    ChangedFileSubject deletion = assertThat(changedFilesSetWithoutRenameDetection.get(1));
+    deletion.hasNewPath().isEmpty();
+    deletion.hasOldPath().value().isEqualTo(Path.of(oldPath));
+    deletion.isNoRename();
+    deletion.isDeletion();
   }
 
   @Test

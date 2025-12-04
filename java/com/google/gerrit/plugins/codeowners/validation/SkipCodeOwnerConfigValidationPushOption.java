@@ -98,7 +98,9 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
     // (MergeCommitStrategy.ALL_CHANGED_FILES) as this is what CodeOwnerConfigValidator does.
     try {
       return changedFiles
-          .get(
+          // we are only interested in the new paths (see below), hence we do not need to detect
+          // renames
+          .getWithoutRenameDetection(
               changeNotes.getProjectName(),
               changeNotes.getCurrentPatchSet().commitId(),
               MergeCommitStrategy.ALL_CHANGED_FILES)
