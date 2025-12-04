@@ -66,7 +66,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetFromDiffCacheForNullRevisionResource() throws Exception {
+  public void cannotGetForNullRevisionResource() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class, () -> changedFiles.get(/* revisionResource= */ null));
@@ -74,7 +74,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetFromDiffCacheForNullProject_v1() throws Exception {
+  public void cannotGetForNullProject_v1() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
@@ -83,7 +83,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetFromDiffCacheForNullRevision_v1() throws Exception {
+  public void cannotGetForNullRevision_v1() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class, () -> changedFiles.get(project, /* revision= */ null));
@@ -91,7 +91,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetFromDiffCacheForNullProject_v2() throws Exception {
+  public void cannotGetForNullProject_v2() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
@@ -102,7 +102,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetFromDiffCacheForNullRevision_v2() throws Exception {
+  public void cannotGetForNullRevision_v2() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
@@ -113,7 +113,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetFromDiffCacheForNullMergeCommitStrategy() throws Exception {
+  public void cannotGetForNullMergeCommitStrategy() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
@@ -122,7 +122,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getFromDiffCacheForChangeThatAddedAFile() throws Exception {
+  public void getForChangeThatAddedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
     RevCommit commit =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
@@ -138,7 +138,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getFromDiffCacheForChangeThatModifiedAFile() throws Exception {
+  public void getForChangeThatModifiedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
     createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -157,7 +157,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getFromDiffCacheForChangeThatDeletedAFile() throws Exception {
+  public void getForChangeThatDeletedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
     TestChange change = createChangeWithFileDeletion(path);
 
@@ -175,7 +175,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getFromDiffCacheForChangeThatRenamedAFile() throws Exception {
+  public void getForChangeThatRenamedAFile() throws Exception {
     String oldPath = "/foo/bar/old.txt";
     String newPath = "/foo/bar/new.txt";
     TestChange change = createChangeWithFileRename(oldPath, newPath);
@@ -196,7 +196,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
   @Test
   @TestProjectInput(createEmptyCommit = false)
-  public void getFromDiffCacheForInitialChangeThatAddedAFile() throws Exception {
+  public void getForInitialChangeThatAddedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
     RevCommit commit =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
@@ -397,7 +397,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getFromDiffCacheReturnsChangedFilesSortedByPath() throws Exception {
+  public void getReturnsChangedFilesSortedByPath() throws Exception {
     String file1 = "foo/bar.baz";
     String file2 = "foo/baz.bar";
     String file3 = "bar/foo.baz";
@@ -429,23 +429,20 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.mergeCommitStrategy", value = "ALL_CHANGED_FILES")
-  public void getFromDiffCacheReturnsChangedFilesSortedByPath_mergeCommitAgainstFirstParent()
-      throws Exception {
-    testGetFromDiffCacheReturnsChangedFilesSortedByPathForMerge(
-        MergeCommitStrategy.ALL_CHANGED_FILES);
+  public void getReturnsChangedFilesSortedByPath_mergeCommitAgainstFirstParent() throws Exception {
+    testGetReturnsChangedFilesSortedByPathForMerge(MergeCommitStrategy.ALL_CHANGED_FILES);
   }
 
   @Test
   @GerritConfig(
       name = "plugin.code-owners.mergeCommitStrategy",
       value = "FILES_WITH_CONFLICT_RESOLUTION")
-  public void getFromDiffCacheReturnsChangedFilesSortedByPath_mergeCommitAgainstAutoMerge()
-      throws Exception {
-    testGetFromDiffCacheReturnsChangedFilesSortedByPathForMerge(
+  public void getReturnsChangedFilesSortedByPath_mergeCommitAgainstAutoMerge() throws Exception {
+    testGetReturnsChangedFilesSortedByPathForMerge(
         MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
   }
 
-  private void testGetFromDiffCacheReturnsChangedFilesSortedByPathForMerge(
+  private void testGetReturnsChangedFilesSortedByPathForMerge(
       MergeCommitStrategy mergeCommitStrategy) throws Exception {
     setAsRootCodeOwners(admin);
 
