@@ -75,18 +75,23 @@ public class ChangedFiles {
   /**
    * Gets the changed files.
    *
-   * <p>Rename detection is enabled.
+   * <p>Rename detection is disabled.
+   *
+   * <p>Uses the configured merge commit strategy.
    *
    * @param project the project
    * @param revision the revision for which the changed files should be retrieved
-   * @param mergeCommitStrategy the merge commit strategy that should be used to compute the changed
-   *     files for merge commits
    * @return the files that have been changed in the given revision, sorted alphabetically by path
+   * @throws IOException thrown if the computation fails due to an I/O error
    */
-  public ImmutableList<ChangedFile> get(
-      Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
-      throws IOException, DiffNotAvailableException {
-    return get(project, revision, mergeCommitStrategy, /* enableRenameDetection= */ true);
+  public ImmutableList<ChangedFile> getWithoutRenameDetection(
+      Project.NameKey project, ObjectId revision) throws IOException, DiffNotAvailableException {
+    requireNonNull(project, "project");
+    requireNonNull(revision, "revision");
+    return getWithoutRenameDetection(
+        project,
+        revision,
+        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
   }
 
   /**
@@ -104,6 +109,63 @@ public class ChangedFiles {
       Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
       throws IOException, DiffNotAvailableException {
     return get(project, revision, mergeCommitStrategy, /* enableRenameDetection= */ false);
+  }
+
+  /**
+   * Gets the changed files.
+   *
+   * <p>Rename detection is enabled.
+   *
+   * <p>Uses the configured merge commit strategy.
+   *
+   * @param revisionResource the revision resource for which the changed files should be retrieved
+   * @return the files that have been changed in the given revision, sorted alphabetically by path
+   * @throws IOException thrown if the computation fails due to an I/O error
+   * @see #get(Project.NameKey, ObjectId, MergeCommitStrategy)
+   */
+  public ImmutableList<ChangedFile> get(RevisionResource revisionResource)
+      throws IOException, DiffNotAvailableException {
+    requireNonNull(revisionResource, "revisionResource");
+    return get(revisionResource.getProject(), revisionResource.getPatchSet().commitId());
+  }
+
+  /**
+   * Gets the changed files.
+   *
+   * <p>Rename detection is enabled.
+   *
+   * <p>Uses the configured merge commit strategy.
+   *
+   * @param project the project
+   * @param revision the revision for which the changed files should be retrieved
+   * @return the files that have been changed in the given revision, sorted alphabetically by path
+   * @throws IOException thrown if the computation fails due to an I/O error
+   */
+  public ImmutableList<ChangedFile> get(Project.NameKey project, ObjectId revision)
+      throws IOException, DiffNotAvailableException {
+    requireNonNull(project, "project");
+    requireNonNull(revision, "revision");
+    return get(
+        project,
+        revision,
+        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
+  }
+
+  /**
+   * Gets the changed files.
+   *
+   * <p>Rename detection is enabled.
+   *
+   * @param project the project
+   * @param revision the revision for which the changed files should be retrieved
+   * @param mergeCommitStrategy the merge commit strategy that should be used to compute the changed
+   *     files for merge commits
+   * @return the files that have been changed in the given revision, sorted alphabetically by path
+   */
+  public ImmutableList<ChangedFile> get(
+      Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
+      throws IOException, DiffNotAvailableException {
+    return get(project, revision, mergeCommitStrategy, /* enableRenameDetection= */ true);
   }
 
   private ImmutableList<ChangedFile> get(
@@ -143,46 +205,6 @@ public class ChangedFiles {
       return modifiedFilesToChangedFiles(filterOutMagicFilesFromModifiedFilesAndSort(modifiedFiles))
           .collect(toImmutableList());
     }
-  }
-
-  /**
-   * Gets the changed files.
-   *
-   * <p>Rename detection is enabled.
-   *
-   * <p>Uses the configured merge commit strategy.
-   *
-   * @param project the project
-   * @param revision the revision for which the changed files should be retrieved
-   * @return the files that have been changed in the given revision, sorted alphabetically by path
-   * @throws IOException thrown if the computation fails due to an I/O error
-   */
-  public ImmutableList<ChangedFile> get(Project.NameKey project, ObjectId revision)
-      throws IOException, DiffNotAvailableException {
-    requireNonNull(project, "project");
-    requireNonNull(revision, "revision");
-    return get(
-        project,
-        revision,
-        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
-  }
-
-  /**
-   * Gets the changed files.
-   *
-   * <p>Rename detection is enabled.
-   *
-   * <p>Uses the configured merge commit strategy.
-   *
-   * @param revisionResource the revision resource for which the changed files should be retrieved
-   * @return the files that have been changed in the given revision, sorted alphabetically by path
-   * @throws IOException thrown if the computation fails due to an I/O error
-   * @see #get(Project.NameKey, ObjectId, MergeCommitStrategy)
-   */
-  public ImmutableList<ChangedFile> get(RevisionResource revisionResource)
-      throws IOException, DiffNotAvailableException {
-    requireNonNull(revisionResource, "revisionResource");
-    return get(revisionResource.getProject(), revisionResource.getPatchSet().commitId());
   }
 
   /**
