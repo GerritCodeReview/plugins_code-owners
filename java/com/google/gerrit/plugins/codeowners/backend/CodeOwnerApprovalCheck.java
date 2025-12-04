@@ -455,7 +455,9 @@ public class CodeOwnerApprovalCheck {
               codeOwnersConfig, codeOwnerResolver, changeNotes, accountIds);
       ChangedFilesByPatchSetCache changedFilesByPatchSetCache =
           changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes);
-      // TODO: check if rename detection can be disabled here
+      // The returned FileCodeOwnerStatus are used for the response of the GetOwnedPath REST
+      // endpoint, which is documented to detect renames. Hence the rename detection should be
+      // enabled here.
       return changedFiles
           .get(changeNotes.getProjectName(), patchSet.commitId(), /* enableRenameDetection= */ true)
           .stream()
