@@ -22,6 +22,30 @@
       },
       "revId": "f76f88ecf76c119726f620d193f092f1c8f13005",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c1175c43_a4777879",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-12-04T07:56:14Z",
+      "side": 1,
+      "message": "No, at least I don\u0027t think so. IIUC calculating diffs and detecting renames are both done by JGit\u0027s DiffFormatter. Calculating diffs without rename detection is possible, but I\u0027m not sure whether rename detection is possible without calculating diffs. Technically I think these should be different though, i.e. rename detection needs to compute file similarity, not diffs.\n\nSince we have a reproducible case, we should be able to see whether the new code still triggers the diff computation when this is rolled out.\n\nEven if it still triggers the diff computation I think this change is a step in the right direction:\n\n* The new code gets the modified files from the ModifiedFilesCache only, whereas the old code first gets the modified files from ModifiedFilesCache and then gets all the diffs from the FileDiffCache. So we eliminate lookups from the FileDiffCache, which is known for being too small, which means that entries in the cache expire too quickly and then need to be recomputed. Actually from the trace that I have I can see that the file diff computation is triggered from the FileDiffCache, not from the ModifiedFilesCache (but maybe the ModifiedFilesCache would also trigger it if there was a cache miss).\n\n* While I\u0027m sure that some functionality in the code-owners plugin needs renames to be detected, I\u0027m not sure whether that\u0027s true for all code paths in the code-owners plugin. As a next step I want to check whether we can disable the rename detection at least for some of the code paths without losing any functionality.\n\n* If rename detection continues to be the blocker for the performance of the code-owners plugin, I think we may consider disabling it, even if it means that we lose a piece of the functionality, as long as it\u0027s not a critical piece (IIRC it shouldn\u0027t be critical).",
+      "parentUuid": "6507b8f3_11bdc5b7",
+      "range": {
+        "startLine": 19,
+        "startChar": 21,
+        "endLine": 19,
+        "endChar": 51
+      },
+      "revId": "f76f88ecf76c119726f620d193f092f1c8f13005",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
