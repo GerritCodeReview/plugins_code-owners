@@ -902,6 +902,8 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerApprovalCheckInput input,
       AtomicReference<String> reason) {
     for (PatchSet.Id patchSetId : input.previouslyApprovedPatchSetsInReverseOrder()) {
+      // changedFilesByPatchSetCache doesn't detect renames. That's fine since we only check whether
+      // the path has been code-owner approved in a previous patch set.
       if (changedFilesByPatchSetCache.get(patchSetId).stream()
           .anyMatch(
               changedFile ->

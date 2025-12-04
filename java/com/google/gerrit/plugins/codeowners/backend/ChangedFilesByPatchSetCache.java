@@ -35,6 +35,8 @@ import java.util.Map;
  * <p>The changed files for a patch set are computed lazily. This way we do not compute changed
  * files unnecessarily that are never requested.
  *
+ * <p>The changed files are computed without rename detection.
+ *
  * <p>This class is not thread-safe.
  */
 public class ChangedFilesByPatchSetCache {
@@ -71,7 +73,7 @@ public class ChangedFilesByPatchSetCache {
         changeNotes.getChange().getId().get());
     PatchSet patchSet = getPatchSet(patchSetId);
     try {
-      return changedFiles.get(
+      return changedFiles.getWithoutRenameDetection(
           changeNotes.getProjectName(),
           patchSet.commitId(),
           codeOwnersConfig.getMergeCommitStrategy());
