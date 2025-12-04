@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "de38a4de_58ebaed8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2025-12-04T13:37:05Z",
+      "side": 1,
+      "message": "method overloads for the same method should be next to each other",
+      "range": {
+        "startLine": 182,
+        "startChar": 61,
+        "endLine": 182,
+        "endChar": 62
+      },
+      "revId": "ef5f74d529736ddd3494498f3e89190cabdd8d4a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
