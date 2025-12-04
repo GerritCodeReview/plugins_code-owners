@@ -75,23 +75,6 @@ public class ChangedFiles {
   /**
    * Gets the changed files.
    *
-   * <p>Rename detection is enabled.
-   *
-   * @param project the project
-   * @param revision the revision for which the changed files should be retrieved
-   * @param mergeCommitStrategy the merge commit strategy that should be used to compute the changed
-   *     files for merge commits
-   * @return the files that have been changed in the given revision, sorted alphabetically by path
-   */
-  public ImmutableList<ChangedFile> get(
-      Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
-      throws IOException, DiffNotAvailableException {
-    return get(project, revision, mergeCommitStrategy, /* enableRenameDetection= */ true);
-  }
-
-  /**
-   * Gets the changed files.
-   *
    * <p>Rename detection is disabled.
    *
    * @param project the project
@@ -106,7 +89,7 @@ public class ChangedFiles {
     return get(project, revision, mergeCommitStrategy, /* enableRenameDetection= */ false);
   }
 
-  private ImmutableList<ChangedFile> get(
+  public ImmutableList<ChangedFile> get(
       Project.NameKey project,
       ObjectId revision,
       MergeCommitStrategy mergeCommitStrategy,
@@ -148,23 +131,24 @@ public class ChangedFiles {
   /**
    * Gets the changed files.
    *
-   * <p>Rename detection is enabled.
-   *
    * <p>Uses the configured merge commit strategy.
    *
    * @param project the project
    * @param revision the revision for which the changed files should be retrieved
+   * @param enableRenameDetection whether the rename detection is enabled
    * @return the files that have been changed in the given revision, sorted alphabetically by path
    * @throws IOException thrown if the computation fails due to an I/O error
    */
-  public ImmutableList<ChangedFile> get(Project.NameKey project, ObjectId revision)
+  public ImmutableList<ChangedFile> get(
+      Project.NameKey project, ObjectId revision, boolean enableRenameDetection)
       throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
     return get(
         project,
         revision,
-        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
+        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy(),
+        enableRenameDetection);
   }
 
   /**
