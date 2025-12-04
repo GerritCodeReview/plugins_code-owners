@@ -192,7 +192,7 @@ public class ChangedFiles {
   /**
    * Gets the changed files.
    *
-   * <p>Rename detection is enabled.
+   * <p>Rename detection is disabled.
    *
    * <p>Uses the configured merge commit strategy.
    *
@@ -201,10 +201,11 @@ public class ChangedFiles {
    * @throws IOException thrown if the computation fails due to an I/O error
    * @see #get(Project.NameKey, ObjectId, MergeCommitStrategy)
    */
-  public ImmutableList<ChangedFile> get(RevisionResource revisionResource)
+  public ImmutableList<ChangedFile> getWithoutRenameDetection(RevisionResource revisionResource)
       throws IOException, DiffNotAvailableException {
     requireNonNull(revisionResource, "revisionResource");
-    return get(revisionResource.getProject(), revisionResource.getPatchSet().commitId());
+    return getWithoutRenameDetection(
+        revisionResource.getProject(), revisionResource.getPatchSet().commitId());
   }
 
   /**

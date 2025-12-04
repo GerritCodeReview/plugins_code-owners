@@ -105,7 +105,12 @@ public class CodeOwnersInChangeCollection
   private void checkThatFileExists(
       RevisionResource revisionResource, PathResource pathResource, IdString id)
       throws RestApiException, IOException, DiffNotAvailableException {
-    if (!changedFiles.get(revisionResource).stream()
+    // We only need to check whether the path exists as a new path or as an old path of a rename or
+    // deletion. Since old paths of deletions and renames are handled the same way we do not need to
+    // detect renames. If we get the changed files without rename detection, renames are returned as
+    // 2 changed files, one with the new path for the addition and one with the old path for the
+    // deletion.
+    if (!changedFiles.getWithoutRenameDetection(revisionResource).stream()
         .anyMatch(
             changedFile ->
                 // Check whether the path matches any file in the change.
