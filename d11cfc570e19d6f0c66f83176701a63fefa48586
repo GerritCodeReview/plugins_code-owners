@@ -40,6 +40,30 @@
       ],
       "revId": "d11cfc570e19d6f0c66f83176701a63fefa48586",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "20b08a41_fc7b5a97",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnersInChangeCollection.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2025-12-04T14:21:20Z",
+      "side": 1,
+      "message": "Done, also updated the comment above.",
+      "parentUuid": "ef2f959f_c2fb0ddb",
+      "range": {
+        "startLine": 125,
+        "startChar": 25,
+        "endLine": 125,
+        "endChar": 47
+      },
+      "revId": "d11cfc570e19d6f0c66f83176701a63fefa48586",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
