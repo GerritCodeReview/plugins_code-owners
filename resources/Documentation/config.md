@@ -798,7 +798,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         parsed.
 
 <a id="codeOwnersPathExpressions">codeOwners.pathExpressions</a>
-:       The path expression syntax that is used in`
+:       The path expression syntax that is used in
         [code owner config files](user-guide.html#codeOwnerConfigFiles).\
         Overrides the global setting
         [plugin.@PLUGIN@.pathExpressions](#pluginCodeOwnersPathExpressions) in
