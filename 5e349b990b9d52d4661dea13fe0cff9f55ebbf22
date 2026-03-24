@@ -16,6 +16,23 @@
       "message": "Approved publish\nNo changes forever",
       "revId": "5e349b990b9d52d4661dea13fe0cff9f55ebbf22",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "04d6f81b_dcbb65c0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4701392
+      },
+      "writtenOn": "2026-03-24T12:48:29Z",
+      "side": 1,
+      "message": "Publish",
+      "revId": "5e349b990b9d52d4661dea13fe0cff9f55ebbf22",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
