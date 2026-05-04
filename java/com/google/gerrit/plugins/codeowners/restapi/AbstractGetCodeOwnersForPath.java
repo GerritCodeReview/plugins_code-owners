@@ -73,6 +73,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.kohsuke.args4j.Option;
@@ -537,7 +538,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private static <T> Stream<T> randomizeOrder(Optional<Long> seed, Set<T> set) {
     List<T> randomlyOrderedCodeOwners = new ArrayList<>(set);
     Collections.shuffle(
-        randomlyOrderedCodeOwners, seed.isPresent() ? new Random(seed.get()) : new Random());
+        randomlyOrderedCodeOwners,
+        seed.isPresent() ? new Random(seed.get()) : ThreadLocalRandom.current());
     return randomlyOrderedCodeOwners.stream();
   }
 
@@ -616,6 +618,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    * <p>No visibility check is performed.
    */
   private Stream<Account.Id> getRandomUsers(int limit) throws IOException {
-    return randomizeOrder(seed, accounts.allIds()).limit(limit);
+    return accounts
+        .randomNIds(
+            limit, seed.isPresent() ? seed.get() : ThreadLocalRandom.current().nextLong())
+        .stream();
   }
 }
