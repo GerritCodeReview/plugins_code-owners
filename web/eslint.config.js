@@ -5,5 +5,5 @@
  */
 __plugindir = "code-owners/web";
 module.exports = {
-  extends: "../../.eslintrc.js",
+  extends: "../../eslint.config.js",
 };
