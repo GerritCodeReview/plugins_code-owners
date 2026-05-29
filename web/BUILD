@@ -1,6 +1,7 @@
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
+load("@com_googlesource_gerrit_bazlets//js:defs.bzl", "gerrit_js_bundle")
+load("//tools/bzl:js.bzl", "web_test_runner")
 load("//tools/js:eslint.bzl", "plugin_eslint")
-load("//tools/bzl:js.bzl", "gerrit_js_bundle", "web_test_runner")
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 
 package_group(
     name = "visibility",
@@ -13,7 +14,7 @@ ts_config(
     name = "tsconfig",
     src = "tsconfig.json",
     deps = [
-        "//plugins:tsconfig-plugins-base.json",
+        "//plugins:tsconfig-plugins-base",
     ],
 )
 
@@ -25,12 +26,9 @@ ts_project(
     ),
     incremental = True,
     out_dir = "_bazel_ts_out",
-    tsc = "//tools/node_tools:tsc-bin",
     tsconfig = ":tsconfig",
     deps = [
-        "@plugins_npm//@gerritcodereview/typescript-api",
-        "@plugins_npm//lit",
-        "@plugins_npm//rxjs",
+        "//plugins:node_modules",
     ],
 )
 
@@ -39,11 +37,10 @@ ts_project(
     srcs = glob(["**/*.ts"]),
     incremental = True,
     out_dir = "_bazel_ts_out_tests",
-    tsc = "//tools/node_tools:tsc-bin",
     tsconfig = ":tsconfig",
     deps = [
-        "@plugins_npm//:node_modules",
-        "@ui_dev_npm//:node_modules",
+        "//plugins:node_modules",
+        "//polygerrit-ui:node_modules",
     ],
 )
 
@@ -64,7 +61,7 @@ web_test_runner(
     data = [
         ":tsconfig-sources",
         ":code-owners-ts-tests",
-        "@plugins_npm//:node_modules",
+        "//plugins:node_modules",
     ],
 )
 
