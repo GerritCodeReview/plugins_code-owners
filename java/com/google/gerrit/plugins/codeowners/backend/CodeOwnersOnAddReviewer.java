@@ -154,20 +154,21 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
     try (Timer1.Context<String> ctx =
         codeOwnerMetrics.addChangeMessageOnAddReviewer.start(
             asynchronous ? "asynchronous" : "synchronous")) {
-      retryHelper
-          .changeUpdate(
-              "addCodeOwnersMessageOnAddReviewer",
-              updateFactory -> {
-                try (BatchUpdate batchUpdate =
-                        updateFactory.create(projectName, currentUser, when);
-                    RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
-                    RefUpdateContext changeCtx = RefUpdateContext.open(CHANGE_MODIFICATION)) {
-                  batchUpdate.addOp(changeId, new Op(reviewers, maxPathsInChangeMessages));
-                  batchUpdate.execute();
-                }
-                return null;
-              })
-          .call();
+      var unused =
+          retryHelper
+              .changeUpdate(
+                  "addCodeOwnersMessageOnAddReviewer",
+                  updateFactory -> {
+                    try (BatchUpdate batchUpdate =
+                            updateFactory.create(projectName, currentUser, when);
+                        RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
+                        RefUpdateContext changeCtx = RefUpdateContext.open(CHANGE_MODIFICATION)) {
+                      batchUpdate.addOp(changeId, new Op(reviewers, maxPathsInChangeMessages));
+                      batchUpdate.execute();
+                    }
+                    return null;
+                  })
+              .call();
     } catch (Exception e) {
       Optional<? extends Exception> configurationError =
           CodeOwnersExceptionHook.getCauseOfConfigurationError(e);

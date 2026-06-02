@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -166,6 +167,7 @@ public abstract class CodeOwnerScoring {
      * @param value the scoring value that should be put for the code owner
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder putValueForCodeOwner(CodeOwner codeOwner, int value) {
       requireNonNull(codeOwner, "codeOwner");
       checkState(value >= 0, "value cannot be negative: %s", value);

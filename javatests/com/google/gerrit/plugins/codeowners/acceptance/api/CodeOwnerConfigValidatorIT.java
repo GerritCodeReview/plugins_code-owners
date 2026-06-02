@@ -2345,7 +2345,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     cherryPickInput.validationOptions =
         ImmutableMap.of(
             String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
-    gApi.changes().id(r.getChangeId()).current().cherryPickAsInfo(cherryPickInput);
+    var unused = gApi.changes().id(r.getChangeId()).current().cherryPickAsInfo(cherryPickInput);
   }
 
   @Test

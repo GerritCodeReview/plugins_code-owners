@@ -240,7 +240,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.function = "NoOp";
     input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
-    gApi.projects().name(project.get()).label(labelName).create(input).get();
+    var unused = gApi.projects().name(project.get()).label(labelName).create(input).get();
 
     // Allow to vote on the Owners-Override label.
     projectOperations

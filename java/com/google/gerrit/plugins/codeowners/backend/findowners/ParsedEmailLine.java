@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 
@@ -43,6 +44,7 @@ abstract class ParsedEmailLine {
 
     abstract ImmutableSet.Builder<CodeOwnerAnnotation> annotationsBuilder();
 
+    @CanIgnoreReturnValue
     Builder addAnnotation(String annotation) {
       requireNonNull(annotation, "annotation");
       annotationsBuilder().add(CodeOwnerAnnotation.create(annotation));

@@ -539,29 +539,30 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
             .create();
 
     // insert some comments
-    codeOwnerConfigFileUpdateScanner.update(
-        BranchNameKey.create(project, "master"),
-        "Insert comments",
-        (codeOwnerConfigFilePath, codeOwnerConfigFileContent) -> {
-          StringBuilder b = new StringBuilder();
-          // insert comment line at the top of the file
-          b.append("# top comment\n");
+    var unused =
+        codeOwnerConfigFileUpdateScanner.update(
+            BranchNameKey.create(project, "master"),
+            "Insert comments",
+            (codeOwnerConfigFilePath, codeOwnerConfigFileContent) -> {
+              StringBuilder b = new StringBuilder();
+              // insert comment line at the top of the file
+              b.append("# top comment\n");
 
-          Iterable<String> lines = Splitter.on('\n').split(codeOwnerConfigFileContent);
-          b.append(Iterables.get(lines, /* position= */ 0) + "\n");
+              Iterable<String> lines = Splitter.on('\n').split(codeOwnerConfigFileContent);
+              b.append(Iterables.get(lines, /* position= */ 0) + "\n");
 
-          // insert comment line in the middle of the file
-          b.append("# middle comment\n");
+              // insert comment line in the middle of the file
+              b.append("# middle comment\n");
 
-          for (String line : Iterables.skip(lines, /* numberToSkip= */ 1)) {
-            b.append(line + "\n");
-          }
+              for (String line : Iterables.skip(lines, /* numberToSkip= */ 1)) {
+                b.append(line + "\n");
+              }
 
-          // insert comment line at the bottom of the file
-          b.append("# bottom comment\n");
+              // insert comment line at the bottom of the file
+              b.append("# bottom comment\n");
 
-          return Optional.of(b.toString());
-        });
+              return Optional.of(b.toString());
+            });
 
     String secondaryEmail = "user-foo@example.com";
     accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
@@ -602,25 +603,26 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
             .create();
 
     // insert some inline comments
-    codeOwnerConfigFileUpdateScanner.update(
-        BranchNameKey.create(project, "master"),
-        "Insert comments",
-        (codeOwnerConfigFilePath, codeOwnerConfigFileContent) -> {
-          StringBuilder b = new StringBuilder();
-          for (String line : Splitter.on('\n').split(codeOwnerConfigFileContent)) {
-            if (line.contains(user.email())) {
-              b.append(line + "# some comment\n");
-              continue;
-            }
-            if (line.contains(admin.email())) {
-              b.append(line + "# other comment\n");
-              continue;
-            }
-            b.append(line + "\n");
-          }
+    var unused =
+        codeOwnerConfigFileUpdateScanner.update(
+            BranchNameKey.create(project, "master"),
+            "Insert comments",
+            (codeOwnerConfigFilePath, codeOwnerConfigFileContent) -> {
+              StringBuilder b = new StringBuilder();
+              for (String line : Splitter.on('\n').split(codeOwnerConfigFileContent)) {
+                if (line.contains(user.email())) {
+                  b.append(line + "# some comment\n");
+                  continue;
+                }
+                if (line.contains(admin.email())) {
+                  b.append(line + "# other comment\n");
+                  continue;
+                }
+                b.append(line + "\n");
+              }
 
-          return Optional.of(b.toString());
-        });
+              return Optional.of(b.toString());
+            });
 
     String secondaryEmail = "user-foo@example.com";
     accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
@@ -663,11 +665,12 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
             .create();
 
     // insert some comments
-    codeOwnerConfigFileUpdateScanner.update(
-        BranchNameKey.create(project, "master"),
-        "Insert comments",
-        (codeOwnerConfigFilePath, codeOwnerConfigFileContent) ->
-            Optional.of("# foo " + user.email() + " bar\n" + codeOwnerConfigFileContent));
+    var unused =
+        codeOwnerConfigFileUpdateScanner.update(
+            BranchNameKey.create(project, "master"),
+            "Insert comments",
+            (codeOwnerConfigFilePath, codeOwnerConfigFileContent) ->
+                Optional.of("# foo " + user.email() + " bar\n" + codeOwnerConfigFileContent));
 
     String secondaryEmail = "user-foo@example.com";
     accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();

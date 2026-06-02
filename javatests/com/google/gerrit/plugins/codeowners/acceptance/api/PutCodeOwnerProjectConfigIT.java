@@ -213,7 +213,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     String otherLabel = "Other";
     LabelDefinitionInput labelInput = new LabelDefinitionInput();
     labelInput.values = ImmutableMap.of("+2", "Approval", "+1", "LGTM", " 0", "No Vote");
-    gApi.projects().name(project.get()).label(otherLabel).create(labelInput).get();
+    var unused = gApi.projects().name(project.get()).label(otherLabel).create(labelInput).get();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.requiredApproval = otherLabel + "+2";

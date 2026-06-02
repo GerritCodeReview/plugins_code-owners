@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -165,6 +166,7 @@ public abstract class CodeOwnerSet {
      * @param codeOwnerConfigReferences references to the code owner configs that should be imported
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public abstract Builder setImports(
         ImmutableSet<CodeOwnerConfigReference> codeOwnerConfigReferences);
 
@@ -199,6 +201,7 @@ public abstract class CodeOwnerSet {
      * @param codeOwnerReference reference to the code owner
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder addCodeOwner(CodeOwnerReference codeOwnerReference) {
       codeOwnersBuilder().add(requireNonNull(codeOwnerReference, "codeOwnerReference"));
       return this;
@@ -215,6 +218,7 @@ public abstract class CodeOwnerSet {
      * @param annotation annotation that should be added
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder addAnnotation(String email, CodeOwnerAnnotation annotation) {
       return addAnnotations(CodeOwnerReference.create(email), ImmutableSet.of(annotation));
     }
@@ -227,6 +231,7 @@ public abstract class CodeOwnerSet {
      * @param annotations annotations that should be added
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder addAnnotations(
         CodeOwnerReference codeOwnerReference, Set<CodeOwnerAnnotation> annotations) {
       requireNonNull(codeOwnerReference, "codeOwnerReference");

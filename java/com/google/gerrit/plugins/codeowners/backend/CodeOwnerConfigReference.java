@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import java.nio.file.Path;
@@ -175,6 +176,7 @@ public abstract class CodeOwnerConfigReference {
      *     prefix may be omitted
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder setBranch(String branch) {
       requireNonNull(branch, "branch");
       return setBranch(Optional.of(RefNames.fullName(branch)));

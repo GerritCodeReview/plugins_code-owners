@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.metrics.Timer1;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
@@ -195,6 +196,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
    *     should be applied
    * @return this {@code CodeOwnerConfigFile} instance to allow chaining calls
    */
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFile setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     this.codeOwnerConfigUpdate = Optional.of(codeOwnerConfigUpdate);
     return this;
@@ -256,6 +258,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   }
 
   @Override
+  @CanIgnoreReturnValue
   public RevCommit commit(MetaDataUpdate update) throws IOException {
     // Reject the creation of a code owner config if the branch doesn't exist.
     checkState(

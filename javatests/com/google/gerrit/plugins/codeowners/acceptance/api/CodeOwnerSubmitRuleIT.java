@@ -695,9 +695,10 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     String changeId = r.getChangeId();
 
     testMetricMaker.reset();
-    gApi.changes()
-        .id(changeId)
-        .get(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS);
+    var unused =
+        gApi.changes()
+            .id(changeId)
+            .get(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS);
 
     // Submit rules are computed freshly, but only once.
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_submit_rule_runs"))
@@ -720,9 +721,10 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     String changeId = r.getChangeId();
 
     testMetricMaker.reset();
-    gApi.changes()
-        .id(changeId)
-        .get(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS);
+    var unused =
+        gApi.changes()
+            .id(changeId)
+            .get(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS);
 
     // Submit rules are computed freshly, but only once.
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_submit_rule_runs"))
@@ -784,10 +786,11 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     String changeId = r.getChangeId();
 
     testMetricMaker.reset();
-    gApi.changes()
-        .query(changeId)
-        .withOptions(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS)
-        .get();
+    var unused =
+        gApi.changes()
+            .query(changeId)
+            .withOptions(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS)
+            .get();
 
     // Submit rule evaluation results from the change index are reused
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_submit_rule_runs"))

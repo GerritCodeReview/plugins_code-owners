@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.acceptance.testsuite.ThrowingFunction;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -258,6 +259,7 @@ public abstract class TestCodeOwnerConfigCreation {
      * @param codeOwnerEmail email of the code owner
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder addCodeOwnerEmail(String codeOwnerEmail) {
       return addCodeOwner(
           CodeOwnerReference.create(requireNonNull(codeOwnerEmail, "codeOwnerEmail")));
@@ -287,6 +289,7 @@ public abstract class TestCodeOwnerConfigCreation {
      * @param codeOwnerSet code owner set that should be added
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder addCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
       codeOwnerSetsBuilder().add(requireNonNull(codeOwnerSet, "codeOwnerSet"));
       return this;
@@ -305,6 +308,7 @@ public abstract class TestCodeOwnerConfigCreation {
      * @param codeOwnerConfigReference reference to the code owner config that should be imported
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder addImport(CodeOwnerConfigReference codeOwnerConfigReference) {
       importsBuilder().add(requireNonNull(codeOwnerConfigReference, "codeOwnerConfigReference"));
       return this;
@@ -331,6 +335,7 @@ public abstract class TestCodeOwnerConfigCreation {
      *
      * @return the key of the code owner config
      */
+    @CanIgnoreReturnValue
     public CodeOwnerConfig.Key create() {
       TestCodeOwnerConfigCreation creation = autoBuild();
       return creation.codeOwnerConfigCreator().applyAndThrowSilently(creation);
