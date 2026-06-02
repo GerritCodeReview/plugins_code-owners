@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.testing.backend;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -62,6 +63,7 @@ public class TestCodeOwnerConfigStorage {
    *     config properties should be set
    * @return the code owner config that was written
    */
+  @CanIgnoreReturnValue
   public CodeOwnerConfig writeCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey,
       Consumer<CodeOwnerConfig.Builder> codeOwnerConfigUpdater)

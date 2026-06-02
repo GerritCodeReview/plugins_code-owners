@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.assistedinject.Assisted;
@@ -93,6 +94,7 @@ public class CodeOwnersUpdate {
    * @return the updated/created code owner config, {@link Optional#empty()} if the update led to a
    *     deletion of the code owner config or if the creation was a no-op
    */
+  @CanIgnoreReturnValue
   public Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     CodeOwnerBackend codeOwnerBackend =

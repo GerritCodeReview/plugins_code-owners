@@ -1549,7 +1549,7 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
       throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+2", "Super-Override", "+1", "Override", " 0", "No Override");
-    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
     configureOverrideApproval(project, "Owners-Override+2");

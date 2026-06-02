@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -163,6 +164,7 @@ public abstract class CodeOwnerConfig {
      * @param imports the imports of this code owner config
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder setImports(ImmutableList<CodeOwnerConfigReference> imports) {
       return setImports(ImmutableSet.copyOf(imports));
     }
@@ -184,6 +186,7 @@ public abstract class CodeOwnerConfig {
      * @param codeOwnerConfigReference reference to the code owner config that should be imported
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder addImport(CodeOwnerConfigReference codeOwnerConfigReference) {
       importsBuilder().add(codeOwnerConfigReference);
       return this;
@@ -195,6 +198,7 @@ public abstract class CodeOwnerConfig {
      *
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder setIgnoreParentCodeOwners() {
       return setIgnoreParentCodeOwners(true);
     }
@@ -208,6 +212,7 @@ public abstract class CodeOwnerConfig {
      * @param codeOwnerSets the code owner sets of this code owner config
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder setCodeOwnerSets(ImmutableList<CodeOwnerSet> codeOwnerSets) {
       return setCodeOwnerSets(ImmutableSet.copyOf(codeOwnerSets));
     }
@@ -229,6 +234,7 @@ public abstract class CodeOwnerConfig {
      * @param codeOwnerSet the code owner set
      * @return the Builder instance for chaining calls
      */
+    @CanIgnoreReturnValue
     public Builder addCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
       codeOwnerSetsBuilder().add(requireNonNull(codeOwnerSet, "codeOwnerSet"));
       return this;

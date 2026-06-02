@@ -117,7 +117,7 @@ abstract class AbstractRequiredApprovalConfig {
     ImmutableList.Builder<CommitValidationMessage> validationMessages = ImmutableList.builder();
     for (String requiredApproval : requiredApprovals) {
       try {
-        RequiredApproval.parse(projectState, requiredApproval);
+        var unused = RequiredApproval.parse(projectState, requiredApproval);
       } catch (IllegalArgumentException | IllegalStateException e) {
         validationMessages.add(
             new CommitValidationMessage(

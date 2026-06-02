@@ -115,7 +115,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     TestAccount user2 = accountCreator.user2();
 
     Path path = Path.of("/foo/bar.baz");
-    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
+    var unused = createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
     String changeId =
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
             .getChangeId();
@@ -215,7 +215,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsRootCodeOwners(user);
 
     Path path = Path.of("/foo/bar.baz");
-    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
+    var unused = createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
     String changeId =
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
             .getChangeId();
@@ -358,7 +358,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsRootCodeOwners(user);
 
     Path path = Path.of("/foo/bar.baz");
-    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
+    var unused = createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
     String changeId =
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
             .getChangeId();
@@ -1868,7 +1868,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void ownersOverridePlus2CountsAsOverrideIfOverridePlus1IsRequired() throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+2", "Override+2", "+1", "Override", " 0", "No Override");
-    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
 
     // Allow to vote on the Owners-Override label.
     projectOperations
