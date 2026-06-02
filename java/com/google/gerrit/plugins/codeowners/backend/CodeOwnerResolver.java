@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
@@ -152,6 +153,7 @@ public class CodeOwnerResolver {
    *     visible to the current user
    * @return the {@link CodeOwnerResolver} instance for chaining calls
    */
+  @CanIgnoreReturnValue
   public CodeOwnerResolver enforceVisibility(boolean enforceVisibility) {
     logger.atFine().log("enforceVisibility = %s", enforceVisibility);
     this.enforceVisibility = enforceVisibility;
@@ -174,6 +176,7 @@ public class CodeOwnerResolver {
    *     see the accounts of the code owners)
    * @return the {@link CodeOwnerResolver} instance for chaining calls
    */
+  @CanIgnoreReturnValue
   public CodeOwnerResolver forUser(IdentifiedUser user) {
     logger.atFine().log("user = %s", user.getLoggableName());
     this.user = user;

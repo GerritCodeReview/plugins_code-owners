@@ -161,7 +161,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   @Test
   public void getForChangeThatModifiedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
-    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
+    var unused = createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
 
     RevCommit commit =
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
@@ -206,7 +206,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     String newPath = "/foo/bar/new.txt";
     TestChange change = createChangeWithFileRename(oldPath, newPath);
 
-    gApi.changes().id(change.id()).current().files();
+    var unused = gApi.changes().id(change.id()).current().files();
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.get(

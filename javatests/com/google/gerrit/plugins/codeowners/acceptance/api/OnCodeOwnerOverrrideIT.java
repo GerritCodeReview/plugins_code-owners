@@ -134,7 +134,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
   public void changeMessageExtendedIfCodeOwnersOverrideIsUpgraded() throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+2", "Override", "+1", "Override", " 0", "No Override");
-    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
 
     // Allow to vote on the Owners-Override label.
     projectOperations
@@ -170,7 +170,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
   public void changeMessageExtendedIfCodeOwnersOverrideIsDowngraded() throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+2", "Override", "+1", "Override", " 0", "No Override");
-    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
 
     // Allow to vote on the Owners-Override label.
     projectOperations
@@ -228,7 +228,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
   public void changeMessageExtendedIfCodeOwnersOverrideIsChangedToNegativeValue() throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Override", " 0", "No Override", "-1", "No Override");
-    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
 
     // Allow to vote on the Owners-Override label.
     projectOperations
@@ -264,7 +264,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
   public void changeMessageNotExtendedIfNonCodeOwnersOverrideIsApplied() throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Approval", " 0", "No Approval");
-    gApi.projects().name(project.get()).label("Other").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Other").create(input).get();
 
     // Allow to vote on the Owners-Override label.
     projectOperations

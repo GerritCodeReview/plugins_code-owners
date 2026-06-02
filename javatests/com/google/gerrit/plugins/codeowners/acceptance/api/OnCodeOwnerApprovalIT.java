@@ -159,7 +159,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
       throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Other", " 0", "Approved");
-    gApi.projects().name(project.get()).label("Other").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Other").create(input).get();
 
     projectOperations
         .project(project)
@@ -208,7 +208,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
       throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Other", " 0", "Approved");
-    gApi.projects().name(project.get()).label("Other").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Other").create(input).get();
 
     projectOperations
         .project(project)
@@ -575,7 +575,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   public void changeMessageNotExtendedForNonCodeOwnerApproval() throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Owner Approval", " 0", "No Owner Approval");
-    gApi.projects().name(project.get()).label("Owners-Approval").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Owners-Approval").create(input).get();
 
     codeOwnerConfigOperations
         .newCodeOwnerConfig()

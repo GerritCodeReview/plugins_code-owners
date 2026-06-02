@@ -256,29 +256,30 @@ class OnCodeOwnerApproval implements OnPostReview, CommentAddedListener {
       RequiredApproval requiredApproval,
       int maxPathsInChangeMessages) {
     try (Timer0.Context ctx = codeOwnerMetrics.addChangeMessageOnCodeOwnerApproval.start()) {
-      retryHelper
-          .changeUpdate(
-              "addCodeOwnersMessageOnCodeOwnerApproval",
-              updateFactory -> {
-                try (BatchUpdate batchUpdate =
-                        updateFactory.create(changeNotes.getProjectName(), user, when);
-                    RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
-                    RefUpdateContext changeCtx = RefUpdateContext.open(CHANGE_MODIFICATION)) {
-                  batchUpdate.addOp(
-                      changeNotes.getChangeId(),
-                      new Op(
-                          user,
-                          changeNotes,
-                          patchSet,
-                          oldApprovals,
-                          approvals,
-                          requiredApproval,
-                          maxPathsInChangeMessages));
-                  batchUpdate.execute();
-                }
-                return null;
-              })
-          .call();
+      var unused =
+          retryHelper
+              .changeUpdate(
+                  "addCodeOwnersMessageOnCodeOwnerApproval",
+                  updateFactory -> {
+                    try (BatchUpdate batchUpdate =
+                            updateFactory.create(changeNotes.getProjectName(), user, when);
+                        RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
+                        RefUpdateContext changeCtx = RefUpdateContext.open(CHANGE_MODIFICATION)) {
+                      batchUpdate.addOp(
+                          changeNotes.getChangeId(),
+                          new Op(
+                              user,
+                              changeNotes,
+                              patchSet,
+                              oldApprovals,
+                              approvals,
+                              requiredApproval,
+                              maxPathsInChangeMessages));
+                      batchUpdate.execute();
+                    }
+                    return null;
+                  })
+              .call();
     } catch (Exception e) {
       Optional<? extends Exception> configurationError =
           CodeOwnersExceptionHook.getCauseOfConfigurationError(e);

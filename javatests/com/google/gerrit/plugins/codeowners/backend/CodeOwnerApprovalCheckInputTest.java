@@ -179,7 +179,7 @@ public class CodeOwnerApprovalCheckInputTest extends AbstractCodeOwnersTest {
     // Create Foo-Review label.
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Approved", " 0", "Not Approved");
-    gApi.projects().name(project.get()).label("Foo-Review").create(input).get();
+    var unused = gApi.projects().name(project.get()).label("Foo-Review").create(input).get();
 
     // Allow to vote on the Foo-Review label.
     projectOperations

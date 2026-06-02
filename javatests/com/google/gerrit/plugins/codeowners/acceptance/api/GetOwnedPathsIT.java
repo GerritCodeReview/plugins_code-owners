@@ -152,16 +152,17 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
     String path2 = "/foo/baz/bar.md";
     String path3 = "/bar/foo.md";
 
-    createChange(
-            "Change Adding Files",
-            ImmutableMap.of(
-                JgitPath.of(path1).get(),
-                "file content 1",
-                JgitPath.of(path2).get(),
-                "file content 2",
-                JgitPath.of(path3).get(),
-                "file content 3"))
-        .getChangeId();
+    var unused =
+        createChange(
+                "Change Adding Files",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content 1",
+                    JgitPath.of(path2).get(),
+                    "file content 2",
+                    JgitPath.of(path3).get(),
+                    "file content 3"))
+            .getChangeId();
 
     PushOneCommit push =
         pushFactory.create(

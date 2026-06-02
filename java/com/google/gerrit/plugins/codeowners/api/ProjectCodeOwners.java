@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.restapi.NotImplementedException;
@@ -37,6 +38,7 @@ public interface ProjectCodeOwners {
    * @param input the input specifying which parameters should be updated
    * @return the update code owner project configuration
    */
+  @CanIgnoreReturnValue
   CodeOwnerProjectConfigInfo updateConfig(CodeOwnerProjectConfigInput input)
       throws RestApiException;
 

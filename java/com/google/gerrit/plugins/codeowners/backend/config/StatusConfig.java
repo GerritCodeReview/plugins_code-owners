@@ -99,7 +99,7 @@ public class StatusConfig {
     for (String refPattern :
         projectLevelConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH)) {
       try {
-        RefPatternMatcher.getMatcher(refPattern).match("refs/heads/master", null);
+        var unused = RefPatternMatcher.getMatcher(refPattern).match("refs/heads/master", null);
       } catch (PatternSyntaxException e) {
         validationMessages.add(
             new CommitValidationMessage(

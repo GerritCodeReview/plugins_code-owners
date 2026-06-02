@@ -289,7 +289,7 @@ public class CodeOwnerConfigHierarchy {
               transientCodeOwnerConfigCache, metaCodeOwnerConfigKey, metaRevision, absolutePath);
       if (pathCodeOwners.isPresent()) {
         logger.atFine().log("visit code owner config %s", metaCodeOwnerConfigKey);
-        pathCodeOwnersVisitor.visit(pathCodeOwners.get());
+        var unused = pathCodeOwnersVisitor.visit(pathCodeOwners.get());
       } else {
         logger.atFine().log("code owner config %s not found", metaCodeOwnerConfigKey);
       }
