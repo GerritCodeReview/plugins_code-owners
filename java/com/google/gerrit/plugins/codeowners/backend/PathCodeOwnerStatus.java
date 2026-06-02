@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
@@ -151,6 +152,7 @@ public abstract class PathCodeOwnerStatus {
     abstract Builder setOwners(Optional<ImmutableSet<Account.Id>> owners);
 
     /** Adds a reason for this status. */
+    @CanIgnoreReturnValue
     public Builder addReason(String reason) {
       reasonsBuilder().add(reason);
       return this;

@@ -1228,7 +1228,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   @Test
   @GerritConfig(name = "accounts.visibility", value = "NONE")
   public void getAllUsersAsCodeOwners_noneVisible() throws Exception {
-    accountCreator.user2();
+    var unused = accountCreator.user2();
 
     // Add a code owner config that makes all users code owners.
     codeOwnerConfigOperations

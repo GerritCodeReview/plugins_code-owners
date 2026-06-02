@@ -823,7 +823,7 @@ public class CodeOwnerConfigValidator
         // there.
         CodeOwnerConfig.Key baseCodeOwnerConfigKey =
             createCodeOwnerConfigKey(branchNameKey, changedFile.oldPath().get());
-        codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, parentRevision);
+        var unused = codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, parentRevision);
         // The code owner config at the parent revision is parseable. This means the parsing error
         // is introduced by the new commit and we should block uploading it, which we achieve by
         // setting the validation message type to fatal.
