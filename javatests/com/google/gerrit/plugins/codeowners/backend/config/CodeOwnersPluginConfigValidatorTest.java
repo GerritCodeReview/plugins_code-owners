@@ -94,7 +94,8 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
           .hasMessageThat()
           .isEqualTo(
               String.format(
-                  "failed to validate file code-owners.config for revision %s in ref %s of project %s",
+                  "failed to validate file code-owners.config for revision %s in ref %s of project"
+                      + " %s",
                   commit.getName(), RefNames.REFS_CONFIG, project));
       assertThat(exception).hasCauseThat().isInstanceOf(ConfigInvalidException.class);
     }

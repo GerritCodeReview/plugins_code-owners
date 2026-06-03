@@ -114,9 +114,9 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
         .hasMessageThat()
         .isEqualTo(
             String.format(
-                "Invalid configuration of the code-owners plugin. Required approval 'INVALID' that is"
-                    + " configured in code-owners.config (parameter codeOwners.%s) is"
-                    + " invalid: Invalid format, expected '<label-name>+<label-value>'.",
+                "Invalid configuration of the code-owners plugin. Required approval 'INVALID' that"
+                    + " is configured in code-owners.config (parameter codeOwners.%s) is invalid:"
+                    + " Invalid format, expected '<label-name>+<label-value>'.",
                 getRequiredApprovalConfig().getConfigKey()));
   }
 
