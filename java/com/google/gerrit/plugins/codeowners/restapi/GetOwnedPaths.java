@@ -94,8 +94,11 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
 
   @Override
   public Response<OwnedPathsInfo> apply(RevisionResource revisionResource)
-      throws BadRequestException, ResourceConflictException, UnresolvableAccountException,
-          ConfigInvalidException, IOException {
+      throws BadRequestException,
+          ResourceConflictException,
+          UnresolvableAccountException,
+          ConfigInvalidException,
+          IOException {
     validateStartAndLimit();
 
     Account.Id accountId = resolveAccount();
@@ -120,7 +123,9 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
   }
 
   private Account.Id resolveAccount()
-      throws BadRequestException, UnresolvableAccountException, ConfigInvalidException,
+      throws BadRequestException,
+          UnresolvableAccountException,
+          ConfigInvalidException,
           IOException {
     if (Strings.isNullOrEmpty(user)) {
       throw new BadRequestException("--user required");

@@ -567,9 +567,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
         return CodeOwnerConfig.builder(codeOwnerConfigKey, revision).build();
       }
 
-      return codeOwnerConfigCache
-          .get(codeOwnerConfigAsString)
-          .toBuilder()
+      return codeOwnerConfigCache.get(codeOwnerConfigAsString).toBuilder()
           .setRevision(revision)
           .build();
     }

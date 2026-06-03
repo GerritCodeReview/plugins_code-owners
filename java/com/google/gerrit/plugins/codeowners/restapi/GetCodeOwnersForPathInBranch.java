@@ -64,8 +64,8 @@ public class GetCodeOwnersForPathInBranch
       name = "-revision",
       usage =
           "revision from which the code owner configs in the branch should be read (imports from"
-              + " other branches or repositories as well as global code owners from refs/meta/config"
-              + " are still read from the current revisions)")
+              + " other branches or repositories as well as global code owners from"
+              + " refs/meta/config are still read from the current revisions)")
   public void setRevision(String revision) {
     this.revision = revision;
   }

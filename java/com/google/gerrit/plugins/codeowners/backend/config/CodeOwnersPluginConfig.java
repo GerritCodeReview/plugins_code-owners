@@ -152,9 +152,9 @@ public class CodeOwnersPluginConfig {
       for (String name : config.getNames(section)) {
         configWithBase.setStringList(
             section,
-            /* subsection = */ null,
+            /* subsection= */ null,
             name,
-            Arrays.asList(config.getStringList(section, /* subsection = */ null, name)));
+            Arrays.asList(config.getStringList(section, /* subsection= */ null, name)));
       }
 
       for (String subsection : config.getSubsections(section)) {

@@ -128,7 +128,8 @@ public class GeneralConfig {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
-                  "Merge commit strategy '%s' that is configured in %s (parameter %s.%s) is invalid.",
+                  "Merge commit strategy '%s' that is configured in %s (parameter %s.%s) is"
+                      + " invalid.",
                   projectLevelConfig.getString(
                       SECTION_CODE_OWNERS, /* subsection= */ null, KEY_MERGE_COMMIT_STRATEGY),
                   fileName,
@@ -147,7 +148,8 @@ public class GeneralConfig {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
-                  "The value for fallback code owners '%s' that is configured in %s (parameter %s.%s) is invalid.",
+                  "The value for fallback code owners '%s' that is configured in %s (parameter"
+                      + " %s.%s) is invalid.",
                   projectLevelConfig.getString(
                       SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FALLBACK_CODE_OWNERS),
                   fileName,
@@ -838,8 +840,8 @@ public class GeneralConfig {
           KEY_MERGE_COMMIT_STRATEGY, MergeCommitStrategy.ALL_CHANGED_FILES);
     } catch (IllegalArgumentException e) {
       logger.atWarning().withCause(e).log(
-          "Ignoring invalid value %s for merge commit stategy in gerrit.config (parameter plugin.%s.%s)."
-              + " Falling back to default value %s.",
+          "Ignoring invalid value %s for merge commit stategy in gerrit.config (parameter"
+              + " plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_MERGE_COMMIT_STRATEGY),
           pluginName,
           KEY_MERGE_COMMIT_STRATEGY,
