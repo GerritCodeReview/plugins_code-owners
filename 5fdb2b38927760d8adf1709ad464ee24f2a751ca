@@ -1,5 +1,29 @@
 {
-  "comments": [],
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c7593935_cbaa66bf",
+        "filename": "web/BUILD",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1065256
+      },
+      "writtenOn": "2026-06-10T08:34:09Z",
+      "side": 1,
+      "message": "This test fails with:\n\n```\n❯ bazelisk test //plugins/code-owners/web:web_test_runner\n...\nERROR: /gerrit/plugins/code-owners/web/BUILD:35:11: Transpiling (js) \u0026 type-checking TypeScript project @@//plugins/code-owners/web:code-owners-ts-tests [tsc -p plugins/code-owners/web/tsconfig.json] failed: (Exit 2): tsc failed: error executing TsProject command (from ts_project rule target //plugins/code-owners/web:code-owners-ts-tests) bazel-out/darwin_arm64-opt-exec/bin/external/aspect_rules_ts++ext+npm_typescript/tsc_/tsc --outDir plugins/code-owners/web/_bazel_ts_out_tests --project plugins/code-owners/web/tsconfig.json --rootDir ... (remaining 5 arguments skipped)\n\nUse --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging\nplugins/code-owners/web/code-owners-service_test.ts(12,19): error TS7016: Could not find a declaration file for module \u0027sinon\u0027. \u0027/Users/.../.cache/bazel/dd8d893b3a01bb1f659aa5cdb7f57f1b/sandbox/darwin-sandbox/922/execroot/_main/bazel-out/darwin_arm64-fastbuild/bin/plugins/node_modules/.aspect_rules_js/sinon@20.0.0/node_modules/sinon/pkg/sinon-esm.js\u0027 implicitly has an \u0027any\u0027 type.\n  There are types at \u0027/Users/.../.cache/bazel/dd8d893b3a01bb1f659aa5cdb7f57f1b/sandbox/darwin-sandbox/922/execroot/_main/bazel-out/darwin_arm64-fastbuild/bin/polygerrit-ui/node_modules/@types/sinon/index.d.ts\u0027, but this result could not be resolved when respecting package.json \"exports\". The \u0027@types/sinon\u0027 library may need to update its package.json or typings.\nTarget //plugins/code-owners/web:web_test_runner failed to build\nUse --verbose_failures to see the command lines of failed build steps.\n...\nUse --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging\nINFO: Elapsed time: 2.520s, Critical Path: 1.90s\nINFO: 2 processes: 2 internal.\nERROR: Build did NOT complete successfully\n//plugins/code-owners/web:web_test_runner                       FAILED TO BUILD\n\nExecuted 0 out of 1 test: 1 fails to build.\n```\n\nFor some reason, this test is not being executed, when running `bazelisk test //plugins/code-owners/...`",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 1
+      },
+      "revId": "5fdb2b38927760d8adf1709ad464ee24f2a751ca",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ],
   "submitRequirementResults": [
     {
       "submitRequirement": {
