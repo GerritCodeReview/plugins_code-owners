@@ -38,6 +38,7 @@ ts_project(
     incremental = True,
     out_dir = "_bazel_ts_out_tests",
     tsconfig = ":tsconfig",
+    tags = ["manual"],
     deps = [
         "//plugins:node_modules",
         "//polygerrit-ui:node_modules",
