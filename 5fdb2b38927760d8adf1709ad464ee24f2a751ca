@@ -22,6 +22,30 @@
       },
       "revId": "5fdb2b38927760d8adf1709ad464ee24f2a751ca",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b60ccce1_f50de93a",
+        "filename": "web/BUILD",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1065256
+      },
+      "writtenOn": "2026-06-10T09:27:25Z",
+      "side": 1,
+      "message": "Ok, it is not executed under `bazelisk test //plugins/code-owners/...` due to the `manual` tag, but `bazelisk build //plugins/code-owners/...` still tries to build it and fails.\n\n@thomasmulhall410@yahoo.com Any ideas on how to fix the test?",
+      "parentUuid": "c7593935_cbaa66bf",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 1
+      },
+      "revId": "5fdb2b38927760d8adf1709ad464ee24f2a751ca",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
