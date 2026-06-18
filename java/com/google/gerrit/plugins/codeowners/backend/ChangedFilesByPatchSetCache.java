@@ -17,7 +17,9 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.PatchSet;
+import java.nio.file.Path;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
@@ -50,6 +52,7 @@ public class ChangedFilesByPatchSetCache {
   private final ChangeNotes changeNotes;
 
   private Map<PatchSet.Id, ImmutableList<ChangedFile>> cache = new HashMap<>();
+  private Map<PatchSet.Id, ImmutableSet<Path>> pathsCache = new HashMap<>();
 
   @Inject
   public ChangedFilesByPatchSetCache(
@@ -63,6 +66,20 @@ public class ChangedFilesByPatchSetCache {
 
   public ImmutableList<ChangedFile> get(PatchSet.Id patchSetId) {
     return cache.computeIfAbsent(patchSetId, this::compute);
+  }
+
+  public ImmutableSet<Path> getPaths(PatchSet.Id patchSetId) {
+    return pathsCache.computeIfAbsent(patchSetId, this::computePaths);
+  }
+
+  private ImmutableSet<Path> computePaths(PatchSet.Id patchSetId) {
+    ImmutableList<ChangedFile> files = get(patchSetId);
+    ImmutableSet.Builder<Path> builder = ImmutableSet.builder();
+    for (ChangedFile file : files) {
+      file.newPath().ifPresent(builder::add);
+      file.oldPath().ifPresent(builder::add);
+    }
+    return builder.build();
   }
 
   private ImmutableList<ChangedFile> compute(PatchSet.Id patchSetId) {
