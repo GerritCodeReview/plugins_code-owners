@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.cache.Cache;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
@@ -26,7 +27,6 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -46,19 +46,22 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
   private final CodeOwners codeOwners;
   private final Optional<Integer> maxCacheSize;
   private final Counters counters;
-  private final HashMap<CacheKey, Optional<CodeOwnerConfig>> cache = new HashMap<>();
+  private final Cache<CacheKey, Optional<CodeOwnerConfig>> globalCache;
+  private final HashMap<CacheKey, Optional<CodeOwnerConfig>> localCache = new HashMap<>();
 
   @Inject
   TransientCodeOwnerConfigCache(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       GitRepositoryManager repoManager,
       CodeOwners codeOwners,
-      CodeOwnerMetrics codeOwnerMetrics) {
+      CodeOwnerMetrics codeOwnerMetrics,
+      Cache<CacheKey, Optional<CodeOwnerConfig>> globalCache) {
     this.repoManager = repoManager;
     this.codeOwners = codeOwners;
     this.maxCacheSize =
         codeOwnersPluginConfiguration.getGlobalConfig().getMaxCodeOwnerConfigCacheSize();
     this.counters = new Counters(codeOwnerMetrics);
+    this.globalCache = globalCache;
   }
 
   /**
@@ -69,12 +72,31 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
   public Optional<CodeOwnerConfig> get(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
     CacheKey cacheKey = CacheKey.create(codeOwnerConfigKey, revision);
-    Optional<CodeOwnerConfig> cachedCodeOwnerConfig = cache.get(cacheKey);
+    Optional<CodeOwnerConfig> cachedCodeOwnerConfig = localCache.get(cacheKey);
     if (cachedCodeOwnerConfig != null) {
       counters.incrementCacheReads();
       return cachedCodeOwnerConfig;
     }
-    return loadAndCache(cacheKey);
+
+    ObjectId resolvedRevision = revision;
+    if (resolvedRevision == null) {
+      Optional<ObjectId> resolved = getRevision(codeOwnerConfigKey.branchNameKey());
+      if (resolved.isPresent()) {
+        resolvedRevision = resolved.get();
+      }
+    }
+
+    if (resolvedRevision != null) {
+      CacheKey globalKey = CacheKey.create(codeOwnerConfigKey, resolvedRevision);
+      cachedCodeOwnerConfig = globalCache.getIfPresent(globalKey);
+      if (cachedCodeOwnerConfig != null) {
+        counters.incrementCacheReads();
+        localCache.put(cacheKey, cachedCodeOwnerConfig);
+        return cachedCodeOwnerConfig;
+      }
+    }
+
+    return loadAndCacheWithResolvedRevision(cacheKey, resolvedRevision);
   }
 
   /**
@@ -87,27 +109,19 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
   }
 
   /** Load a code owner config and puts it into the cache. */
-  private Optional<CodeOwnerConfig> loadAndCache(CacheKey cacheKey) {
+  private Optional<CodeOwnerConfig> loadAndCacheWithResolvedRevision(
+      CacheKey cacheKey, @Nullable ObjectId resolvedRevision) {
     counters.incrementBackendReads();
     Optional<CodeOwnerConfig> codeOwnerConfig;
-    if (cacheKey.revision().isPresent()) {
-      codeOwnerConfig = codeOwners.get(cacheKey.codeOwnerConfigKey(), cacheKey.revision().get());
+    if (resolvedRevision != null) {
+      codeOwnerConfig = codeOwners.get(cacheKey.codeOwnerConfigKey(), resolvedRevision);
+      CacheKey globalKey = CacheKey.create(cacheKey.codeOwnerConfigKey(), resolvedRevision);
+      globalCache.put(globalKey, codeOwnerConfig);
     } else {
-      Optional<ObjectId> revision = getRevision(cacheKey.codeOwnerConfigKey().branchNameKey());
-      if (revision.isPresent()) {
-        codeOwnerConfig = codeOwners.get(cacheKey.codeOwnerConfigKey(), revision.get());
-      } else {
-        // branch does not exists, hence the code owner config also doesn't exist
-        codeOwnerConfig = Optional.empty();
-      }
+      // branch does not exists, hence the code owner config also doesn't exist
+      codeOwnerConfig = Optional.empty();
     }
-    if (!maxCacheSize.isPresent() || cache.size() < maxCacheSize.get()) {
-      cache.put(cacheKey, codeOwnerConfig);
-    } else if (maxCacheSize.isPresent()) {
-      logger.atWarning().atMostEvery(1, TimeUnit.DAYS).log(
-          "exceeded limit of %s (project = %s, limit = %s)",
-          getClass().getSimpleName(), cacheKey.codeOwnerConfigKey().project(), maxCacheSize.get());
-    }
+    localCache.put(cacheKey, codeOwnerConfig);
     return codeOwnerConfig;
   }
 

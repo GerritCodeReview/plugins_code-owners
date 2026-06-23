@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.extensions.events.CommentAddedListener;
@@ -23,7 +25,9 @@ import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalHasOperand.CodeOwnerApprovalHasOperandModule;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerEnabledHasOperand.CodeOwnerEnabledHasOperandModule;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule.CodeOwnerSubmitRuleModule;
+import com.google.gerrit.plugins.codeowners.backend.TransientCodeOwnerConfigCache.CacheKey;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginGlobalConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.server.ExceptionHook;
@@ -32,6 +36,9 @@ import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.UserInitiated;
 import com.google.gerrit.server.restapi.change.OnPostReview;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /** Guice module to bind code owner backends. */
 public class BackendModule extends FactoryModule {
@@ -80,4 +87,20 @@ public class BackendModule extends FactoryModule {
       CodeOwnersUpdate.Factory codeOwnersUpdateFactory, IdentifiedUser currentUser) {
     return codeOwnersUpdateFactory.create(currentUser);
   }
+
+  @Provides
+  @Singleton
+  Cache<CacheKey, Optional<CodeOwnerConfig>> provideCodeOwnerConfigCache(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+    int maxCacheSize =
+        codeOwnersPluginConfiguration
+            .getGlobalConfig()
+            .getMaxCodeOwnerConfigCacheSize()
+            .orElse(50000);
+    return CacheBuilder.newBuilder()
+        .maximumSize(maxCacheSize)
+        .expireAfterAccess(1, TimeUnit.HOURS)
+        .build();
+  }
 }
+
