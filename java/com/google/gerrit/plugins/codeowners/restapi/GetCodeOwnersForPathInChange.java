@@ -15,10 +15,12 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_REVIEWER_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REVIEWER_SCORING_VALUE;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.hash.Hashing;
@@ -27,6 +29,7 @@ import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
+import com.google.gerrit.plugins.codeowners.backend.AttentionSetLoads;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
@@ -48,6 +51,7 @@ import com.google.gerrit.server.restapi.change.SuggestReviewers;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.eclipse.jgit.lib.Config;
@@ -65,6 +69,7 @@ public class GetCodeOwnersForPathInChange
 
   private final Config cfg;
   private final ServiceUserClassifier serviceUserClassifier;
+  private final AttentionSetLoads attentionSetLoads;
 
   @Inject
   GetCodeOwnersForPathInChange(
@@ -80,7 +85,8 @@ public class GetCodeOwnersForPathInChange
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ServiceUserClassifier serviceUserClassifier,
       CodeOwnerJson.Factory codeOwnerJsonFactory,
-      CodeOwnerConfigFileJson codeOwnerConfigFileJson) {
+      CodeOwnerConfigFileJson codeOwnerConfigFileJson,
+      AttentionSetLoads attentionSetLoads) {
     super(
         accountVisibility,
         accounts,
@@ -95,6 +101,7 @@ public class GetCodeOwnersForPathInChange
         codeOwnerConfigFileJson);
     this.cfg = cfg;
     this.serviceUserClassifier = serviceUserClassifier;
+    this.attentionSetLoads = attentionSetLoads;
   }
 
   @Override
@@ -115,8 +122,9 @@ public class GetCodeOwnersForPathInChange
   }
 
   /**
-   * This method is overridden to add scorings for the {@link CodeOwnerScore#IS_REVIEWER} score that
-   * only applies if code owners are suggested on changes.
+   * This method is overridden to add scorings for the {@link CodeOwnerScore#IS_REVIEWER} and {@link
+   * CodeOwnerScore#ATTENTION_SET_LOAD} scores that only apply if code owners are suggested on
+   * changes.
    */
   @Override
   protected ImmutableSet<CodeOwnerScoring> getCodeOwnerScorings(
@@ -136,7 +144,31 @@ public class GetCodeOwnersForPathInChange
                     ? IS_REVIEWER_SCORING_VALUE
                     : NO_REVIEWER_SCORING_VALUE));
 
-    return ImmutableSet.of(isReviewerScoring.build());
+    if (!isAttentionSetScoringEnabled()) {
+      return ImmutableSet.of(isReviewerScoring.build());
+    }
+
+    // Add scorings for ATTENTION_SET_LOAD score, so that among code owners with the same distance
+    // the one with the most review capacity is suggested first.
+    ImmutableMap<CodeOwner, Integer> loads =
+        codeOwners.stream()
+            .collect(
+                toImmutableMap(
+                    Function.identity(),
+                    codeOwner -> attentionSetLoads.get(codeOwner.accountId())));
+    int maxLoad = loads.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+    if (maxLoad == 0) {
+      return ImmutableSet.of(isReviewerScoring.build());
+    }
+    CodeOwnerScoring.Builder attentionSetLoadScoring =
+        CodeOwnerScore.ATTENTION_SET_LOAD.createScoring(maxLoad);
+    loads.forEach(attentionSetLoadScoring::putValueForCodeOwner);
+
+    return ImmutableSet.of(isReviewerScoring.build(), attentionSetLoadScoring.build());
+  }
+
+  private boolean isAttentionSetScoringEnabled() {
+    return cfg.getBoolean("plugin", "code-owners", "enableAttentionSetScoring", false);
   }
 
   @Override

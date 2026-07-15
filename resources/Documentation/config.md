@@ -582,6 +582,20 @@ endpoint or by touching the change (e.g. by adding a comment).
 :       Whether experimental REST endpoints are enabled.\
         By default `false`.
 
+<a id="pluginCodeOwnersEnableAttentionSetScoring">plugin.@PLUGIN@.enableAttentionSetScoring</a>
+:       Whether code owner suggestions on changes should take the review load
+        of the code owners into account.\
+        \
+        If enabled, code owners that are in the attention set of many open
+        changes are ranked lower than code owners with the same distance that
+        have more capacity to take on further reviews. Attention set entries
+        that are older than `suggest.attentionSetStaleAgeDays` (default 7)
+        count an additional `suggest.attentionSetStaleFactor` (default 1.0),
+        since unattended entries indicate that the code owner is not actively
+        reviewing at the moment (e.g. because they are fully booked or
+        absent).\
+        By default `false`.
+
 <a id="pluginCodeOwnersMergeCommitStrategy">plugin.@PLUGIN@.mergeCommitStrategy</a>
 :       Strategy that defines for merge commits which files require code owner
         approvals.\

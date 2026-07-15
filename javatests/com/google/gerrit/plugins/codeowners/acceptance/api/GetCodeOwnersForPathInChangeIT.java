@@ -108,6 +108,41 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableAttentionSetScoring", value = "true")
+  public void codeOwnersWithLowerAttentionSetLoadAreSuggestedFirst() throws Exception {
+    TestAccount busyCodeOwner =
+        accountCreator.create("busyCodeOwner", "busyCodeOwner@example.com", "BusyCodeOwner", null);
+    TestAccount availableCodeOwner =
+        accountCreator.create(
+            "availableCodeOwner", "availableCodeOwner@example.com", "AvailableCodeOwner", null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(busyCodeOwner.email())
+        .addCodeOwnerEmail(availableCodeOwner.email())
+        .create();
+
+    // Put busyCodeOwner into the attention set of two open changes.
+    for (int i = 0; i < 2; i++) {
+      String openChangeId =
+          createChange("Open Change " + i, "open-change-" + i + ".txt", "content").getChangeId();
+      gApi.changes().id(openChangeId).addReviewer(busyCodeOwner.email());
+    }
+
+    // Both code owners have the same distance, but availableCodeOwner has more capacity and is
+    // suggested first.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(availableCodeOwner.id(), busyCodeOwner.id())
+        .inOrder();
+  }
+
+  @Test
   public void getCodeOwnersOrderIsAlwaysTheSameIfCodeOwnersHaveTheSameScoring() throws Exception {
     TestAccount user2 = accountCreator.user2();
     TestAccount user3 = accountCreator.create("user3", "user3@example.com", "User3", null);
