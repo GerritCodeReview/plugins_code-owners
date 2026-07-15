@@ -80,7 +80,22 @@ public enum CodeOwnerScore {
    * {@link #DISTANCE} score takes precedence and the load mainly spreads reviews across equally
    * well matching code owners.
    */
-  ATTENTION_SET_LOAD(Kind.LOWER_VALUE_IS_BETTER, /* weight= */ 0.5, /* maxValue= */ null);
+  ATTENTION_SET_LOAD(Kind.LOWER_VALUE_IS_BETTER, /* weight= */ 0.5, /* maxValue= */ null),
+
+  /**
+   * Score to take into account whether a code owner recently worked on the path for which code
+   * owners are suggested.
+   *
+   * <p>Code owners that recently owned or reviewed changes that touched the path (see {@link
+   * RecentFileActivities}) are likely the ones that actively maintain the code and hence are better
+   * suited to review it than code owners that have not worked on it for a long time.
+   *
+   * <p>The RECENT_ACTIVITY score has a lower weight than the {@link #DISTANCE} score so that the
+   * {@link #DISTANCE} score takes precedence, but a higher weight than the {@link
+   * #ATTENTION_SET_LOAD} score so that among code owners with the same distance activity matters
+   * more than capacity.
+   */
+  RECENT_ACTIVITY(Kind.GREATER_VALUE_IS_BETTER, /* weight= */ 0.75, /* maxValue= */ null);
 
   /**
    * Scoring value for the {@link #IS_REVIEWER} score for users that are not a reviewer of the

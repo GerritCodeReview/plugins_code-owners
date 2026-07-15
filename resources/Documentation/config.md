@@ -596,6 +596,18 @@ endpoint or by touching the change (e.g. by adding a comment).
         absent).\
         By default `false`.
 
+<a id="pluginCodeOwnersEnableRecentActivityScoring">plugin.@PLUGIN@.enableRecentActivityScoring</a>
+:       Whether code owner suggestions on changes should take into account how
+        recently the code owners worked on the path.\
+        \
+        If enabled, code owners that recently owned or reviewed changes that
+        touched the path are ranked higher than code owners with the same
+        distance that have not worked on the path within
+        `suggest.touchedFilesMaxAgeDays` (default 90). They are likely the
+        ones that actively maintain the code and hence are better suited to
+        review it.\
+        By default `false`.
+
 <a id="pluginCodeOwnersMergeCommitStrategy">plugin.@PLUGIN@.mergeCommitStrategy</a>
 :       Strategy that defines for merge commits which files require code owner
         approvals.\

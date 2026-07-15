@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_REVIEWER_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REVIEWER_SCORING_VALUE;
 
@@ -38,8 +39,10 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
 import com.google.gerrit.plugins.codeowners.backend.DebugMessage;
+import com.google.gerrit.plugins.codeowners.backend.RecentFileActivities;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.ServiceUserClassifier;
@@ -70,6 +73,7 @@ public class GetCodeOwnersForPathInChange
   private final Config cfg;
   private final ServiceUserClassifier serviceUserClassifier;
   private final AttentionSetLoads attentionSetLoads;
+  private final RecentFileActivities recentFileActivities;
 
   @Inject
   GetCodeOwnersForPathInChange(
@@ -86,7 +90,8 @@ public class GetCodeOwnersForPathInChange
       ServiceUserClassifier serviceUserClassifier,
       CodeOwnerJson.Factory codeOwnerJsonFactory,
       CodeOwnerConfigFileJson codeOwnerConfigFileJson,
-      AttentionSetLoads attentionSetLoads) {
+      AttentionSetLoads attentionSetLoads,
+      RecentFileActivities recentFileActivities) {
     super(
         accountVisibility,
         accounts,
@@ -102,6 +107,7 @@ public class GetCodeOwnersForPathInChange
     this.cfg = cfg;
     this.serviceUserClassifier = serviceUserClassifier;
     this.attentionSetLoads = attentionSetLoads;
+    this.recentFileActivities = recentFileActivities;
   }
 
   @Override
@@ -129,7 +135,19 @@ public class GetCodeOwnersForPathInChange
   @Override
   protected ImmutableSet<CodeOwnerScoring> getCodeOwnerScorings(
       CodeOwnersInChangeCollection.PathResource rsrc, ImmutableSet<CodeOwner> codeOwners) {
-    // Add scorings for IS_REVIEWER score.
+    ImmutableSet.Builder<CodeOwnerScoring> scorings = ImmutableSet.builder();
+    scorings.add(createIsReviewerScoring(rsrc, codeOwners));
+    if (isAttentionSetScoringEnabled()) {
+      createAttentionSetLoadScoring(codeOwners).ifPresent(scorings::add);
+    }
+    if (isRecentActivityScoringEnabled()) {
+      createRecentActivityScoring(rsrc, codeOwners).ifPresent(scorings::add);
+    }
+    return scorings.build();
+  }
+
+  private CodeOwnerScoring createIsReviewerScoring(
+      CodeOwnersInChangeCollection.PathResource rsrc, ImmutableSet<CodeOwner> codeOwners) {
     ImmutableSet<Account.Id> reviewers =
         rsrc.getRevisionResource()
             .getNotes()
@@ -143,13 +161,15 @@ public class GetCodeOwnersForPathInChange
                 reviewers.contains(codeOwner.accountId())
                     ? IS_REVIEWER_SCORING_VALUE
                     : NO_REVIEWER_SCORING_VALUE));
+    return isReviewerScoring.build();
+  }
 
-    if (!isAttentionSetScoringEnabled()) {
-      return ImmutableSet.of(isReviewerScoring.build());
-    }
-
-    // Add scorings for ATTENTION_SET_LOAD score, so that among code owners with the same distance
-    // the one with the most review capacity is suggested first.
+  /**
+   * Creates a scoring for the {@link CodeOwnerScore#ATTENTION_SET_LOAD} score, so that among code
+   * owners with the same distance the one with the most review capacity is suggested first.
+   */
+  private Optional<CodeOwnerScoring> createAttentionSetLoadScoring(
+      ImmutableSet<CodeOwner> codeOwners) {
     ImmutableMap<CodeOwner, Integer> loads =
         codeOwners.stream()
             .collect(
@@ -158,17 +178,45 @@ public class GetCodeOwnersForPathInChange
                     codeOwner -> attentionSetLoads.get(codeOwner.accountId())));
     int maxLoad = loads.values().stream().mapToInt(Integer::intValue).max().orElse(0);
     if (maxLoad == 0) {
-      return ImmutableSet.of(isReviewerScoring.build());
+      return Optional.empty();
     }
     CodeOwnerScoring.Builder attentionSetLoadScoring =
         CodeOwnerScore.ATTENTION_SET_LOAD.createScoring(maxLoad);
     loads.forEach(attentionSetLoadScoring::putValueForCodeOwner);
+    return Optional.of(attentionSetLoadScoring.build());
+  }
 
-    return ImmutableSet.of(isReviewerScoring.build(), attentionSetLoadScoring.build());
+  /**
+   * Creates a scoring for the {@link CodeOwnerScore#RECENT_ACTIVITY} score, so that among code
+   * owners with the same distance the one that actively works on the path is suggested first.
+   */
+  private Optional<CodeOwnerScoring> createRecentActivityScoring(
+      CodeOwnersInChangeCollection.PathResource rsrc, ImmutableSet<CodeOwner> codeOwners) {
+    ImmutableMap<Account.Id, Integer> activities =
+        recentFileActivities.compute(
+            rsrc.getRevisionResource().getProject(),
+            rsrc.getRevisionResource().getChange().getId(),
+            JgitPath.of(rsrc.getPath()).get(),
+            codeOwners.stream().map(CodeOwner::accountId).collect(toImmutableSet()));
+    int maxActivity = activities.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+    if (maxActivity == 0) {
+      return Optional.empty();
+    }
+    CodeOwnerScoring.Builder recentActivityScoring =
+        CodeOwnerScore.RECENT_ACTIVITY.createScoring(maxActivity);
+    codeOwners.forEach(
+        codeOwner ->
+            recentActivityScoring.putValueForCodeOwner(
+                codeOwner, activities.getOrDefault(codeOwner.accountId(), 0)));
+    return Optional.of(recentActivityScoring.build());
   }
 
   private boolean isAttentionSetScoringEnabled() {
     return cfg.getBoolean("plugin", "code-owners", "enableAttentionSetScoring", false);
+  }
+
+  private boolean isRecentActivityScoringEnabled() {
+    return cfg.getBoolean("plugin", "code-owners", "enableRecentActivityScoring", false);
   }
 
   @Override
