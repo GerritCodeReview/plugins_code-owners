@@ -33,6 +33,7 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.AccountGroup;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -105,6 +106,52 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .that(gApi.changes().id(changeId).current().files())
         .containsKey(JgitPath.of(path).get());
     return super.queryCodeOwners(queryRequest, path);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableRecentActivityScoring", value = "true")
+  public void codeOwnersThatRecentlyWorkedOnThePathAreSuggestedFirst() throws Exception {
+    TestAccount activeCodeOwner =
+        accountCreator.create(
+            "activeCodeOwner", "activeCodeOwner@example.com", "ActiveCodeOwner", null);
+    TestAccount inactiveCodeOwner =
+        accountCreator.create(
+            "inactiveCodeOwner", "inactiveCodeOwner@example.com", "InactiveCodeOwner", null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(activeCodeOwner.email())
+        .addCodeOwnerEmail(inactiveCodeOwner.email())
+        .create();
+
+    // activeCodeOwner recently worked on the path: they own a merged change that touched it.
+    TestRepository<InMemoryRepository> activeCodeOwnerRepo = cloneProject(project, activeCodeOwner);
+    PushOneCommit.Result mergedChange =
+        pushFactory
+            .create(
+                activeCodeOwner.newIdent(),
+                activeCodeOwnerRepo,
+                "Touch foo/bar.md",
+                "foo/bar.md",
+                "old content")
+            .to("refs/for/master");
+    mergedChange.assertOkStatus();
+    gApi.changes().id(mergedChange.getChangeId()).current().review(ReviewInput.approve());
+    disableCodeOwnersForProject(project);
+    gApi.changes().id(mergedChange.getChangeId()).current().submit();
+    enableCodeOwnersForProject(project);
+
+    // Both code owners have the same distance, but activeCodeOwner recently worked on the path
+    // and is suggested first.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(activeCodeOwner.id(), inactiveCodeOwner.id())
+        .inOrder();
   }
 
   @Test
