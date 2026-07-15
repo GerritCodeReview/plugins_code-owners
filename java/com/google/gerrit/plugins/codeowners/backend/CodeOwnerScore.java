@@ -67,7 +67,20 @@ public enum CodeOwnerScore {
    * <p>The IS_EXPLICITLY_MENTIONED score has a lower weight than the {@link #DISTANCE} score so
    * that the {@link #DISTANCE} score takes precedence.
    */
-  IS_EXPLICITLY_MENTIONED(Kind.GREATER_VALUE_IS_BETTER, /* weight= */ 0.5, /* maxValue= */ 1);
+  IS_EXPLICITLY_MENTIONED(Kind.GREATER_VALUE_IS_BETTER, /* weight= */ 0.5, /* maxValue= */ 1),
+
+  /**
+   * Score to take into account how much review load a code owner already has.
+   *
+   * <p>The load of a code owner is the number of open changes in which the code owner is in the
+   * attention set (see {@link AttentionSetLoads}). The smaller the load the more capacity the code
+   * owner has to take on further reviews.
+   *
+   * <p>The ATTENTION_SET_LOAD score has a lower weight than the {@link #DISTANCE} score so that the
+   * {@link #DISTANCE} score takes precedence and the load mainly spreads reviews across equally
+   * well matching code owners.
+   */
+  ATTENTION_SET_LOAD(Kind.LOWER_VALUE_IS_BETTER, /* weight= */ 0.5, /* maxValue= */ null);
 
   /**
    * Scoring value for the {@link #IS_REVIEWER} score for users that are not a reviewer of the
