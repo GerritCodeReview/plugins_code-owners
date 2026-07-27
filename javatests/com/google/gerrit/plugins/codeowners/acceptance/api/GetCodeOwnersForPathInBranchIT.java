@@ -38,6 +38,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
+import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.jgit.lib.Constants;
@@ -332,5 +333,39 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  public void getCodeOwnersWithPathPrefix() throws Exception {
+    setCodeOwnersConfig(project, /* subsection= */ null, GeneralConfig.KEY_PATH_PREFIX, "/prefix");
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // Query path inside prefix: /prefix/foo/bar.md
+    // OWNERS at /foo/ and / in repo branch apply to /prefix/foo/bar.md
+    CodeOwnersInfo codeOwnersInfoUnderPrefix = queryCodeOwners("/prefix/foo/bar.md");
+    assertThat(codeOwnersInfoUnderPrefix)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
+
+    // Query path outside prefix: /other/foo/bar.md
+    // OWNERS files do not apply outside pathPrefix
+    CodeOwnersInfo codeOwnersInfoOutsidePrefix = queryCodeOwners("/other/foo/bar.md");
+    assertThat(codeOwnersInfoOutsidePrefix.codeOwners).isEmpty();
   }
 }

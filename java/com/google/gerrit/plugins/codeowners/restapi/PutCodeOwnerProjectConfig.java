@@ -28,6 +28,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_OVERRIDE_INFO_URL;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_PATH_PREFIX;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_READ_ONLY;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS;
@@ -133,6 +134,15 @@ public class PutCodeOwnerProjectConfig
       if (input.fileExtension != null) {
         codeOwnersConfig.setString(
             SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION, input.fileExtension);
+      }
+
+      if (input.pathPrefix != null) {
+        if (input.pathPrefix.isEmpty()) {
+          codeOwnersConfig.unset(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_PATH_PREFIX);
+        } else {
+          codeOwnersConfig.setString(
+              SECTION_CODE_OWNERS, /* subsection= */ null, KEY_PATH_PREFIX, input.pathPrefix);
+        }
       }
 
       if (input.requiredApproval != null) {
