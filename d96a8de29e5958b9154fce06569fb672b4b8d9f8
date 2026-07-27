@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a0b1c835_c11080ec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1024057
+      },
+      "writtenOn": "2026-07-27T02:06:36Z",
+      "side": 1,
+      "message": "battle of the AI bots",
+      "revId": "d96a8de29e5958b9154fce06569fb672b4b8d9f8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0c133827_cfcfc3ae",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerProjectConfigInput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1024057
+      },
+      "writtenOn": "2026-07-27T02:06:36Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by autoreview issue finding: Consider adding the `@Nullable` annotation to this field to be consistent with other optional fields in this class.",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 0
+      },
+      "revId": "d96a8de29e5958b9154fce06569fb672b4b8d9f8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a02bd268_f0999272",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1024057
+      },
+      "writtenOn": "2026-07-27T02:06:36Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by autoreview issue finding: Building a path via string concatenation like `Path.of(\"/\" + ...)` is slightly fragile. Consider using `Path.of(\"/\", relUnderPrefix.toString())` or `Path.resolve`.",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 225,
+        "endChar": 0
+      },
+      "revId": "d96a8de29e5958b9154fce06569fb672b4b8d9f8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eb879422_4fd7e369",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1024057
+      },
+      "writtenOn": "2026-07-27T02:06:36Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by autoreview issue finding: Validation for `pathPrefix` should be added to `validateProjectLevelConfig` in `GeneralConfig.java` to ensure that invalid paths are rejected when the configuration is pushed.",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 182,
+        "endChar": 0
+      },
+      "revId": "d96a8de29e5958b9154fce06569fb672b4b8d9f8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "23ee8ec2_11145f42",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/PutCodeOwnerProjectConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1024057
+      },
+      "writtenOn": "2026-07-27T02:06:36Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by autoreview issue finding: This block should handle unsetting the `pathPrefix` when an empty string is provided, similar to how `requiredApproval` is handled below. Without this, the configuration cannot be removed once set via the REST API.",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 139,
+        "endChar": 0
+      },
+      "revId": "d96a8de29e5958b9154fce06569fb672b4b8d9f8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
