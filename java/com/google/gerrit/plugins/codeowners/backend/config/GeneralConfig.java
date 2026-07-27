@@ -63,6 +63,7 @@ public class GeneralConfig {
   public static final String SECTION_VALIDATION = "validation";
 
   public static final String KEY_FILE_EXTENSION = "fileExtension";
+  public static final String KEY_PATH_PREFIX = "pathPrefix";
   public static final String KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER =
       "enableAsyncMessageOnAddReviewer";
   public static final String KEY_ENABLE_ASYNC_MESSAGE_ON_CODE_OWNER_APPROVAL =
@@ -190,6 +191,17 @@ public class GeneralConfig {
    */
   Optional<String> getFileExtension(Config pluginConfig) {
     return getStringValue(pluginConfig, KEY_FILE_EXTENSION);
+  }
+
+  /**
+   * Gets the path prefix configuration from the given plugin config with fallback to {@code
+   * gerrit.config}.
+   *
+   * @param pluginConfig the plugin config from which the path prefix configuration should be read.
+   * @return the path prefix configuration, {@link Optional#empty()} if no path prefix is configured
+   */
+  Optional<String> getPathPrefix(Config pluginConfig) {
+    return getStringValue(pluginConfig, KEY_PATH_PREFIX);
   }
 
   /**

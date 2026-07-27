@@ -30,6 +30,7 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
+import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.gerrit.server.restapi.project.DeleteRef;
@@ -772,6 +773,63 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     // This test is making sure that trying to load 4. doesn't fail if refs/meta/config doesn't
     // exist.
     visit("master", "/foo/bar/baz.md");
+    verifyNoInteractions(visitor);
+  }
+
+  @Test
+  public void visitorInvokedForApplyingCodeOwnerConfigsWithPathPrefix() throws Exception {
+    setCodeOwnersConfig(
+        project, /* subsection= */ null, GeneralConfig.KEY_PATH_PREFIX, "/foo");
+
+    String branch = "master";
+
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key barCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/bar/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit(branch, "/foo/bar/baz.md");
+
+    InOrder orderVerifier = Mockito.inOrder(visitor);
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(barCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void visitorNotInvokedForPathOutsidePathPrefix() throws Exception {
+    setCodeOwnersConfig(
+        project, /* subsection= */ null, GeneralConfig.KEY_PATH_PREFIX, "/foo");
+
+    String branch = "master";
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branch)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    visit(branch, "/other/bar/baz.md");
     verifyNoInteractions(visitor);
   }
 

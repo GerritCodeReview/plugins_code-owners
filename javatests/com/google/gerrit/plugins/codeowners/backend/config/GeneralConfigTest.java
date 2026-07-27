@@ -29,6 +29,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_EXEMPT_PURE_REVERTS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_PATH_PREFIX;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES;
@@ -102,6 +103,27 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION, "bar");
     OptionalSubject.assertThat(generalConfig.getFileExtension(cfg)).value().isEqualTo("bar");
+  }
+
+  @Test
+  public void getPathPrefixNotSet() throws Exception {
+    OptionalSubject.assertThat(generalConfig.getPathPrefix(new Config())).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathPrefix", value = "/foo")
+  public void getPathPrefixFromGerritConfig() throws Exception {
+    OptionalSubject.assertThat(generalConfig.getPathPrefix(new Config()))
+        .value()
+        .isEqualTo("/foo");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathPrefix", value = "/foo")
+  public void pathPrefixInPluginConfigOverridesPathPrefixInGerritConfig() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_PATH_PREFIX, "/bar");
+    OptionalSubject.assertThat(generalConfig.getPathPrefix(cfg)).value().isEqualTo("/bar");
   }
 
   @Test
