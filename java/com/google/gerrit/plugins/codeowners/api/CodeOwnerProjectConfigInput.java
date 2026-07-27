@@ -44,6 +44,9 @@ public class CodeOwnerProjectConfigInput {
   /** The file extension that should be used for code owner config files in this project. */
   public String fileExtension;
 
+  /** The path prefix that should be prepended to paths covered by OWNERS files. */
+  public String pathPrefix;
+
   /**
    * The approval that is required from code owners.
    *

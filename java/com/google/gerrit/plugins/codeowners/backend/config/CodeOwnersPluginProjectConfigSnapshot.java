@@ -42,6 +42,7 @@ import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,6 +68,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   private final Config pluginConfig;
 
   @Nullable private Optional<String> fileExtension;
+  @Nullable private Optional<Path> pathPrefix;
   @Nullable private Boolean enableCodeOwnerConfigFilesWithFileExtensions;
   @Nullable private Boolean codeOwnerConfigsReadOnly;
   @Nullable private Boolean exemptPureReverts;
@@ -128,6 +130,24 @@ public class CodeOwnersPluginProjectConfigSnapshot {
       fileExtension = generalConfig.getFileExtension(pluginConfig);
     }
     return fileExtension;
+  }
+
+  /**
+   * Gets the path prefix that should be prepended to paths covered by OWNERS files, if any
+   * configured.
+   */
+  public Optional<Path> getPathPrefix() {
+    if (pathPrefix == null) {
+      pathPrefix =
+          generalConfig
+              .getPathPrefix(pluginConfig)
+              .filter(p -> !p.trim().isEmpty())
+              .map(p -> p.startsWith("/") ? p : "/" + p)
+              .map(p -> (p.length() > 1 && p.endsWith("/")) ? p.substring(0, p.length() - 1) : p)
+              .filter(p -> !p.equals("/"))
+              .map(Path::of);
+    }
+    return pathPrefix;
   }
 
   /** Whether file extensions for code owner config files are enabled. */
