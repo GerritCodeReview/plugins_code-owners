@@ -38,6 +38,7 @@ import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.RefPatternMatcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -63,6 +64,7 @@ public class GeneralConfig {
   public static final String SECTION_VALIDATION = "validation";
 
   public static final String KEY_FILE_EXTENSION = "fileExtension";
+  public static final String KEY_PATH_PREFIX = "pathPrefix";
   public static final String KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER =
       "enableAsyncMessageOnAddReviewer";
   public static final String KEY_ENABLE_ASYNC_MESSAGE_ON_CODE_OWNER_APPROVAL =
@@ -180,6 +182,22 @@ public class GeneralConfig {
               ValidationMessage.Type.ERROR));
     }
 
+    String pathPrefix =
+        projectLevelConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_PATH_PREFIX);
+    if (pathPrefix != null && !pathPrefix.trim().isEmpty()) {
+      try {
+        var unused = Path.of(pathPrefix);
+      } catch (IllegalArgumentException e) {
+        validationMessages.add(
+            new CommitValidationMessage(
+                String.format(
+                    "The value for path prefix '%s' that is configured in %s (parameter %s.%s) is"
+                        + " invalid: %s",
+                    pathPrefix, fileName, SECTION_CODE_OWNERS, KEY_PATH_PREFIX, e.getMessage()),
+                ValidationMessage.Type.ERROR));
+      }
+    }
+
     return validationMessages.build();
   }
 
@@ -192,6 +210,17 @@ public class GeneralConfig {
    */
   Optional<String> getFileExtension(Config pluginConfig) {
     return getStringValue(pluginConfig, KEY_FILE_EXTENSION);
+  }
+
+  /**
+   * Gets the path prefix configuration from the given plugin config with fallback to {@code
+   * gerrit.config}.
+   *
+   * @param pluginConfig the plugin config from which the path prefix configuration should be read.
+   * @return the path prefix configuration, {@link Optional#empty()} if no path prefix is configured
+   */
+  Optional<String> getPathPrefix(Config pluginConfig) {
+    return getStringValue(pluginConfig, KEY_PATH_PREFIX);
   }
 
   /**
@@ -840,7 +869,7 @@ public class GeneralConfig {
           KEY_MERGE_COMMIT_STRATEGY, MergeCommitStrategy.ALL_CHANGED_FILES);
     } catch (IllegalArgumentException e) {
       logger.atWarning().withCause(e).log(
-          "Ignoring invalid value %s for merge commit stategy in gerrit.config (parameter"
+          "Ignoring invalid value %s for merge commit strategy in gerrit.config (parameter"
               + " plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_MERGE_COMMIT_STRATEGY),
           pluginName,

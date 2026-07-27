@@ -185,6 +185,15 @@ endpoint or by touching the change (e.g. by adding a comment).
         owner config files with other file extensions use a different owners
         syntax or reference users that do not exist on this Gerrit host.
 
+<a id="pluginCodeOwnersPathPrefix">plugin.@PLUGIN@.pathPrefix</a>
+:       The path prefix that should be prepended to paths covered by OWNERS files.\
+        If set, only files under this path prefix are covered by OWNERS files. OWNERS\
+        files in the repository are evaluated relative to this path prefix.\
+        Can be overridden per project by setting
+        [codeOwners.pathPrefix](#codeOwnersPathPrefix) in
+        `@PLUGIN@.config`.\
+        By default unset.
+
 <a id="pluginCodeOwnersEnableCodeOwnerConfigFilesWithFileExtensions">plugin.@PLUGIN@.enableCodeOwnerConfigFilesWithFileExtensions</a>
 :       Whether file extensions for code owner config files are enabled.\
         If enabled, code owner config files with file extensions are treated as
