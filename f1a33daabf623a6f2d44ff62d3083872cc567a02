@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6f1c16cf_c4b488da",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2026-07-27T06:26:35Z",
+      "side": 1,
+      "message": "Sorry, since end of last year I\u0027m no longer working on Gerrit, hence I\u0027m not the right person to review this.",
+      "revId": "f1a33daabf623a6f2d44ff62d3083872cc567a02",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
