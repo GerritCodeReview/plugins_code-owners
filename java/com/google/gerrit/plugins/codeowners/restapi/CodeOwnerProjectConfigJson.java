@@ -44,6 +44,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -107,6 +108,7 @@ public class CodeOwnerProjectConfigJson {
 
     GeneralInfo generalInfo = new GeneralInfo();
     generalInfo.fileExtension = codeOwnersConfig.getFileExtension().orElse(null);
+    generalInfo.pathPrefix = codeOwnersConfig.getPathPrefix().map(Path::toString).orElse(null);
     generalInfo.mergeCommitStrategy = codeOwnersConfig.getMergeCommitStrategy();
     generalInfo.implicitApprovals = codeOwnersConfig.areImplicitApprovalsEnabled() ? true : null;
     generalInfo.overrideInfoUrl = codeOwnersConfig.getOverrideInfoUrl().orElse(null);

@@ -23,6 +23,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -55,15 +56,18 @@ public class CodeOwnerConfigHierarchy {
   private final GitRepositoryManager repoManager;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
   private final TransientCodeOwnerConfigCache transientCodeOwnerConfigCache;
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
 
   @Inject
   CodeOwnerConfigHierarchy(
       GitRepositoryManager repoManager,
       PathCodeOwners.Factory pathCodeOwnersFactory,
-      TransientCodeOwnerConfigCache transientCodeOwnerConfigCache) {
+      TransientCodeOwnerConfigCache transientCodeOwnerConfigCache,
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
     this.repoManager = repoManager;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
     this.transientCodeOwnerConfigCache = transientCodeOwnerConfigCache;
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
   }
 
   /**
@@ -205,10 +209,31 @@ public class CodeOwnerConfigHierarchy {
         branchNameKey.project(),
         revision != null ? revision.name() : "n/a");
 
+    Optional<Path> pathPrefix =
+        codeOwnersPluginConfiguration.getProjectConfig(branchNameKey.project()).getPathPrefix();
+
+    Path pathForHierarchy = absolutePath;
+    Path startFolderForHierarchy = startFolder;
+
+    if (pathPrefix.isPresent()) {
+      Path prefix = pathPrefix.get();
+      if (!absolutePath.startsWith(prefix)) {
+        // The path is outside the configured pathPrefix, so it is not covered by any OWNERS files.
+        return;
+      }
+      Path relUnderPrefix = prefix.relativize(absolutePath);
+      pathForHierarchy = Path.of("/", relUnderPrefix.toString());
+
+      startFolderForHierarchy =
+          (startFolder == null || !startFolder.startsWith(prefix) || startFolder.equals(prefix))
+              ? Path.of("/")
+              : Path.of("/", prefix.relativize(startFolder).toString());
+    }
+
     if (revision != null) {
       // Next path in which we look for a code owner configuration. We start at the given folder and
       // then go up the parent hierarchy.
-      Path ownerConfigFolder = startFolder;
+      Path ownerConfigFolder = startFolderForHierarchy;
 
       // Iterate over the parent code owner configurations.
       while (ownerConfigFolder != null) {
@@ -219,7 +244,7 @@ public class CodeOwnerConfigHierarchy {
             CodeOwnerConfig.Key.create(branchNameKey, ownerConfigFolder);
         Optional<PathCodeOwners> pathCodeOwners =
             pathCodeOwnersFactory.create(
-                transientCodeOwnerConfigCache, codeOwnerConfigKey, revision, absolutePath);
+                transientCodeOwnerConfigCache, codeOwnerConfigKey, revision, pathForHierarchy);
         if (pathCodeOwners.isPresent()) {
           logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
           boolean visitFurtherCodeOwnerConfigs = pathCodeOwnersVisitor.visit(pathCodeOwners.get());
@@ -250,7 +275,7 @@ public class CodeOwnerConfigHierarchy {
 
     if (!RefNames.REFS_CONFIG.equals(branchNameKey.branch())) {
       visitCodeOwnerConfigInRefsMetaConfig(
-          branchNameKey.project(), absolutePath, pathCodeOwnersVisitor);
+          branchNameKey.project(), pathForHierarchy, pathCodeOwnersVisitor);
     }
   }
 
