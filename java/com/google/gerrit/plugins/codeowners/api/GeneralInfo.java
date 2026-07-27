@@ -31,6 +31,13 @@ public class GeneralInfo {
    */
   public String fileExtension;
 
+  /**
+   * The path prefix that should be prepended to paths covered by OWNERS files.
+   *
+   * <p>Unset if no path prefix is used.
+   */
+  public String pathPrefix;
+
   /** Strategy that defines for merge commits which files require code owner approvals. */
   public MergeCommitStrategy mergeCommitStrategy;
 
