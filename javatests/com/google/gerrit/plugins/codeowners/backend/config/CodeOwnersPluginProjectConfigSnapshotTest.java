@@ -101,6 +101,36 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
   }
 
   @Test
+  public void getPathPrefixNotSet() throws Exception {
+    OptionalSubject.assertThat(cfgSnapshot().getPathPrefix()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathPrefix", value = "")
+  public void getPathPrefixEmptyString() throws Exception {
+    OptionalSubject.assertThat(cfgSnapshot().getPathPrefix()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathPrefix", value = "/foo")
+  public void getPathPrefixFromGerritConfig() throws Exception {
+    OptionalSubject.assertThat(cfgSnapshot().getPathPrefix()).value().isEqualTo(Path.of("/foo"));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathPrefix", value = "foo/")
+  public void getPathPrefixNormalized() throws Exception {
+    OptionalSubject.assertThat(cfgSnapshot().getPathPrefix()).value().isEqualTo(Path.of("/foo"));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathPrefix", value = "/foo")
+  public void pathPrefixOnProjectLevelOverridesGlobalPathPrefix() throws Exception {
+    configurePathPrefix(project, "/bar");
+    OptionalSubject.assertThat(cfgSnapshot().getPathPrefix()).value().isEqualTo(Path.of("/bar"));
+  }
+
+  @Test
   public void getMergeCommitStrategyIfNoneIsConfigured() throws Exception {
     assertThat(cfgSnapshot().getMergeCommitStrategy())
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
@@ -1222,8 +1252,8 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
             String.format(
                 "Invalid configuration of the code-owners plugin. Required approval 'Foo-Bar+1'"
                     + " that is configured in gerrit.config (parameter"
-                    + " plugin.code-owners.requiredApproval) is invalid: Label Foo-Bar doesn't exist"
-                    + " for project %s.",
+                    + " plugin.code-owners.requiredApproval) is invalid: Label Foo-Bar doesn't"
+                    + " exist for project %s.",
                 project.get()));
   }
 
@@ -2053,6 +2083,10 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
       throws Exception {
     setCodeOwnersConfig(
         project, /* subsection= */ null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
+  }
+
+  private void configurePathPrefix(Project.NameKey project, String pathPrefix) throws Exception {
+    setCodeOwnersConfig(project, /* subsection= */ null, GeneralConfig.KEY_PATH_PREFIX, pathPrefix);
   }
 
   private void configureMergeCommitStrategy(
