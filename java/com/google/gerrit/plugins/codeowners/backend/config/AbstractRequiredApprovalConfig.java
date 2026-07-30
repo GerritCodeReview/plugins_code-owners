@@ -122,7 +122,8 @@ abstract class AbstractRequiredApprovalConfig {
         validationMessages.add(
             new CommitValidationMessage(
                 String.format(
-                    "Required approval '%s' that is configured in %s (parameter %s.%s) is invalid: %s",
+                    "Required approval '%s' that is configured in %s (parameter %s.%s) is invalid:"
+                        + " %s",
                     requiredApproval,
                     fileName,
                     SECTION_CODE_OWNERS,

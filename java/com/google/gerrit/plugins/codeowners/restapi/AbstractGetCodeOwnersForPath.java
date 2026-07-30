@@ -619,8 +619,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    */
   private Stream<Account.Id> getRandomUsers(int limit) throws IOException {
     return accounts
-        .randomNIds(
-            limit, seed.isPresent() ? seed.get() : ThreadLocalRandom.current().nextLong())
+        .randomNIds(limit, seed.isPresent() ? seed.get() : ThreadLocalRandom.current().nextLong())
         .stream();
   }
 }

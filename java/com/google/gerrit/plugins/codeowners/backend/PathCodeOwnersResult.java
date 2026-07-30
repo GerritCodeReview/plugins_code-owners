@@ -186,8 +186,8 @@ public abstract class PathCodeOwnersResult {
           addMessage(
               DebugMessage.createMessage(
                   String.format(
-                      "found matching per-file code owner set (with path expressions = %s) that ignores"
-                          + " parent code owners, hence ignoring the folder code owners",
+                      "found matching per-file code owner set (with path expressions = %s) that"
+                          + " ignores parent code owners, hence ignoring the folder code owners",
                       perFileCodeOwnerSet.pathExpressions())));
         }
       }

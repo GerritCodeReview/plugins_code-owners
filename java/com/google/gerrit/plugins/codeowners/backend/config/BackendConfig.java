@@ -141,7 +141,8 @@ public class BackendConfig {
           validationMessages.add(
               new CommitValidationMessage(
                   String.format(
-                      "Code owner backend '%s' that is configured in %s (parameter %s.%s.%s) not found.",
+                      "Code owner backend '%s' that is configured in %s (parameter %s.%s.%s) not"
+                          + " found.",
                       backendName, fileName, SECTION_CODE_OWNERS, subsection, KEY_BACKEND),
                   ValidationMessage.Type.ERROR));
         }
@@ -154,7 +155,8 @@ public class BackendConfig {
         validationMessages.add(
             new CommitValidationMessage(
                 String.format(
-                    "Path expressions '%s' that are configured in %s (parameter %s.%s.%s) not found.",
+                    "Path expressions '%s' that are configured in %s (parameter %s.%s.%s) not"
+                        + " found.",
                     pathExpressionsName,
                     fileName,
                     SECTION_CODE_OWNERS,

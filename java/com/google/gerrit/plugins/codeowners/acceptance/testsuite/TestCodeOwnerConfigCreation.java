@@ -140,7 +140,8 @@ public abstract class TestCodeOwnerConfigCreation {
             .orElseThrow(
                 () ->
                     new IllegalStateException(
-                        "project not specified, specifying a project is required for code owner config creation"));
+                        "project not specified, specifying a project is required for code owner"
+                            + " config creation"));
     String branchName = branch().orElse("master");
     Path folderPath = folderPath().orElse(Path.of("/"));
     return CodeOwnerConfig.Key.create(

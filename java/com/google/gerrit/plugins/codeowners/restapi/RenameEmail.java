@@ -78,8 +78,12 @@ public class RenameEmail implements RestModifyView<BranchResource, RenameEmailIn
   @Override
   public Response<RenameEmailResultInfo> apply(
       BranchResource branchResource, RenameEmailInput input)
-      throws AuthException, BadRequestException, ResourceConflictException,
-          MethodNotAllowedException, UnprocessableEntityException, PermissionBackendException,
+      throws AuthException,
+          BadRequestException,
+          ResourceConflictException,
+          MethodNotAllowedException,
+          UnprocessableEntityException,
+          PermissionBackendException,
           IOException {
     if (!currentUser.get().isIdentifiedUser()) {
       throw new AuthException("Authentication required");

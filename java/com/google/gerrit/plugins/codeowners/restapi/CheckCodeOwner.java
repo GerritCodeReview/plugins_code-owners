@@ -158,8 +158,12 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
 
   @Override
   public Response<CodeOwnerCheckInfo> apply(BranchResource branchResource)
-      throws BadRequestException, AuthException, IOException, ConfigInvalidException,
-          PermissionBackendException, ResourceNotFoundException {
+      throws BadRequestException,
+          AuthException,
+          IOException,
+          ConfigInvalidException,
+          PermissionBackendException,
+          ResourceNotFoundException {
     if (!self.get().isIdentifiedUser()) {
       throw new AuthException("Authentication required");
     }
@@ -257,8 +261,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               messages.add(
                   DebugMessage.createMessage(
                       String.format(
-                          "found the all users wildcard ('%s') as a code owner in %s which makes %s a"
-                              + " code owner",
+                          "found the all users wildcard ('%s') as a code owner in %s which makes %s"
+                              + " a code owner",
                           CodeOwnerResolver.ALL_USERS_WILDCARD, codeOwnerConfigFilePath, email)));
             }
 
@@ -268,7 +272,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               messages.add(
                   DebugMessage.createMessage(
                       String.format(
-                          "found annotations for the all users wildcard ('%s') which apply to %s: %s",
+                          "found annotations for the all users wildcard ('%s') which apply to %s:"
+                              + " %s",
                           CodeOwnerResolver.ALL_USERS_WILDCARD, email, sort(localAnnotations))));
               annotations.addAll(localAnnotations);
             }
@@ -399,8 +404,12 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   }
 
   private void validateInput(BranchResource branchResource)
-      throws BadRequestException, AuthException, IOException, ConfigInvalidException,
-          PermissionBackendException, ResourceNotFoundException {
+      throws BadRequestException,
+          AuthException,
+          IOException,
+          ConfigInvalidException,
+          PermissionBackendException,
+          ResourceNotFoundException {
     if (branchResource.getRevision().isEmpty()) {
       throw new ResourceNotFoundException(IdString.fromDecoded(branchResource.getName()));
     }
@@ -449,7 +458,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   }
 
   private boolean isGlobalCodeOwner(Project.NameKey projectName, String email) {
-    return codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners()
+    return codeOwnersPluginConfiguration
+        .getProjectConfig(projectName)
+        .getGlobalCodeOwners()
         .stream()
         .filter(cor -> cor.email().equals(email))
         .findAny()

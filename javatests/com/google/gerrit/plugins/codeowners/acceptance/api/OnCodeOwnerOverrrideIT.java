@@ -76,7 +76,8 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
-                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
+                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden"
+                    + " by %s\n",
                 AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
@@ -113,7 +114,8 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
-                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
+                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden"
+                    + " by %s\n",
                 AccountTemplateUtil.getAccountTemplate(admin.id())));
 
     // Apply the Owners-Override+1 approval by another user
@@ -125,7 +127,8 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
-                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
+                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden"
+                    + " by %s\n",
                 AccountTemplateUtil.getAccountTemplate(user.id())));
   }
 
@@ -355,7 +358,8 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
-                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
+                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden"
+                    + " by %s\n",
                 AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
@@ -601,7 +605,8 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
-                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
+                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden"
+                    + " by %s\n",
                 AccountTemplateUtil.getAccountTemplate(user.id())));
   }
 
@@ -667,7 +672,8 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
         .contains(
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
-                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s <%s>\n",
+                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden"
+                    + " by %s <%s>\n",
                 user.fullName(), user.email()));
   }
 }

@@ -175,7 +175,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
-                "cannot resolve code owner email %s: account %s is referenced by secondary email but user %s cannot see secondary emails",
+                "cannot resolve code owner email %s: account %s is referenced by secondary email"
+                    + " but user %s cannot see secondary emails",
                 secondaryEmail, codeOwner.id(), user.username()));
 
     requestScopeOperations.setApiUser(user.id());

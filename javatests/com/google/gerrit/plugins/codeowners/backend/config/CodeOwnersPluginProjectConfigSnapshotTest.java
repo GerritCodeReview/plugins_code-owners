@@ -1222,8 +1222,8 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
             String.format(
                 "Invalid configuration of the code-owners plugin. Required approval 'Foo-Bar+1'"
                     + " that is configured in gerrit.config (parameter"
-                    + " plugin.code-owners.requiredApproval) is invalid: Label Foo-Bar doesn't exist"
-                    + " for project %s.",
+                    + " plugin.code-owners.requiredApproval) is invalid: Label Foo-Bar doesn't"
+                    + " exist for project %s.",
                 project.get()));
   }
 

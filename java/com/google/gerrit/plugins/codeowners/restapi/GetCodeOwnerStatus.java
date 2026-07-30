@@ -89,8 +89,11 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
 
   @Override
   public Response<CodeOwnerStatusInfo> apply(ChangeResource changeResource)
-      throws RestApiException, IOException, PermissionBackendException,
-          PatchListNotAvailableException, DiffNotAvailableException {
+      throws RestApiException,
+          IOException,
+          PermissionBackendException,
+          PatchListNotAvailableException,
+          DiffNotAvailableException {
     validateStartAndLimit();
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
