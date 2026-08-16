@@ -371,12 +371,9 @@ Unknown annotations are silently ignored.
 annotation, this annotation applies to all these users. E.g. if an annotation is
 set for the all users wildcard (aka `*`) it applies to all users.
 
-**NOTE:** Only [email lines](#userEmails) and [per-file lines](#perFile) that
-assign code ownership directly to users support annotations, for other lines
-(e.g.  [file lines](#fileKeyword), [include lines](#includeKeyword) and
-[per-file lines](#perFile) that reference other `OWNERS` files via the
-[file](#fileKeyword) keyword) annotations are interpreted as
-[comments](#comments) and are silently ignored.
+**NOTE:** Annotations on [include lines](#includeKeyword) and [file lines](#fileKeyword)
+apply to all imported code owners. This includes code owners imported through
+[per-file lines](#perFile) that reference another `OWNERS` file.
 
 ### <a id="comments">Comments
 

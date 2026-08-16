@@ -38,6 +38,7 @@ import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -1530,6 +1531,53 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImport.createResolvedImport(
                 importedCodeOwnerConfig, importingCodeOwnerConfig, codeOwnerConfigReference2));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
+  }
+
+  @Test
+  public void importWithAnnotations() throws Exception {
+    // create imported config with global code owner
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/bar/")
+            .fileName("OWNERS")
+            .addCodeOwnerEmail(user.email())
+            .create();
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig)
+            .toBuilder()
+            .addAnnotation(CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
+            .build();
+
+    // create importing config with global code owner and annotated import
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .fileName("OWNERS")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(codeOwnerConfigReference)
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            keyOfImportingCodeOwnerConfig,
+            projectOperations.project(project).getHead("master"),
+            Path.of("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    PathCodeOwnersResult pathCodeOwnersResult = pathCodeOwners.get().resolveCodeOwnerConfig();
+    assertThat(pathCodeOwnersResult.getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwnersResult.getAnnotationsFor(user.email()))
+        .containsExactly(CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key());
+    assertThat(pathCodeOwnersResult.getAnnotationsFor(admin.email())).isEmpty();
   }
 
   @Test

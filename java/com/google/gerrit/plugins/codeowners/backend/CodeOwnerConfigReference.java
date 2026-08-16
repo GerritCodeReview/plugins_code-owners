@@ -19,11 +19,13 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * A reference to a {@link CodeOwnerConfig}.
@@ -60,6 +62,9 @@ public abstract class CodeOwnerConfigReference {
    * <p>May be absolute or relative to the path of the importing code owner config.
    */
   public abstract Path filePath();
+
+  /** Gets the annotations on this code owner config reference. */
+  public abstract ImmutableSet<CodeOwnerAnnotation> annotations();
 
   /**
    * The path of the folder that contains the code owner config.
@@ -132,7 +137,8 @@ public abstract class CodeOwnerConfigReference {
   public static Builder builder(CodeOwnerConfigImportMode importMode, Path filePath) {
     return new AutoValue_CodeOwnerConfigReference.Builder()
         .setImportMode(importMode)
-        .setFilePath(filePath);
+        .setFilePath(filePath)
+        .setAnnotations(ImmutableSet.of());
   }
 
   /** Returns a copy of the given code owner config reference with the given import mode. */
@@ -190,6 +196,42 @@ public abstract class CodeOwnerConfigReference {
      * @return the Builder instance for chaining calls
      */
     abstract Builder setFilePath(Path filePath);
+
+    abstract ImmutableSet.Builder<CodeOwnerAnnotation> annotationsBuilder();
+
+    /**
+     * Adds an annotation for this code owner config reference.
+     *
+     * @param annotation annotation that should be added
+     * @return the Builder instance for chaining calls
+     */
+    @CanIgnoreReturnValue
+    public Builder addAnnotation(CodeOwnerAnnotation annotation) {
+      requireNonNull(annotation, "annotation");
+      annotationsBuilder().add(annotation);
+      return this;
+    }
+
+    /**
+     * Adds annotations for this code owner config reference.
+     *
+     * @param annotations annotations that should be added
+     * @return the Builder instance for chaining calls
+     */
+    @CanIgnoreReturnValue
+    public Builder addAnnotations(Set<CodeOwnerAnnotation> annotations) {
+      requireNonNull(annotations, "annotations");
+      annotations.forEach(this::addAnnotation);
+      return this;
+    }
+
+    /**
+     * Sets the annotations of this code owner config reference.
+     *
+     * @param annotations the annotations
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder setAnnotations(ImmutableSet<CodeOwnerAnnotation> annotations);
 
     /**
      * Builds the {@link CodeOwnerConfigReference} instance without validation.

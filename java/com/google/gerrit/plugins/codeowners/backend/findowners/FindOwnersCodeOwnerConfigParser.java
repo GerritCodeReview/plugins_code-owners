@@ -273,16 +273,6 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
             .build();
       }
 
-      CodeOwnerConfigReference codeOwnerConfigReference;
-      if ((codeOwnerConfigReference = parseInclude(directive)) != null) {
-        return CodeOwnerSet.builder()
-            .addImport(codeOwnerConfigReference)
-            .setPathExpressions(dirGlobs)
-            .build();
-      }
-
-      List<String> ownerEmails = Arrays.asList(directive.split(COMMA, -1));
-
       // Get the comment part of the line (the first '#' and everything that follows).
       String comment = perFileMatcher.group(3);
       Set<CodeOwnerAnnotation> annotations = new HashSet<>();
@@ -293,6 +283,20 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
           annotations.add(CodeOwnerAnnotation.create(annotation));
         }
       }
+
+      CodeOwnerConfigReference codeOwnerConfigReference;
+      if ((codeOwnerConfigReference = parseInclude(directive)) != null) {
+        if (!annotations.isEmpty()) {
+          codeOwnerConfigReference =
+              codeOwnerConfigReference.toBuilder().addAnnotations(annotations).build();
+        }
+        return CodeOwnerSet.builder()
+            .addImport(codeOwnerConfigReference)
+            .setPathExpressions(dirGlobs)
+            .build();
+      }
+
+      List<String> ownerEmails = Arrays.asList(directive.split(COMMA, -1));
 
       CodeOwnerSet.Builder codeOwnerSet =
           CodeOwnerSet.builder()
@@ -412,6 +416,15 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
           // BRANCH_NAME ends with ':'
           branchName = branchName.split(COLON, -1)[0].trim();
           builder.setBranch(branchName);
+        }
+      }
+
+      String comment = m.group(5);
+      if (comment != null) {
+        Matcher annotationMatcher = PAT_ANNOTATION.matcher(comment);
+        while (annotationMatcher.find()) {
+          String annotation = annotationMatcher.group(1);
+          builder.addAnnotation(CodeOwnerAnnotation.create(annotation));
         }
       }
 
@@ -619,6 +632,14 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
       // write the file path
       b.append(codeOwnerConfigReference.filePath());
+
+      if (!codeOwnerConfigReference.annotations().isEmpty()) {
+        b.append(
+            formatAnnotations(
+                codeOwnerConfigReference.annotations().stream()
+                    .map(CodeOwnerAnnotation::key)
+                    .collect(toImmutableSortedSet(naturalOrder()))));
+      }
 
       return b.toString();
     }

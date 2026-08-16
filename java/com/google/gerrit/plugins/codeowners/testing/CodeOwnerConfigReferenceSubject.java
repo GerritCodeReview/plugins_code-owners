@@ -14,12 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.truth.OptionalSubject.optionals;
 
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.PathSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.truth.OptionalSubject;
 
@@ -58,6 +61,15 @@ public class CodeOwnerConfigReferenceSubject extends Subject {
   /** Returns a subject for the file path. */
   public PathSubject hasFilePathThat() {
     return check("filePath()").that(codeOwnerConfigReference().filePath());
+  }
+
+  /** Returns a subject for the annotations on this code owner config reference. */
+  public IterableSubject hasAnnotationsThat() {
+    return check("annotations()")
+        .that(
+            codeOwnerConfigReference().annotations().stream()
+                .map(CodeOwnerAnnotation::key)
+                .collect(toImmutableSet()));
   }
 
   private CodeOwnerConfigReference codeOwnerConfigReference() {

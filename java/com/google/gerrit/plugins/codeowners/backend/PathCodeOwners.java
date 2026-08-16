@@ -397,10 +397,16 @@ public class PathCodeOwners {
               // owners
               logger.atFine().log("add imported global code owners as per-file code owners");
               getGlobalCodeOwnerSets(importedCodeOwnerConfig)
+                  .map(
+                      codeOwnerSet ->
+                          applyAnnotations(codeOwnerSet, codeOwnerConfigImport.annotations()))
                   .forEach(pathCodeOwnersResultBuilder::addPerFileCodeOwnerSet);
             } else {
               logger.atFine().log("add possibly ignored imported global code owners");
               getGlobalCodeOwnerSets(importedCodeOwnerConfig)
+                  .map(
+                      codeOwnerSet ->
+                          applyAnnotations(codeOwnerSet, codeOwnerConfigImport.annotations()))
                   .forEach(pathCodeOwnersResultBuilder::addGlobalCodeOwnerSet);
             }
           }
@@ -416,7 +422,8 @@ public class PathCodeOwners {
                           String.format(
                               "per-file code owner set with path expressions %s matches\n",
                               codeOwnerSet.pathExpressions())));
-                  pathCodeOwnersResultBuilder.addPerFileCodeOwnerSet(codeOwnerSet);
+                  pathCodeOwnersResultBuilder.addPerFileCodeOwnerSet(
+                      applyAnnotations(codeOwnerSet, codeOwnerConfigImport.annotations()));
                 });
           }
 
@@ -545,6 +552,18 @@ public class PathCodeOwners {
         .anyMatch(pathExpression -> matcher.matches(pathExpression, relativePath));
   }
 
+  private static CodeOwnerSet applyAnnotations(
+      CodeOwnerSet codeOwnerSet, ImmutableSet<CodeOwnerAnnotation> annotations) {
+    if (annotations.isEmpty() || codeOwnerSet.codeOwners().isEmpty()) {
+      return codeOwnerSet;
+    }
+    CodeOwnerSet.Builder builder = codeOwnerSet.toBuilder();
+    for (CodeOwnerReference codeOwner : codeOwnerSet.codeOwners()) {
+      builder.addAnnotations(codeOwner, annotations);
+    }
+    return builder.build();
+  }
+
   @AutoValue
   abstract static class CodeOwnerImport {
     /** The import that imported the {@link #importingCodeOwnerConfig()}. */
@@ -558,6 +577,21 @@ public class PathCodeOwners {
 
     /** The code owner set that specified the import, empty if it is a global import. */
     public abstract Optional<CodeOwnerSet> codeOwnerSet();
+
+    /**
+     * Gets all annotations that should be applied to code owners from this import.
+     *
+     * <p>Includes annotations specified on this import reference as well as annotations from parent
+     * import references.
+     */
+    ImmutableSet<CodeOwnerAnnotation> annotations() {
+      ImmutableSet.Builder<CodeOwnerAnnotation> annotationsBuilder = ImmutableSet.builder();
+      if (prevImport().isPresent()) {
+        annotationsBuilder.addAll(prevImport().get().annotations());
+      }
+      annotationsBuilder.addAll(referenceToImportedCodeOwnerConfig().annotations());
+      return annotationsBuilder.build();
+    }
 
     /**
      * The import level.

@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParseException;
@@ -36,6 +37,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigReferenceSubject;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.junit.Test;
 
@@ -65,7 +67,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
               }
               b.append(
                   String.format(
-                      "%s %s%s%s\n",
+                      "%s %s%s%s%s\n",
                       keyword,
                       codeOwnerConfigReference
                           .project()
@@ -73,7 +75,8 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                           .map(projectName -> projectName + ":")
                           .orElse(""),
                       codeOwnerConfigReference.branch().map(branch -> branch + ":").orElse(""),
-                      codeOwnerConfigReference.filePath()));
+                      codeOwnerConfigReference.filePath(),
+                      formatAnnotations(codeOwnerConfigReference.annotations())));
             });
 
     // global code owners
@@ -102,7 +105,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
       for (CodeOwnerConfigReference codeOwnerConfigReference : codeOwnerSet.imports()) {
         b.append(
             String.format(
-                "per-file %s=file: %s%s%s\n",
+                "per-file %s=file: %s%s%s%s\n",
                 codeOwnerSet.pathExpressions().stream().sorted().collect(joining(",")),
                 codeOwnerConfigReference
                     .project()
@@ -110,7 +113,8 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                     .map(projectName -> projectName + ":")
                     .orElse(""),
                 codeOwnerConfigReference.branch().map(branch -> branch + ":").orElse(""),
-                codeOwnerConfigReference.filePath()));
+                codeOwnerConfigReference.filePath(),
+                formatAnnotations(codeOwnerConfigReference.annotations())));
       }
       if (!codeOwnerSet.codeOwners().isEmpty()) {
         b.append(
@@ -125,6 +129,17 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     }
 
     return b.toString();
+  }
+
+  private static String formatAnnotations(Set<CodeOwnerAnnotation> annotations) {
+    if (annotations.isEmpty()) {
+      return "";
+    }
+    return annotations.stream()
+        .map(CodeOwnerAnnotation::key)
+        .sorted()
+        .map(annotation -> "#{" + annotation + "}")
+        .collect(joining(" ", " ", ""));
   }
 
   @Test
@@ -234,6 +249,58 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
         },
         // inline comments are dropped
         getCodeOwnerConfig(codeOwnerConfigReference));
+  }
+
+  @Test
+  public void importCodeOwnerConfigWithAnnotations() throws Exception {
+    Path path = Path.of("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path)
+            .addAnnotation(CodeOwnerAnnotation.create("LAST_RESORT_SUGGESTION"))
+            .addAnnotation(CodeOwnerAnnotation.create("FOO"))
+            .build();
+    assertParseAndFormat(
+        "include " + path + " #{LAST_RESORT_SUGGESTION} #{FOO} # some comment",
+        codeOwnerConfig -> {
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              assertThat(codeOwnerConfig).hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasProjectThat().isEmpty();
+          codeOwnerConfigReferenceSubject.hasBranchThat().isEmpty();
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+          codeOwnerConfigReferenceSubject
+              .hasAnnotationsThat()
+              .containsExactly("LAST_RESORT_SUGGESTION", "FOO");
+        },
+        getCodeOwnerConfig(codeOwnerConfigReference));
+  }
+
+  @Test
+  public void perFileImportCodeOwnerConfigWithAnnotations() throws Exception {
+    Path path = Path.of("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)
+            .addAnnotation(CodeOwnerAnnotation.create("LAST_RESORT_SUGGESTION"))
+            .build();
+    assertParseAndFormat(
+        "per-file *.md=file: " + path + " #{LAST_RESORT_SUGGESTION} # some comment",
+        codeOwnerConfig -> {
+          CodeOwnerSetSubject codeOwnerSetSubject =
+              assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().onlyElement();
+          codeOwnerSetSubject.hasPathExpressionsThat().containsExactly("*.md");
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              codeOwnerSetSubject.hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+          codeOwnerConfigReferenceSubject
+              .hasAnnotationsThat()
+              .containsExactly("LAST_RESORT_SUGGESTION");
+        },
+        getCodeOwnerConfig(
+            false,
+            CodeOwnerSet.builder()
+                .setPathExpressions(ImmutableSet.of("*.md"))
+                .addImport(codeOwnerConfigReference)
+                .build()));
   }
 
   @Test
