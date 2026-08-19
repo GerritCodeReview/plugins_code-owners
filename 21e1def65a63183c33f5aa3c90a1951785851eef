@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4cdfc69d_f2439c6c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2026-08-19T09:42:48Z",
+      "side": 1,
+      "message": "Thank you Joey for implementing full support for this annotations on include. Also updating documentation. This change is great. I will quickly import it to google and release to prod.",
+      "revId": "21e1def65a63183c33f5aa3c90a1951785851eef",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
