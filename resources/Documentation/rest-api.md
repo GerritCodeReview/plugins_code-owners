@@ -792,7 +792,7 @@ The following request parameters can be specified:
 | ----------------------- | --------- | ----------- |
 | `start`\|`S`            | optional  | Number of owned paths to skip. Allows to page over the owned files. By default 0.
 | `limit`\|`n`            | optional  | Limit defining how many [OwnedChangedFileInfo](#owned-changed-file-info) entities should be returned at most. By default 50.
-| `check_reviewers`\|`c'` | optional  | Whether it should be checked which reviewers are owners. When set, [OwnedPathInfo](#owned-path-info) will contain the `owners` field
+| `check_reviewers`\|`c` | optional  | Whether it should be checked which reviewers are owners. When set, [OwnedPathInfo](#owned-path-info) will contain the `owners` field
 | `user`                  | mandatory | user for which the owned paths should be returned
 
 #### Request
@@ -861,7 +861,7 @@ Input options can be set in the request body as a
 [CheckCodeOwnerConfigFilesInRevisionInput](#check-code-owner-config-files-in-revision-input)
 entity.
 
-As a response a map is returned that that maps an owner configuration file path
+As a response a map is returned that maps an owner configuration file path
 to a list of
 [ConsistencyProblemInfo](../../../Documentation/rest-api-config.html#consistency-problem-info)
 entities.
@@ -978,16 +978,16 @@ ownership of a user for a path in a branch.
 
 | Field Name      | Description |
 | --------------- | ----------- |
-| `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) any code owner config file assigns codeownership to the email for the path (see `assigns_code_ownership_to_user` field of the inspected code owner configs that are return in the `code_owner_configs` field) or the email is configured as global code owner (see field `is_global_code_owner`) or the user is a fallback code owner (see field `is_fallback_code_owner`).
+| `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable`) and b) any code owner config file assigns codeownership to the email for the path (see `assigns_code_ownership_to_user` field of the inspected code owner configs that are return in the `code_owner_configs` field) or the email is configured as global code owner (see field `is_global_code_owner`) or the user is a fallback code owner (see field `is_fallback_code_owner`).
 | `is_resolvable` | Whether the given email is resolvable for the specified user or the calling user if no user was specified.
 | `checked_code_owner_configs` | The code owner config files that have been inspected to check the code owner with check results as [CheckedCodeOwnerConfigFileInfo](#checked-code-owner-config-file-info) entities.
 | `can_read_ref` | Whether the user to which the given email was resolved has read permissions on the branch. Not set if the given email is not resolvable or if the given email is the all users wildcard (aka '*').
 | `can_see_change`| Whether the user to which the given email was resolved can see the specified change. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
 | `can_approve_change`| Whether the user to which the given email was resolved can code-owner approve the specified change. Being able to code-owner approve the change means that the user has permissions to vote on the label that is [required as code owner approval](config.html#pluginCodeOwnersRequiredApproval). Other permissions are not considered for computing this flag. In particular missing read permissions on the change don't have any effect on this flag. Whether the user misses read permissions on the change (and hence cannot apply the code owner approval) can be seen from the `can_see_change` flag. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
-| `is_fallback_code_owner` | Whether the given email is a fallback code owner of the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) no code owners are defined for the specified path in the branch and c) parent code owners are not ignored and d) the user is a fallback code owner according to the [configured fallback code owner policy](config.html#pluginCodeOwnersFallbackCodeOwners)
+| `is_fallback_code_owner` | Whether the given email is a fallback code owner of the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable`) and b) no code owners are defined for the specified path in the branch and c) parent code owners are not ignored and d) the user is a fallback code owner according to the [configured fallback code owner policy](config.html#pluginCodeOwnersFallbackCodeOwners)
 | `is_default_code_owner` | Whether the given email is configured as a default code owner in the code owner config file in `refs/meta/config`. Note that if the email is configured as default code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_global_code_owner` | Whether the given email is configured as a global code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
-| `is_owned_by_all_users` | Whether the the specified path in the branch is owned by all users (aka `*`).
+| `is_owned_by_all_users` | Whether the specified path in the branch is owned by all users (aka `*`).
 | `annotations` | Annotations that were set for the user. Contains only supported annotations (unsupported annotations are reported in the `debug_logs`). Sorted alphabetically.
 | `debug_logs` | List of debug logs that may help to understand why the user is or isn't a code owner. Full debug logs are only returned for callers that have the [Check Code Owner](#checkCodeOwner) or the [Administrate Server](../../../Documentation/access-control.html#capability_administrateServer) global capability, for other callers the debug logs are limited. This information is purely for debugging and the output may be changed at any time. This means bot callers must not parse the debug logs.
 
@@ -1041,7 +1041,7 @@ configuration.
 | `disabled`  | optional | Whether the code owners functionality is disabled for the branch. If `true` the code owners API is disabled and submitting changes doesn't require code owner approvals. Not set if `false`.
 | `backend_id`| optional | ID of the code owner backend that is configured for the branch. Not set if `disabled` is `true`.
 | `required_approval` | optional | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval. Any approval on this label with a value >= the given value is considered as code owner approval. Not set if `disabled` is `true`.
-| `override_approval` | optional | Approvals that count as override for the code owners submit check as a list of [RequiredApprovalInfo](#required-approval-info) entities (sorted alphabetically). If multiple approvals are returned, any of them is sufficient to override the code owners submit check. All returned override approvals are guarenteed to have distinct label names. Any approval on these labels with a value >= the given values is considered as code owner override. If unset, overriding the code owners submit check is disabled. Not set if `disabled` is `true`.
+| `override_approval` | optional | Approvals that count as override for the code owners submit check as a list of [RequiredApprovalInfo](#required-approval-info) entities (sorted alphabetically). If multiple approvals are returned, any of them is sufficient to override the code owners submit check. All returned override approvals are guaranteed to have distinct label names. Any approval on these labels with a value >= the given values is considered as code owner override. If unset, overriding the code owners submit check is disabled. Not set if `disabled` is `true`.
 
 ---
 
@@ -1055,7 +1055,7 @@ configuration.
 | `status`   | optional | The code owner status configuration as [CodeOwnersStatusInfo](#code-owners-status-info) entity. Contains information about whether the code owners functionality is disabled for the project or for any branch.
 | `backend`  | optional | The code owner backend configuration as [BackendInfo](#backend-info) entity. Not set if `status.disabled` is `true`.
 | `required_approval` | optional | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval. Not set if `status.disabled` is `true`.
-| `override_approval` | optional | Approvals that count as override for the code owners submit check as a list of [RequiredApprovalInfo](#required-approval-info) entities. If multiple approvals are returned, any of them is sufficient to override the code owners submit check. All returned override approvals are guarenteed to have distinct label names. If unset, overriding the code owners submit check is disabled. Not set if `disabled` is `true`.
+| `override_approval` | optional | Approvals that count as override for the code owners submit check as a list of [RequiredApprovalInfo](#required-approval-info) entities. If multiple approvals are returned, any of them is sufficient to override the code owners submit check. All returned override approvals are guaranteed to have distinct label names. If unset, overriding the code owners submit check is disabled. Not set if `disabled` is `true`.
 
 ---
 
@@ -1133,7 +1133,7 @@ The `CodeOwnersInfo` entity contains information about a list of code owners.
 
 | Field Name    |          | Description |
 | ------------- | -------- | ----------- |
-| `code_owners` |          | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by a score that is computed from mutliple [scoring factors](#scoringFactors).
+| `code_owners` |          | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by a score that is computed from multiple [scoring factors](#scoringFactors).
 | `owned_by_all_users` | optional | Whether the path is owned by all users. Not set if `false`.
 | `code_owner_configs` || The code owner config files that have been inspected to gather the code owners as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
 | `debug_logs`  | optional | Debug logs that may help to understand why a user is or isn't suggested as a code owner. Only set if requested via `--debug`. This information is purely for debugging and the output may be changed at any time. This means bot callers must not parse the debug logs.
