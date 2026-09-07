@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "985b5669_73aade72",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 991,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2026-09-07T09:47:40Z",
+      "side": 1,
+      "message": "Since you are modifying this line, you might want to fix a small pre-existing typo here: `debugs_logs` should probably be `debug_logs` (matching the field name defined on the next line).",
+      "range": {
+        "startLine": 991,
+        "startChar": 0,
+        "endLine": 991,
+        "endChar": 0
+      },
+      "revId": "82af3084b3f9d0805817cd220ab94c8a5da63860",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
