@@ -954,7 +954,7 @@ owner config file and results of checking it.
 
 | Field Name  | Description |
 | ----------- | ----------- |
-| `code_owner_config` | The code owner config file as a [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entity.
+| `code_owner_config_file_info` | The code owner config file as a [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entity.
 | `assigns_code_ownership_to_user` | Whether this code owner config file assigns code ownership to the specified email and path. Note that if code ownership is assigned to the email via a code owner config file, but the email is not resolvable (see the `is_resolvable` field in [CodeOwnerCheckInfo](#code-owner-check-info)), the user is not a code owner.
 | `are_parent_code_owners_ignored` | Whether code owners from parent directory are ignored.
 | `are_folder_code_owners_ignored` | Whether folder code owners are ignored (i.e. whether there is a matching per-file rule that ignores folder code owners, e.g. by using "set noparent").
@@ -968,6 +968,7 @@ The `CheckCodeOwnerConfigFilesInRevisionInput` allows to set options for the
 | Field Name                   |          | Description |
 | ---------------------------- | -------- | ----------- |
 | `path`                       | optional | Glob that limits the validation to code owner config files that have a path that matches this glob. By default unset, which means that all modified code owner config files should be validated.
+| `verbosity`                  | optional | Level that controls which code owner config file issues are returned. The following values are supported: `FATAL` - only fatal issues are returned, `ERROR` - only fatal and error issues are returned, `WARNING` - all issues (warning, error and fatal) are returned. If unset, `WARNING` is used.
 
 ---
 
@@ -987,7 +988,7 @@ ownership of a user for a path in a branch.
 | `is_default_code_owner` | Whether the given email is configured as a default code owner in the code owner config file in `refs/meta/config`. Note that if the email is configured as default code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_global_code_owner` | Whether the given email is configured as a global code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_owned_by_all_users` | Whether the the specified path in the branch is owned by all users (aka `*`).
-| `annotation` | Annotations that were set for the user. Contains only supported annotations (unsupported annotations are reported in the `debugs_logs`). Sorted alphabetically.
+| `annotations` | Annotations that were set for the user. Contains only supported annotations (unsupported annotations are reported in the `debugs_logs`). Sorted alphabetically.
 | `debug_logs` | List of debug logs that may help to understand why the user is or isn't a code owner. Full debug logs are only returned for callers that have the [Check Code Owner](#checkCodeOwner) or the [Administrate Server](../../../Documentation/access-control.html#capability_administrateServer) global capability, for other callers the debug logs are limited. This information is purely for debugging and the output may be changed at any time. This means bot callers must not parse the debug logs.
 
 ---
@@ -1068,7 +1069,7 @@ If a field in this input is not set, the corresponding parameter in the
 | Field Name |          | Description |
 | ---------- | -------- | ----------- |
 | `disabled` | optional | Whether the code owners functionality should be disabled/enabled for the project.
-| `disabled_branch` | optional | List of branches for which the code owners functionality is disabled. Can be exact refs, ref patterns or regular expressions. Overrides any existing disabled branch configuration.
+| `disabled_branches` | optional | List of branches for which the code owners functionality is disabled. Can be exact refs, ref patterns or regular expressions. Overrides any existing disabled branch configuration.
 | `file_extension` | optional | The file extension that should be used for code owner config files in this project.
 | `required_approval` | optional | The approval that is required from code owners. Must be specified in the format "\<label-name\>+\<label-value\>". If an empty string is provided the required approval configuration is unset. Unsetting the required approval means that the inherited required approval configuration or the default required approval (`Code-Review+1`) will apply. In contrast to providing an empty string, providing `null` (or not setting the value) means that the required approval configuration is not updated.
 | `override_approvals` | optional | The approvals that count as override for the code owners submit check. Must be specified in the format "\<label-name\>+\<label-value\>".
