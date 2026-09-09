@@ -32,6 +32,7 @@ import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.UserInitiated;
 import com.google.gerrit.server.restapi.change.OnPostReview;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 
 /** Guice module to bind code owner backends. */
 public class BackendModule extends FactoryModule {
@@ -65,6 +66,8 @@ public class BackendModule extends FactoryModule {
     DynamicSet.bind(binder(), CommentAddedListener.class).to(OnCodeOwnerApproval.class);
     DynamicSet.bind(binder(), OnPostReview.class).to(OnCodeOwnerOverride.class);
     DynamicSet.bind(binder(), ReviewerAddedListener.class).to(CodeOwnersOnAddReviewer.class);
+
+    bind(CodeOwnerConfigCache.class).in(Scopes.SINGLETON);
   }
 
   @Provides
