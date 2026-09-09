@@ -65,6 +65,8 @@ public class BackendModule extends FactoryModule {
     DynamicSet.bind(binder(), CommentAddedListener.class).to(OnCodeOwnerApproval.class);
     DynamicSet.bind(binder(), OnPostReview.class).to(OnCodeOwnerOverride.class);
     DynamicSet.bind(binder(), ReviewerAddedListener.class).to(CodeOwnersOnAddReviewer.class);
+
+    install(CodeOwnerConfigCache.module());
   }
 
   @Provides
