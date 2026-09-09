@@ -34,8 +34,8 @@ import org.eclipse.jgit.lib.Repository;
 /**
  * Class to load and cache {@link CodeOwnerConfig}s within a request.
  *
- * <p>This cache is transient, which means the code owner configs stay cached only for the lifetime
- * of the {@code TransientCodeOwnerConfigCache} instance.
+ * <p>This cache maintains a transient request-scoped cache and consults the process-wide {@link
+ * CodeOwnerConfigCache} when resolving code owner configs.
  *
  * <p><strong>Note</strong>: This class is not thread-safe.
  */
@@ -44,6 +44,7 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
 
   private final GitRepositoryManager repoManager;
   private final CodeOwners codeOwners;
+  private final CodeOwnerConfigCache persistentCache;
   private final Optional<Integer> maxCacheSize;
   private final Counters counters;
   private final HashMap<CacheKey, Optional<CodeOwnerConfig>> cache = new HashMap<>();
@@ -53,9 +54,11 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       GitRepositoryManager repoManager,
       CodeOwners codeOwners,
+      CodeOwnerConfigCache persistentCache,
       CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwners = codeOwners;
+    this.persistentCache = persistentCache;
     this.maxCacheSize =
         codeOwnersPluginConfiguration.getGlobalConfig().getMaxCodeOwnerConfigCacheSize();
     this.counters = new Counters(codeOwnerMetrics);
@@ -68,13 +71,60 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
   @Override
   public Optional<CodeOwnerConfig> get(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
+    // 1. Check L1 (request-local HashMap) first.
     CacheKey cacheKey = CacheKey.create(codeOwnerConfigKey, revision);
     Optional<CodeOwnerConfig> cachedCodeOwnerConfig = cache.get(cacheKey);
     if (cachedCodeOwnerConfig != null) {
       counters.incrementCacheReads();
       return cachedCodeOwnerConfig;
     }
-    return loadAndCache(cacheKey);
+
+    // 2. L1 miss: resolve branch revision once if null before querying L2.
+    ObjectId targetRevision = revision;
+    if (targetRevision == null) {
+      Optional<ObjectId> branchRevision = getRevision(codeOwnerConfigKey.branchNameKey());
+      if (branchRevision.isEmpty()) {
+        // branch does not exist, cache negative lookup in L1 and return
+        putInL1(cacheKey, Optional.empty());
+        return Optional.empty();
+      }
+      targetRevision = branchRevision.get();
+    }
+
+    // 3. Check L2 (process-wide cache).
+    Optional<Optional<CodeOwnerConfig>> persistentConfig =
+        persistentCache.getIfPresent(codeOwnerConfigKey, targetRevision);
+    if (persistentConfig.isPresent()) {
+      counters.incrementCacheReads();
+      // Populate L1 cache so subsequent reads in this request are O(1) without touching L2
+      putInL1(cacheKey, persistentConfig.get());
+      return persistentConfig.get();
+    }
+
+    // 4. L2 miss: load using resolved revision to avoid duplicate ref lookup.
+    counters.incrementBackendReads();
+    Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(codeOwnerConfigKey, targetRevision);
+    putInL1(cacheKey, codeOwnerConfig);
+
+    persistentCache.put(codeOwnerConfigKey, targetRevision, codeOwnerConfig);
+    return codeOwnerConfig;
+  }
+
+  /**
+   * Puts an entry into the request-local L1 cache if the configured size limit allows.
+   *
+   * <p>Note: {@code maxCacheSize} is {@link Optional#empty()} when unlimited (which is also the
+   * case if configured &le; 0 in {@code gerrit.config}). Thus, the warning is only logged when a
+   * positive limit is exceeded.
+   */
+  private void putInL1(CacheKey cacheKey, Optional<CodeOwnerConfig> codeOwnerConfig) {
+    if (maxCacheSize.isEmpty() || cache.size() < maxCacheSize.get()) {
+      cache.put(cacheKey, codeOwnerConfig);
+    } else {
+      logger.atWarning().atMostEvery(1, TimeUnit.DAYS).log(
+          "exceeded limit of %s (project = %s, limit = %s)",
+          getClass().getSimpleName(), cacheKey.codeOwnerConfigKey().project(), maxCacheSize.get());
+    }
   }
 
   /**
@@ -84,31 +134,6 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
   @Override
   public Optional<CodeOwnerConfig> getFromCurrentRevision(CodeOwnerConfig.Key codeOwnerConfigKey) {
     return get(codeOwnerConfigKey, /* revision= */ null);
-  }
-
-  /** Load a code owner config and puts it into the cache. */
-  private Optional<CodeOwnerConfig> loadAndCache(CacheKey cacheKey) {
-    counters.incrementBackendReads();
-    Optional<CodeOwnerConfig> codeOwnerConfig;
-    if (cacheKey.revision().isPresent()) {
-      codeOwnerConfig = codeOwners.get(cacheKey.codeOwnerConfigKey(), cacheKey.revision().get());
-    } else {
-      Optional<ObjectId> revision = getRevision(cacheKey.codeOwnerConfigKey().branchNameKey());
-      if (revision.isPresent()) {
-        codeOwnerConfig = codeOwners.get(cacheKey.codeOwnerConfigKey(), revision.get());
-      } else {
-        // branch does not exists, hence the code owner config also doesn't exist
-        codeOwnerConfig = Optional.empty();
-      }
-    }
-    if (!maxCacheSize.isPresent() || cache.size() < maxCacheSize.get()) {
-      cache.put(cacheKey, codeOwnerConfig);
-    } else if (maxCacheSize.isPresent()) {
-      logger.atWarning().atMostEvery(1, TimeUnit.DAYS).log(
-          "exceeded limit of %s (project = %s, limit = %s)",
-          getClass().getSimpleName(), cacheKey.codeOwnerConfigKey().project(), maxCacheSize.get());
-    }
-    return codeOwnerConfig;
   }
 
   /**
@@ -152,6 +177,7 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
     return counters;
   }
 
+  /** Performance counters for cache reads and backend reads. */
   public static class Counters {
     private final CodeOwnerMetrics codeOwnerMetrics;
 
