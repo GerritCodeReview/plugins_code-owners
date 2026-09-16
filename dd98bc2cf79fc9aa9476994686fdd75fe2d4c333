@@ -16,6 +16,86 @@
       "message": "Hi anything else needed here for code-review.",
       "revId": "dd98bc2cf79fc9aa9476994686fdd75fe2d4c333",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9df5ea58_4955e0a5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 4639732
+      },
+      "writtenOn": "2026-09-16T20:37:02Z",
+      "side": 1,
+      "message": "Can we have more tests on this please. is the intent here to match both on /foo and /foobar folders if the prefix of /foo was provided? Or use the fully qualified folder names as prefixes",
+      "fixSuggestions": [
+        {
+          "fixId": "709f9d79_fa06fd96",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+              "range": {
+                "startLine": 228,
+                "startChar": 0,
+                "endLine": 229,
+                "endChar": 0
+              },
+              "replacement": "          (startFolder \u003d\u003d null || !startFolder.startsWith(prefix))\n"
+            }
+          ]
+        }
+      ],
+      "revId": "dd98bc2cf79fc9aa9476994686fdd75fe2d4c333",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b50479a7_000e7d33",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 4639732
+      },
+      "writtenOn": "2026-09-16T20:37:02Z",
+      "side": 1,
+      "message": "nit: toString won\u0027t work in Window server as it uses backslash in path. would be somethign like C:\\Users\\user . Nit: because i don\u0027t know if other parts of gerrit code already uses Path.toString making this not the only place of concern. Please check.",
+      "fixSuggestions": [
+        {
+          "fixId": "23768882_20f5aa85",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+              "range": {
+                "startLine": 225,
+                "startChar": 0,
+                "endLine": 226,
+                "endChar": 0
+              },
+              "replacement": "      pathForHierarchy \u003d Path.of(\"/\").resolve(relUnderPrefix);\n"
+            },
+            {
+              "path": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+              "range": {
+                "startLine": 230,
+                "startChar": 0,
+                "endLine": 231,
+                "endChar": 0
+              },
+              "replacement": "              : Path.of(\"/\").resolve(prefix.relativize(startFolder));\n"
+            }
+          ]
+        }
+      ],
+      "revId": "dd98bc2cf79fc9aa9476994686fdd75fe2d4c333",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
