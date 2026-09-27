@@ -18,6 +18,29 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fddda8cf_c7bf01e6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 5179666
+      },
+      "writtenOn": "2026-09-27T16:50:31Z",
+      "side": 1,
+      "message": "Under Jgit repostory objects using a projects project.namekey\npackage com.example.gerrit.plugins;\n\nimport com.google.gerrit.entities.Project;\nimport com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;\nimport com.google.gerrit.server.git.GitRepositoryManager;\nimport com.google.inject.Inject;\nimport com.google.inject.Singleton;\nimport org.eclipse.jgit.lib.Repository;\nimport java.io.IOException;\n\n@Singleton\npublic class CustomCodeOwnerService {\n\n  private final CodeOwnersPluginConfiguration pluginConfig;\n  private final GitRepositoryManager repoManager;\n\n  @Inject\n  public CustomCodeOwnerService(\n      CodeOwnersPluginConfiguration pluginConfig,\n      GitRepositoryManager repoManager) {\n    this.pluginConfig \u003d pluginConfig;\n    this.repoManager \u003d repoManager;\n  }\n\n  public void inspectProjectOwners(Project.NameKey projectName) throws IOException {\n    // Check plugin status for the project\n    boolean isDisabled \u003d pluginConfig.getProjectConfig(projectName).isDisabled();\n\n    if (!isDisabled) {\n      // Access the Git repository\n      try (Repository repo \u003d repoManager.openRepository(projectName)) {\n        // Perform repository analysis or inspect OWNERS files...\n      }\n    }\n  }\n}",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 57
+      },
+      "revId": "dd98bc2cf79fc9aa9476994686fdd75fe2d4c333",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9df5ea58_4955e0a5",
@@ -94,6 +117,75 @@
           ]
         }
       ],
+      "revId": "dd98bc2cf79fc9aa9476994686fdd75fe2d4c333",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "01efed94_d8886788",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginProjectConfigSnapshot.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 5179666
+      },
+      "writtenOn": "2026-09-27T16:50:31Z",
+      "side": 1,
+      "message": "Introduced in java7(NIO2)\nThe Java modern (revisi maksudku Karna selama ini anda salah object not Rz_ci/ac)replacemen for Java.io.file is an interface\n\nJava.nio.file.files and Java.nio.file.paths(patch.of()in java 11)\nExample\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\nimport java.nio.file.Paths;\nimport java.util.List;\n\npublic class PathExample {\n\n  public static void main(String[] args) throws IOException {\n    // 1. Creating a Path (Java 11+ syntax: Path.of(...); Java 7-10: Paths.get(...))\n    Path configPath \u003d Path.of(\"config\", \"app.properties\");\n    Path absolutePath \u003d configPath.toAbsolutePath().normalize();\n\n    System.out.println(\"Path: \" + configPath);\n    System.out.println(\"Absolute: \" + absolutePath);\n    System.out.println(\"Parent Directory: \" + configPath.getParent());\n\n    // 2. Combining paths (Resolving relative paths)\n    Path baseDir \u003d Path.of(\"/var/logs\");\n    Path logFile \u003d baseDir.resolve(\"app.log\"); // Result: /var/logs/app.log\n\n    // 3. Using Path with the Files utility class\n    if (Files.exists(logFile)) {\n      List\u003cString\u003e lines \u003d Files.readAllLines(logFile);\n      lines.forEach(System.out::println);",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 26
+      },
+      "revId": "dd98bc2cf79fc9aa9476994686fdd75fe2d4c333",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a151c73e_5c9e372b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 5179666
+      },
+      "writtenOn": "2026-09-27T16:50:31Z",
+      "side": 1,
+      "message": "Text yang sebenarnya\nImport java.nio.file.Path;the key-represent file location in java2\nimport java.util.Collection;the map implementation-proveide \nimport java.util.HashMap;list ,set,ect\n\nTersimpan pada code \nImport.java.nio.file.path yang terlihat hanya tulisan tersebut namun setiap satu baris tersisip pengaturan keyboard yang masing masing memiliki code (tandai Import.java.nio.file.path kemudian copy, setelah itu Ctrl P) maka muncul 3 object yang saya maksud atau sistem seperti ini dulu 2010 dikenal dengan nama injeksi tersembunyi atau sekarang . Hidden text injeksion.hehe\n\nCara mendeteksi :\nCtrl+shift+V\nCtrl (+,)\n\npublic class TextCleaner {\n    public static String cleanHiddenCharacters(String input) {\n        // Menghapus karakter kontrol tak terlihat dan Zero-Width Spaces\n        return input.replaceAll(\"[\\\\p{Cf}\\\\p{Co}\\\\p{Cn}]\", \"\");\n    }\n}\n\nPesan saya : zero dan w_speces dalam penjelasan terdengar danterlihat sangat mudah dan simple namun 1 hal yang perlu diketahui , teknologi digital adalah sistem regenerasi yang setiap tahunya memiliki versi dan fitur lain namun . Pertanyaan saya dan mewakili publik Apakah versi dan fitur dalam satu program, sistem, apk web dll. Kompetibel dengan versi dan fitur benek moyang teknologi sebelumnya. \nDan jika anda bertanya semua sudah berubah seiring modernisasi globalisasi dan westrrnisasi menyelimuti wadah teknologi.\n\nSaya hanya menjawab .jika anda ingin merenovasi sebuah rumah .anda mungkin bisa mempercantik ,meminimalkan atau memperbesar dengan desain ,gravis dal arsitektur masa kini. Namun satu hal yang perlu anda ketahui semegah dan sebesar apapun rumah yang akan anda renovasi anda tidak akan bisa mengubah pondasi rumah tersebut setidaknya 50% pondasi terdahulu masih difungsikan\n\nimport java.nio.file.Path;\nimport java.util.ArrayList;\nimport java.util.Collection;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.Map;\n\npublic class PathRegistry {\n\n  // Maps file paths to a collection of associated items (e.g., Code Owners or tags)\n  private final Map\u003cPath, Collection\u003cString\u003e\u003e pathMap \u003d new HashMap\u003c\u003e();\n\n  /** Adds a value to the collection for a given path. */\n  public void addValue(Path path, String value) {\n    // Normalize the path so lookup keys remain consistent\n    Path key \u003d path.normalize();\n    pathMap.computeIfAbsent(key, k -\u003e new ArrayList\u003c\u003e()).add(value);\n  }\n\n  /** Retrieves the collection associated with a path. */\n  public Collection\u003cString\u003e getValues(Path path) {\n    return pathMap.getOrDefault(path.normalize(), Collections.emptyList());\n  }\n}\n\nBegitulah resiko dari Zero dan w speces sangat beresiko untuk komponen komponen lain yang berdekatan atau yang terhubung ,(issue yang dipubkan )",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 26
+      },
+      "revId": "dd98bc2cf79fc9aa9476994686fdd75fe2d4c333",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0b2528f6_9cdf42f2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerProjectConfigJson.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 5179666
+      },
+      "writtenOn": "2026-09-27T16:50:31Z",
+      "side": 1,
+      "message": "Hal yang perlu diperhatikan \n   generalInfo.pathPrefix \u003d codeOwnersConfig.getPathPrefix()\n    .map(Path::normalize)\n    .map(Path::toString)\n    .orElse(null);\n   \n   \nJika maksud perubahan adalah    codeOwnersConfig.getFileExtension().orElse(null);\ngeneralInfo.pathPrefix \u003d codeOwnersConfig.getPathPrefix().map(Path::toString).orElse(null);\n\n\n KESALAHAN KONFIGURASI (SALAH)\n# Plugin mengevaluasi file OWNERS dari root utama repositori \u0027/\u0027\n[plugin \"code-owners\"]\n    # Tanpa pathPrefix, aturan di subprojects/project-A/OWNERS \n    # mencari file \u0027/src/Code.java\u0027 padahal lokasi riilnya \u0027subprojects/project-A/src/Code.java\u0027\n    disabled \u003d false\n    # Mismatch: Jalur file tidak terdeteksi oleh sistem\n    1\nPencabutan Akses OAuth \u0026 API Services\nTarget: myaccount.google.com/connections\n2\nPembersihan Token \u0026 Diskonfigurasi Webhook VCS\nTarget: Developer Settings (GitHub / Gerrit / GitLab)\n3\nDeaktivasi Auto-SYNC \u0026 Background Data Refresh\nTarget: Pengaturan Sistem Operasi Perangkat (Mobile/PC)\n4\nIsolasi Pelacakan Lokasi Sintetis (Google Accuracy)\nTarget: Pengaturan Lokasi \u0026 Sensor Perangkat",
+      "range": {
+        "startLine": 111,
+        "startChar": 4,
+        "endLine": 111,
+        "endChar": 93
+      },
       "revId": "dd98bc2cf79fc9aa9476994686fdd75fe2d4c333",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
