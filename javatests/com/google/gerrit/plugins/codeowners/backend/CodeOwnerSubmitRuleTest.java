@@ -24,6 +24,7 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.entities.SubmitRecord;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -228,5 +229,42 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
         submitRecordSubject.hasSubmitRequirementsThat().onlyElement();
     submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
     submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
+  }
+
+  @Test
+  public void evaluateIsMemoizedForSameChangeDataAndRevision() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    ChangeData changeData = createChange("Change Adding A File", path, "file content").getChange();
+
+    SubmitRecord firstRecord = codeOwnerSubmitRule.evaluate(changeData).get();
+    SubmitRecord secondRecord = codeOwnerSubmitRule.evaluate(changeData).get();
+    assertThat(firstRecord.status).isEqualTo(SubmitRecord.Status.NOT_READY);
+    assertThat(secondRecord).isSameInstanceAs(firstRecord);
+
+    // Reloading ChangeData creates a new ChangeNotes instance and invalidates the cached
+    // evaluation even when the change meta revision has not advanced.
+    changeData.reloadChange();
+    SubmitRecord reloadedRecord = codeOwnerSubmitRule.evaluate(changeData).get();
+    assertThat(reloadedRecord.status).isEqualTo(SubmitRecord.Status.NOT_READY);
+    assertThat(reloadedRecord).isNotSameInstanceAs(firstRecord);
+    assertThat(codeOwnerSubmitRule.evaluate(changeData).get()).isSameInstanceAs(reloadedRecord);
+
+    // After applying a code owner approval and reloading ChangeData, the new ChangeNotes revision
+    // invalidates the cached evaluation and re-evaluates to OK.
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeData.change().getKey().get());
+    changeData.reloadChange();
+
+    SubmitRecord updatedRecord = codeOwnerSubmitRule.evaluate(changeData).get();
+    assertThat(updatedRecord.status).isEqualTo(SubmitRecord.Status.OK);
+    assertThat(codeOwnerSubmitRule.evaluate(changeData).get()).isSameInstanceAs(updatedRecord);
   }
 }
