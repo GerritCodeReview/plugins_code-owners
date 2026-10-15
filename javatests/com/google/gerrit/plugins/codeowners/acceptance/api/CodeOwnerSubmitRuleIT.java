@@ -706,7 +706,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void submitRuleIsInvokedTwiceWhenACodeOwnersSubmitRequirementIsConfigured()
+  public void submitRuleIsInvokedOnlyOnceWhenACodeOwnersSubmitRequirementIsConfigured()
       throws Exception {
     // Configure a Code-Owners submit requirement
     SubmitRequirementInput input = new SubmitRequirementInput();
@@ -714,9 +714,10 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     input.submittabilityExpression = "has:approval_code-owners";
     gApi.projects().name(project.get()).submitRequirement("Code-Owners").create(input);
 
-    // Getting change details triggers the Code-Owners submit requirement twice, once because the
-    // CodeOwnerSubmitRule implements the SubmitRule extension point and once because there is a
-    // submit requirement configured that uses the CodeOwnerApprovalPredicate.
+    // Getting change details evaluates both the CodeOwnerSubmitRule (via the SubmitRule extension
+    // point) and the configured submit requirement (via CodeOwnerApprovalPredicate) on the same
+    // ChangeData instance. Because CodeOwnerSubmitRule memoizes its result per ChangeData and
+    // ChangeNotes instance/revision, the submit rule only runs once.
     PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
     String changeId = r.getChangeId();
 
@@ -726,9 +727,11 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
             .id(changeId)
             .get(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS);
 
-    // Submit rules are computed freshly, but only once.
+    // Even when both the SubmitRule extension point and the CodeOwnerApprovalPredicate submit
+    // requirement evaluate on the same ChangeData, memoization ensures the submit rule only runs
+    // once per ChangeNotes revision.
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_submit_rule_runs"))
-        .isEqualTo(2);
+        .isEqualTo(1);
   }
 
   @Test

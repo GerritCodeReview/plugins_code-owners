@@ -16,6 +16,8 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.LegacySubmitRequirement;
@@ -35,7 +37,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
+import java.util.Objects;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 
 /** Submit rule that checks that all files in a change have been approved by their code owners. */
 @Singleton
@@ -54,6 +58,12 @@ class CodeOwnerSubmitRule implements SubmitRule {
 
   private static final LegacySubmitRequirement SUBMIT_REQUIREMENT =
       LegacySubmitRequirement.builder().setFallbackText(RULE_NAME).setType("code-owners").build();
+
+  private record CachedEvaluation(
+      int notesIdentityHash, ObjectId notesRevision, Optional<SubmitRecord> submitRecord) {}
+
+  private final Cache<ChangeData, CachedEvaluation> evaluationCache =
+      CacheBuilder.newBuilder().weakKeys().maximumSize(256).build();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
@@ -78,6 +88,16 @@ class CodeOwnerSubmitRule implements SubmitRule {
         return Optional.empty();
       }
 
+      CachedEvaluation cached = evaluationCache.getIfPresent(changeData);
+      if (cached != null) {
+        ChangeNotes cachedNotes = changeData.notes();
+        if (cachedNotes != null
+            && cached.notesIdentityHash() == System.identityHashCode(cachedNotes)
+            && Objects.equals(cached.notesRevision(), cachedNotes.getRevision())) {
+          return cached.submitRecord();
+        }
+      }
+
       try (Timer0.Context ctx = codeOwnerMetrics.runCodeOwnerSubmitRule.start()) {
         codeOwnerMetrics.countCodeOwnerSubmitRuleRuns.increment();
         logger.atFine().log(
@@ -92,7 +112,15 @@ class CodeOwnerSubmitRule implements SubmitRule {
           return Optional.empty();
         }
 
-        return Optional.of(getSubmitRecord(changeData.notes()));
+        ChangeNotes changeNotes = changeData.notes();
+        Optional<SubmitRecord> result = Optional.of(getSubmitRecord(changeNotes));
+        ObjectId notesRevision = changeNotes.getRevision();
+        if (notesRevision != null) {
+          evaluationCache.put(
+              changeData,
+              new CachedEvaluation(System.identityHashCode(changeNotes), notesRevision, result));
+        }
+        return result;
       }
     } catch (Exception e) {
       // Whether the exception should be treated as RULE_ERROR.
