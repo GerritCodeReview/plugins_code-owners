@@ -94,6 +94,30 @@
       },
       "revId": "5fdb2b38927760d8adf1709ad464ee24f2a751ca",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dcf6ac81_f84993a0",
+        "filename": "web/BUILD",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1029953
+      },
+      "writtenOn": "2026-10-24T11:41:24Z",
+      "side": 1,
+      "message": "https://github.com/GerritCodeReview/gerrit/commit/4e65a3cc306184820b9a6ba0e4bf116484471fad fixed it.",
+      "parentUuid": "135f1a35_56c84957",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 1
+      },
+      "revId": "5fdb2b38927760d8adf1709ad464ee24f2a751ca",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
