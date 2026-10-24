@@ -70,6 +70,30 @@
       },
       "revId": "5fdb2b38927760d8adf1709ad464ee24f2a751ca",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "135f1a35_56c84957",
+        "filename": "web/BUILD",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1029953
+      },
+      "writtenOn": "2026-10-24T10:09:45Z",
+      "side": 1,
+      "message": "You probably want to add https://github.com/GerritCodeReview/plugins_delete-project/blob/master/web/BUILD#L60 to https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/web/BUILD#65",
+      "parentUuid": "435a5ddf_e70022ba",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 1
+      },
+      "revId": "5fdb2b38927760d8adf1709ad464ee24f2a751ca",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
