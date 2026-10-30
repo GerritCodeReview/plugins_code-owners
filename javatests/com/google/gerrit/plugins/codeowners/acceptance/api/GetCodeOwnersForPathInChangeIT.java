@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasScoring;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnersInfoSubject.assertThat;
@@ -33,6 +34,7 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.AccountGroup;
+import com.google.gerrit.entities.Permission;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -410,6 +412,15 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .addMember(serviceUser.id())
         .update();
 
+    // Create a user that cannot see the destination branch.
+    TestAccount user2 = accountCreator.user2();
+    AccountGroup.UUID blockedGroupUuid = groupOperations.newGroup().addMember(user2.id()).create();
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/heads/master").group(blockedGroupUuid))
+        .update();
+
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -419,6 +430,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
             CodeOwnerSet.builder()
                 .addCodeOwnerEmail(serviceUser.email())
                 .addCodeOwnerEmail(changeOwner.email())
+                .addCodeOwnerEmail(user2.email())
                 .addCodeOwnerEmail(admin.email())
                 .addAnnotation(
                     admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
@@ -427,9 +439,9 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .build())
         .create();
 
-    // Expectation: The service user and the change owner are filtered out. admin and user get
-    // suggested despite of the LAST_RESORT_SUGGESTION annotation since ignoring them would make
-    // the result empty.
+    // Expectation: The service user, the change owner, and user2 (who cannot see the branch) are
+    // filtered out. admin and user get suggested despite of the LAST_RESORT_SUGGESTION annotation
+    // since ignoring them would make the result empty.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()

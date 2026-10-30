@@ -168,6 +168,17 @@ public class GetCodeOwnersForPathInChange
       // #{LAST_RESORT_SUGGESTION}.
       return filteredCodeOwners.stream();
     }
+
+    boolean lastResortOwnersWereDropped =
+        filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.size()
+            < filteredCodeOwners.size();
+    if (lastResortOwnersWereDropped
+        && filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.stream()
+            .noneMatch(codeOwner -> isVisibleTo(rsrc, codeOwner))) {
+      // None of the remaining code owners can see the branch, hence return code owners that are
+      // annotated with #{LAST_RESORT_SUGGESTION}.
+      return filteredCodeOwners.stream();
+    }
     return filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.stream();
   }
 

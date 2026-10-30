@@ -224,13 +224,14 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     ImmutableList.Builder<DebugMessage> debugLogsBuilder = ImmutableList.builder();
     ImmutableList.Builder<CodeOwnerConfigFileInfo> codeOwnerConfigFileInfosBuilder =
         ImmutableList.builder();
+    CodeOwnerResolver resolver = codeOwnerResolver.get();
     codeOwnerConfigHierarchy.visit(
         rsrc.getBranch(),
         rsrc.getRevision(),
         rsrc.getPath(),
         codeOwnerConfig -> {
           CodeOwnerResolverResult pathCodeOwners =
-              codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
+              resolver.resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
 
           codeOwnerConfigFileInfosBuilder.add(
               codeOwnerConfigFileJson.format(
@@ -283,7 +284,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
         });
 
     if (!ownedByAllUsers.get()) {
-      CodeOwnerResolverResult globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
+      CodeOwnerResolverResult globalCodeOwners =
+          getGlobalCodeOwners(resolver, rsrc.getBranch().project());
 
       debugLogsBuilder.add(DebugMessage.createMessage("resolve global code owners"));
       debugLogsBuilder.addAll(globalCodeOwners.messages());
@@ -325,17 +327,14 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     ImmutableMap<CodeOwner, Double> scoredCodeOwners =
         codeOwnerScorings.getScorings(filteredCodeOwners);
 
-    ImmutableList<CodeOwner> sortedAndLimitedCodeOwners = sortAndLimit(scoredCodeOwners);
+    ImmutableList<CodeOwner> sortedAndLimitedCodeOwners = sortAndLimit(rsrc, scoredCodeOwners);
 
-    if (highestScoreOnly) {
-      Optional<Double> highestScore =
-          scoredCodeOwners.values().stream().max(Comparator.naturalOrder());
-      if (highestScore.isPresent()) {
-        sortedAndLimitedCodeOwners =
-            sortedAndLimitedCodeOwners.stream()
-                .filter(codeOwner -> scoredCodeOwners.get(codeOwner).equals(highestScore.get()))
-                .collect(toImmutableList());
-      }
+    if (highestScoreOnly && !sortedAndLimitedCodeOwners.isEmpty()) {
+      Double highestScore = scoredCodeOwners.get(sortedAndLimitedCodeOwners.get(0));
+      sortedAndLimitedCodeOwners =
+          sortedAndLimitedCodeOwners.stream()
+              .filter(codeOwner -> scoredCodeOwners.get(codeOwner).equals(highestScore))
+              .collect(toImmutableList());
     }
     ImmutableMap<CodeOwner, ImmutableMap<CodeOwnerScore, Integer>> codeOwnerToScorings =
         sortedAndLimitedCodeOwners.stream()
@@ -368,12 +367,11 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     return CodeOwnerScorings.create(codeOwnerScorings.build());
   }
 
-  private CodeOwnerResolverResult getGlobalCodeOwners(Project.NameKey projectName) {
+  private CodeOwnerResolverResult getGlobalCodeOwners(
+      CodeOwnerResolver resolver, Project.NameKey projectName) {
     CodeOwnerResolverResult globalCodeOwners =
-        codeOwnerResolver
-            .get()
-            .resolve(
-                codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners());
+        resolver.resolve(
+            codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners());
     logger.atFine().log("including global code owners = %s", globalCodeOwners);
     return globalCodeOwners;
   }
@@ -392,28 +390,22 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   }
 
   /**
-   * Filters out code owners that should not be suggested.
+   * Filters out code owners that should not be suggested, as defined by subclasses.
    *
-   * <p>The following code owners are filtered out:
-   *
-   * <ul>
-   *   <li>code owners that cannot see the branch: Code owners that cannot see the branch cannot
-   *       approve paths in this branch. Hence returning them to the client is not useful.
-   *   <li>code owners that are service users: Requesting a code owner approval from a service user
-   *       normally doesn't make sense since they will not react to review requests.
-   * </ul>
+   * <p>Note that filtering out code owners that cannot see the branch is deferred to {@link
+   * #sortAndLimit} so that visibility checks are only performed until the limit is reached.
    */
   private ImmutableSet<CodeOwner> filterCodeOwners(
       R rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       ImmutableSet<CodeOwner> codeOwners,
       ImmutableList.Builder<DebugMessage> debugLogs) {
-    return filterCodeOwners(rsrc, annotations, getVisibleCodeOwners(rsrc, codeOwners), debugLogs)
+    return filterCodeOwners(rsrc, annotations, codeOwners.stream(), debugLogs)
         .collect(toImmutableSet());
   }
 
   /**
-   * To be overridden by subclasses to filter out additional code owners.
+   * To be overridden by subclasses to filter out code owners that should not be suggested.
    *
    * @param rsrc resource on which the request is being performed
    * @param annotations annotations that were set on the code owners
@@ -441,22 +433,27 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     return Optional.empty();
   }
 
-  private Stream<CodeOwner> getVisibleCodeOwners(R rsrc, ImmutableSet<CodeOwner> allCodeOwners) {
-    return allCodeOwners.stream()
-        .filter(
-            codeOwner -> {
-              if (isVisibleTo(rsrc, codeOwner)) {
-                return true;
-              }
-              logger.atFine().log(
-                  "Filtering out %s because this code owner cannot see the branch %s",
-                  codeOwner, rsrc.getBranch().branch());
-              return false;
-            });
+  /**
+   * Filters out code owners that cannot see the branch.
+   *
+   * <p>Code owners that cannot see the branch cannot approve paths in this branch. Hence returning
+   * them to the client is not useful.
+   */
+  private Stream<CodeOwner> getVisibleCodeOwners(R rsrc, Stream<CodeOwner> codeOwners) {
+    return codeOwners.filter(
+        codeOwner -> {
+          if (isVisibleTo(rsrc, codeOwner)) {
+            return true;
+          }
+          logger.atFine().log(
+              "Filtering out %s because this code owner cannot see the branch %s",
+              codeOwner, rsrc.getBranch().branch());
+          return false;
+        });
   }
 
   /** Whether the given resource is visible to the given code owner. */
-  private boolean isVisibleTo(R rsrc, CodeOwner codeOwner) {
+  protected boolean isVisibleTo(R rsrc, CodeOwner codeOwner) {
     // We always check for the visibility of the branch.
     // This is also correct for the GetCodeOwnersForPathInChange subclass where branch is the
     // destination branch of the change. For changes the intention of the visibility check is to
@@ -507,8 +504,15 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     return fillOptions;
   }
 
-  private ImmutableList<CodeOwner> sortAndLimit(ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
-    return sortCodeOwners(seed, scoredCodeOwners).limit(limit).collect(toImmutableList());
+  /**
+   * Sorts the code owners by score, filters out code owners that cannot see the branch, and limits
+   * the result to {@link #limit}.
+   */
+  private ImmutableList<CodeOwner> sortAndLimit(
+      R rsrc, ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
+    return getVisibleCodeOwners(rsrc, sortCodeOwners(seed, scoredCodeOwners))
+        .limit(limit)
+        .collect(toImmutableList());
   }
 
   /**
