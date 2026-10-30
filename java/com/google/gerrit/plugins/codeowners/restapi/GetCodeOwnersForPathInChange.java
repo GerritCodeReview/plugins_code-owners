@@ -163,7 +163,11 @@ public class GetCodeOwnersForPathInChange
                     filterOutCodeOwnersThatAreAnnotatedWithLastResortSuggestion(
                         rsrc, annotations, debugLogs))
                 .collect(toImmutableList());
-    if (filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.isEmpty()) {
+    if (filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.isEmpty()
+        || (filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.size()
+                < filteredCodeOwners.size()
+            && filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.stream()
+                .noneMatch(codeOwner -> isVisibleTo(rsrc, codeOwner)))) {
       // The result would be empty, hence return code owners that are annotated with
       // #{LAST_RESORT_SUGGESTION}.
       return filteredCodeOwners.stream();
