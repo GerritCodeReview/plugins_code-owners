@@ -16,6 +16,23 @@
       "message": "I\u0027m no longer working on Gerrit, hence removing myself as a reviewer.",
       "revId": "bd32e5676a2f4cc9a30967b84047094bbce365fa",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2d1517f8_aee235b0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2026-11-03T16:03:17Z",
+      "side": 1,
+      "message": "Hi @beckysiegel@google.com! This change removes unnecessary latency intensive permission lookups, and should improve E2E latency of the API. PTAL",
+      "revId": "bd32e5676a2f4cc9a30967b84047094bbce365fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
