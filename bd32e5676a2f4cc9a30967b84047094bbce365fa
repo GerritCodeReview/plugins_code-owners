@@ -50,6 +50,52 @@
       "message": "I think @sjoshbrown@google.com is a good reviewer for this one.",
       "revId": "bd32e5676a2f4cc9a30967b84047094bbce365fa",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "746ddc34_e4193723",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1162625
+      },
+      "writtenOn": "2026-11-06T20:15:41Z",
+      "side": 1,
+      "message": "Since we no longer filter code owners here the javadoc for this method should be updated",
+      "range": {
+        "startLine": 409,
+        "startChar": 47,
+        "endLine": 409,
+        "endChar": 66
+      },
+      "revId": "bd32e5676a2f4cc9a30967b84047094bbce365fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fc1e801c_61c87b7e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInChange.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1162625
+      },
+      "writtenOn": "2026-11-06T20:15:41Z",
+      "side": 1,
+      "message": "nit: This conditional could be easier to read if we pulled out some named booleans (e.g. lastResortOwnersWereDropped, anyRemainingOwnerVisible)",
+      "range": {
+        "startLine": 166,
+        "startChar": 0,
+        "endLine": 170,
+        "endChar": 71
+      },
+      "revId": "bd32e5676a2f4cc9a30967b84047094bbce365fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
